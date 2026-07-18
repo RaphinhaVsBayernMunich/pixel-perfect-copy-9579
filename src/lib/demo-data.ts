@@ -26,7 +26,8 @@ export interface Quest {
   estimatedMinutes: number;
   xp: number;
   deadline?: string; // ISO
-  scheduledFor?: string; // ISO date
+  scheduledFor?: string; // ISO date (YYYY-MM-DD)
+  startTime?: string; // HH:MM (24h) — optional time-block
   completed?: boolean;
   progress?: number; // 0..1 for main/weekly
   subtasksDone?: number;
@@ -69,6 +70,11 @@ export const character: Character = {
 };
 
 const today = new Date().toISOString().slice(0, 10);
+function offsetDate(days: number) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
 
 export const quests: Quest[] = [
   {
@@ -106,6 +112,7 @@ export const quests: Quest[] = [
     estimatedMinutes: 90,
     xp: 150,
     scheduledFor: today,
+    startTime: "09:00",
   },
   {
     id: "q4",
@@ -117,6 +124,7 @@ export const quests: Quest[] = [
     estimatedMinutes: 35,
     xp: 80,
     scheduledFor: today,
+    startTime: "07:00",
     completed: true,
   },
   {
@@ -129,6 +137,7 @@ export const quests: Quest[] = [
     estimatedMinutes: 180,
     xp: 220,
     scheduledFor: today,
+    startTime: "14:00",
   },
   {
     id: "q6",
@@ -151,6 +160,7 @@ export const quests: Quest[] = [
     estimatedMinutes: 10,
     xp: 30,
     scheduledFor: today,
+    startTime: "21:30",
   },
   {
     id: "q8",
@@ -162,6 +172,42 @@ export const quests: Quest[] = [
     estimatedMinutes: 60 * 5,
     xp: 500,
     progress: 0.6,
+  },
+  {
+    id: "q9",
+    title: "Team standup",
+    type: "daily",
+    category: "business",
+    priority: "medium",
+    difficulty: "very-easy",
+    estimatedMinutes: 30,
+    xp: 40,
+    scheduledFor: offsetDate(1),
+    startTime: "10:00",
+  },
+  {
+    id: "q10",
+    title: "Long run — 10km",
+    type: "daily",
+    category: "fitness",
+    priority: "high",
+    difficulty: "medium",
+    estimatedMinutes: 75,
+    xp: 200,
+    scheduledFor: offsetDate(2),
+    startTime: "07:30",
+  },
+  {
+    id: "q11",
+    title: "Design QuestOS onboarding",
+    type: "side",
+    category: "creativity",
+    priority: "medium",
+    difficulty: "medium",
+    estimatedMinutes: 120,
+    xp: 180,
+    scheduledFor: offsetDate(3),
+    startTime: "15:00",
   },
 ];
 
