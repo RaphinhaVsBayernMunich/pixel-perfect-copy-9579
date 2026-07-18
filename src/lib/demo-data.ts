@@ -26,7 +26,8 @@ export interface Quest {
   estimatedMinutes: number;
   xp: number;
   deadline?: string; // ISO
-  scheduledFor?: string; // ISO date
+  scheduledFor?: string; // ISO date (YYYY-MM-DD)
+  startTime?: string; // HH:MM (24h) — optional time-block
   completed?: boolean;
   progress?: number; // 0..1 for main/weekly
   subtasksDone?: number;
