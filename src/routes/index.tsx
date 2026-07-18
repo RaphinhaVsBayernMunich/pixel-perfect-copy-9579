@@ -1,14 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Sparkles, Target, Trophy, Zap } from "lucide-react";
-import {
-  bossBattles,
-  character,
-  mainQuests,
-  todayQuests,
-  weeklyQuests,
-  CATEGORY_TOKEN,
-  CATEGORY_LABEL,
-} from "@/lib/demo-data";
+import { CATEGORY_TOKEN, CATEGORY_LABEL } from "@/lib/demo-data";
+import { useQuests } from "@/lib/quests-store";
 import { QuestRow } from "@/components/quest-row";
 
 export const Route = createFileRoute("/")({
@@ -16,11 +9,13 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const daily = todayQuests();
+  const quests = useQuests((s) => s.quests);
+  const character = useQuests((s) => s.character);
+  const daily = quests.filter((q) => q.type === "daily");
   const doneToday = daily.filter((q) => q.completed).length;
-  const main = mainQuests()[0];
-  const boss = bossBattles()[0];
-  const weekly = weeklyQuests();
+  const main = quests.find((q) => q.type === "main" && !q.completed);
+  const boss = quests.find((q) => q.type === "boss" && !q.completed);
+  const weekly = quests.filter((q) => q.type === "weekly" && !q.completed);
 
   const xpPct = Math.min(100, (character.xp / character.xpToNext) * 100);
   const todayPct = daily.length ? (doneToday / daily.length) * 100 : 0;
