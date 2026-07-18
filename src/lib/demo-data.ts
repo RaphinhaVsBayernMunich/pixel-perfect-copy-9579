@@ -112,6 +112,7 @@ export const quests: Quest[] = [
     estimatedMinutes: 90,
     xp: 150,
     scheduledFor: today,
+    startTime: "09:00",
   },
   {
     id: "q4",
@@ -123,6 +124,7 @@ export const quests: Quest[] = [
     estimatedMinutes: 35,
     xp: 80,
     scheduledFor: today,
+    startTime: "07:00",
     completed: true,
   },
   {
@@ -135,6 +137,7 @@ export const quests: Quest[] = [
     estimatedMinutes: 180,
     xp: 220,
     scheduledFor: today,
+    startTime: "14:00",
   },
   {
     id: "q6",
