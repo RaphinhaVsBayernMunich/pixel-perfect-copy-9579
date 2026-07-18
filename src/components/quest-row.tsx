@@ -1,22 +1,37 @@
-import { Check, Clock, Flame } from "lucide-react";
+import { Check, Clock, Flame, MoreHorizontal, Copy, Trash2, Pencil } from "lucide-react";
 import {
   CATEGORY_LABEL,
   CATEGORY_TOKEN,
-  type Quest,
 } from "@/lib/demo-data";
+import { useQuests, type Quest } from "@/lib/quests-store";
+import { useUI } from "@/lib/ui-store";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function QuestRow({ quest }: { quest: Quest }) {
+  const complete = useQuests((s) => s.complete);
+  const uncomplete = useQuests((s) => s.uncomplete);
+  const duplicate = useQuests((s) => s.duplicate);
+  const remove = useQuests((s) => s.remove);
+  const openEditor = useUI((s) => s.openEditor);
   const done = !!quest.completed;
+
   return (
     <div
       className={cn(
-        "group flex items-center gap-4 rounded-xl border border-hairline bg-card/60 p-3 pr-4 transition hover:bg-card",
+        "group flex items-center gap-3 rounded-xl border border-hairline bg-card/60 p-3 pr-2 transition hover:bg-card",
         done && "opacity-60",
       )}
     >
       <button
         aria-label={done ? "Undo complete" : "Complete quest"}
+        onClick={() => (done ? uncomplete(quest.id) : complete(quest.id))}
         className={cn(
           "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition",
           done
@@ -34,7 +49,10 @@ export function QuestRow({ quest }: { quest: Quest }) {
         )}
       </button>
 
-      <div className="min-w-0 flex-1">
+      <button
+        onClick={() => openEditor(quest.id)}
+        className="min-w-0 flex-1 text-left"
+      >
         <p
           className={cn(
             "truncate text-sm font-medium",
@@ -65,9 +83,9 @@ export function QuestRow({ quest }: { quest: Quest }) {
             </span>
           ) : null}
         </div>
-      </div>
+      </button>
 
-      <div className="shrink-0 text-right">
+      <div className="shrink-0 pr-1 text-right">
         <div className="font-display text-sm font-semibold text-xp">
           +{quest.xp}
         </div>
@@ -75,6 +93,30 @@ export function QuestRow({ quest }: { quest: Quest }) {
           XP
         </div>
       </div>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground opacity-0 transition hover:bg-accent hover:text-foreground group-hover:opacity-100 data-[state=open]:opacity-100"
+          aria-label="Quest actions"
+        >
+          <MoreHorizontal className="h-4 w-4" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => openEditor(quest.id)}>
+            <Pencil className="h-3.5 w-3.5" /> Edit
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => duplicate(quest.id)}>
+            <Copy className="h-3.5 w-3.5" /> Duplicate
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={() => remove(quest.id)}
+            className="text-destructive focus:text-destructive"
+          >
+            <Trash2 className="h-3.5 w-3.5" /> Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }

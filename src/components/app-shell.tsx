@@ -2,6 +2,10 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, Swords, CalendarDays, Scroll, User, Plus } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { useUI } from "@/lib/ui-store";
+import { QuestQuickAdd } from "@/components/quest-quick-add";
+import { QuestEditor } from "@/components/quest-editor";
+import { QuestCelebration } from "@/components/quest-celebration";
 
 const NAV = [
   { to: "/", label: "Home", icon: Home },
@@ -13,6 +17,7 @@ const NAV = [
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const openQuickAdd = useUI((s) => s.openQuickAdd);
 
   return (
     <div className="min-h-screen bg-ambient text-foreground">
@@ -69,10 +74,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         </main>
       </div>
 
-      {/* Floating action button — visible on every primary page */}
+      {/* Floating action button */}
       <button
         type="button"
         aria-label="Add quest"
+        onClick={openQuickAdd}
         className="fixed right-5 bottom-24 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-glow-xp transition hover:scale-105 active:scale-95 md:right-8 md:bottom-8"
       >
         <Plus className="h-6 w-6" strokeWidth={2.5} />
@@ -102,6 +108,11 @@ export function AppShell({ children }: { children: ReactNode }) {
           })}
         </ul>
       </nav>
+
+      {/* Global quest UI */}
+      <QuestQuickAdd />
+      <QuestEditor />
+      <QuestCelebration />
     </div>
   );
 }
