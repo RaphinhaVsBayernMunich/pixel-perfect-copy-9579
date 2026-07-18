@@ -162,6 +162,27 @@ export function QuestEditor() {
             </div>
           </div>
 
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="text-[10px] tracking-[0.15em] uppercase">Scheduled for</Label>
+              <Input
+                type="date"
+                value={draft.scheduledFor ?? ""}
+                onChange={(e) => set("scheduledFor", e.target.value || undefined)}
+                className="mt-2 h-10 border-hairline bg-background/60"
+              />
+            </div>
+            <div>
+              <Label className="text-[10px] tracking-[0.15em] uppercase">Start time</Label>
+              <Input
+                type="time"
+                value={draft.startTime ?? ""}
+                onChange={(e) => set("startTime", e.target.value || undefined)}
+                className="mt-2 h-10 border-hairline bg-background/60"
+              />
+            </div>
+          </div>
+
           <div>
             <Label className="text-[10px] tracking-[0.15em] uppercase">Deadline</Label>
             <Input
