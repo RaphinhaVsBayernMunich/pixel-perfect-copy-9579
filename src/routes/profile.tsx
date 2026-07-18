@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { RouteStub } from "@/components/route-stub";
-import { character, CATEGORY_LABEL, CATEGORY_TOKEN } from "@/lib/demo-data";
+import { CATEGORY_LABEL, CATEGORY_TOKEN } from "@/lib/demo-data";
+import { useQuests } from "@/lib/quests-store";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/profile")({
 });
 
 function ProfilePage() {
+  const character = useQuests((s) => s.character);
   return (
     <RouteStub
       eyebrow="Character sheet"
