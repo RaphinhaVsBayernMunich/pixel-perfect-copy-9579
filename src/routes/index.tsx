@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Sparkles, Target, Trophy, Zap } from "lucide-react";
 import { CATEGORY_TOKEN, CATEGORY_LABEL } from "@/lib/demo-data";
 import { useQuests } from "@/lib/quests-store";
+import { useUI } from "@/lib/ui-store";
 import { QuestRow } from "@/components/quest-row";
 
 export const Route = createFileRoute("/")({
@@ -11,6 +12,8 @@ export const Route = createFileRoute("/")({
 function Home() {
   const quests = useQuests((s) => s.quests);
   const character = useQuests((s) => s.character);
+  const openAICoach = useUI((s) => s.openAICoach);
+
   const daily = quests.filter((q) => q.type === "daily");
   const doneToday = daily.filter((q) => q.completed).length;
   const main = quests.find((q) => q.type === "main" && !q.completed);
@@ -45,10 +48,19 @@ function Home() {
         </div>
 
         <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={openAICoach}
+            className="group flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/20"
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            AI Coach
+          </button>
           <StatChip icon={<Zap className="h-3.5 w-3.5" />} label="Streak" value={`${character.streakDays}d`} />
           <StatChip icon={<Trophy className="h-3.5 w-3.5" />} label="Level" value={String(character.level)} accent />
         </div>
       </header>
+
 
       {/* Level + XP bar */}
       <section className="mb-6 overflow-hidden rounded-2xl border border-hairline bg-card/60 p-5 shadow-glow-xp/50 backdrop-blur-sm">
