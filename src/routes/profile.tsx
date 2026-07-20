@@ -4,6 +4,7 @@ import { CATEGORY_LABEL, CATEGORY_TOKEN } from "@/lib/demo-data";
 import { useQuests } from "@/lib/quests-store";
 import { computeAttributes } from "@/lib/attributes";
 import { ACHIEVEMENTS, TIER_COLOR } from "@/lib/achievements";
+import { SubscriptionSection } from "@/components/subscription/subscription-section";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/profile")({
@@ -182,8 +183,13 @@ function ProfilePage() {
         )}
       </section>
 
+      {/* Subscription */}
+      <section className="mb-8">
+        <SubscriptionSection />
+      </section>
+
       <p className="text-xs text-muted-foreground">
-        Cloud sync, resume export, and full skill trees arrive with Lovable Cloud in Phase 5.
+        Cloud sync is always on. Premium unlocks unlimited AI, advanced analytics, themes, sounds, integrations, and more.
       </p>
     </div>
   );

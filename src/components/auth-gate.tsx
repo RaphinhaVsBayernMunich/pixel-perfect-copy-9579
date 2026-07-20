@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-store";
 import { useQuests } from "@/lib/quests-store";
 import { attachSync, detachSync } from "@/lib/cloud-sync";
+import { useSubscription } from "@/lib/subscription/service";
 import { AuthPage } from "./auth-page";
 import { OnboardingWizard } from "./onboarding/wizard";
 
@@ -12,6 +13,13 @@ export function AuthGate({ children }: { children: ReactNode }) {
   const cloudLoaded = useAuth((s) => s.cloudLoaded);
   const setUser = useAuth((s) => s.setUser);
   const onboardingCompleted = useQuests((s) => s.onboardingCompleted);
+  const initSubscription = useSubscription((s) => s.init);
+  const resetSubscription = useSubscription((s) => s.reset);
+
+  useEffect(() => {
+    if (user && cloudLoaded) void initSubscription(user.id);
+    if (!user) resetSubscription();
+  }, [user, cloudLoaded, initSubscription, resetSubscription]);
 
   useEffect(() => {
     let mounted = true;

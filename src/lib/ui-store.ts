@@ -4,23 +4,28 @@ type UIState = {
   quickAddOpen: boolean;
   editorQuestId?: string;
   aiCoachOpen: boolean;
+  paywallOpen: boolean;
   openQuickAdd: () => void;
   closeQuickAdd: () => void;
   openEditor: (id: string) => void;
   closeEditor: () => void;
   openAICoach: () => void;
   closeAICoach: () => void;
+  openPaywall: () => void;
+  closePaywall: () => void;
 };
 
 export const useUI = create<UIState>((set) => ({
   quickAddOpen: false,
   editorQuestId: undefined,
   aiCoachOpen: false,
+  paywallOpen: false,
   openQuickAdd: () => set({ quickAddOpen: true }),
   closeQuickAdd: () => set({ quickAddOpen: false }),
   openEditor: (id) => set({ editorQuestId: id }),
   closeEditor: () => set({ editorQuestId: undefined }),
   openAICoach: () => set({ aiCoachOpen: true }),
   closeAICoach: () => set({ aiCoachOpen: false }),
+  openPaywall: () => set({ paywallOpen: true }),
+  closePaywall: () => set({ paywallOpen: false }),
 }));
-

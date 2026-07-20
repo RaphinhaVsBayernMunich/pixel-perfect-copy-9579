@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      installations: {
+        Row: {
+          fingerprint: string
+          first_seen_at: string
+          id: string
+          last_seen_at: string
+          platform: string
+          trial_consumed: boolean
+          trial_consumed_at: string | null
+          trial_consumed_by: string | null
+          user_ids: string[]
+        }
+        Insert: {
+          fingerprint: string
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          platform?: string
+          trial_consumed?: boolean
+          trial_consumed_at?: string | null
+          trial_consumed_by?: string | null
+          user_ids?: string[]
+        }
+        Update: {
+          fingerprint?: string
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          platform?: string
+          trial_consumed?: boolean
+          trial_consumed_at?: string | null
+          trial_consumed_by?: string | null
+          user_ids?: string[]
+        }
+        Relationships: []
+      }
       legacy_events: {
         Row: {
           category: string | null
@@ -57,11 +93,19 @@ export type Database = {
           character_state: Json
           character_title: string | null
           created_at: string
+          current_plan: string | null
           day_start_hour: number
           display_name: string | null
+          entitlement: string
+          last_verification: string | null
           level: number
+          premium_expiration: string | null
+          revenuecat_customer_id: string | null
+          subscription_status: string
           timezone: string
           total_xp: number
+          trial_end: string | null
+          trial_start: string | null
           updated_at: string
           user_id: string
         }
@@ -71,11 +115,19 @@ export type Database = {
           character_state?: Json
           character_title?: string | null
           created_at?: string
+          current_plan?: string | null
           day_start_hour?: number
           display_name?: string | null
+          entitlement?: string
+          last_verification?: string | null
           level?: number
+          premium_expiration?: string | null
+          revenuecat_customer_id?: string | null
+          subscription_status?: string
           timezone?: string
           total_xp?: number
+          trial_end?: string | null
+          trial_start?: string | null
           updated_at?: string
           user_id: string
         }
@@ -85,11 +137,19 @@ export type Database = {
           character_state?: Json
           character_title?: string | null
           created_at?: string
+          current_plan?: string | null
           day_start_hour?: number
           display_name?: string | null
+          entitlement?: string
+          last_verification?: string | null
           level?: number
+          premium_expiration?: string | null
+          revenuecat_customer_id?: string | null
+          subscription_status?: string
           timezone?: string
           total_xp?: number
+          trial_end?: string | null
+          trial_start?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -152,6 +212,39 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_events: {
+        Row: {
+          entitlement: string | null
+          id: string
+          kind: string
+          metadata: Json
+          occurred_at: string
+          product_id: string | null
+          source: string
+          user_id: string
+        }
+        Insert: {
+          entitlement?: string | null
+          id?: string
+          kind: string
+          metadata?: Json
+          occurred_at?: string
+          product_id?: string | null
+          source?: string
+          user_id: string
+        }
+        Update: {
+          entitlement?: string | null
+          id?: string
+          kind?: string
+          metadata?: Json
+          occurred_at?: string
+          product_id?: string | null
+          source?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_achievements: {
         Row: {
           achievement_id: string
@@ -178,7 +271,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_active_premium: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

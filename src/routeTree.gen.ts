@@ -14,6 +14,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as LegacyRouteImport } from './routes/legacy'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiPublicRevenuecatWebhookRouteImport } from './routes/api/public/revenuecat-webhook'
 
 const QuestsRoute = QuestsRouteImport.update({
   id: '/quests',
@@ -40,6 +41,12 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicRevenuecatWebhookRoute =
+  ApiPublicRevenuecatWebhookRouteImport.update({
+    id: '/api/public/revenuecat-webhook',
+    path: '/api/public/revenuecat-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +54,7 @@ export interface FileRoutesByFullPath {
   '/legacy': typeof LegacyRoute
   '/profile': typeof ProfileRoute
   '/quests': typeof QuestsRoute
+  '/api/public/revenuecat-webhook': typeof ApiPublicRevenuecatWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +62,7 @@ export interface FileRoutesByTo {
   '/legacy': typeof LegacyRoute
   '/profile': typeof ProfileRoute
   '/quests': typeof QuestsRoute
+  '/api/public/revenuecat-webhook': typeof ApiPublicRevenuecatWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +71,33 @@ export interface FileRoutesById {
   '/legacy': typeof LegacyRoute
   '/profile': typeof ProfileRoute
   '/quests': typeof QuestsRoute
+  '/api/public/revenuecat-webhook': typeof ApiPublicRevenuecatWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/calendar' | '/legacy' | '/profile' | '/quests'
+  fullPaths:
+    | '/'
+    | '/calendar'
+    | '/legacy'
+    | '/profile'
+    | '/quests'
+    | '/api/public/revenuecat-webhook'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/calendar' | '/legacy' | '/profile' | '/quests'
-  id: '__root__' | '/' | '/calendar' | '/legacy' | '/profile' | '/quests'
+  to:
+    | '/'
+    | '/calendar'
+    | '/legacy'
+    | '/profile'
+    | '/quests'
+    | '/api/public/revenuecat-webhook'
+  id:
+    | '__root__'
+    | '/'
+    | '/calendar'
+    | '/legacy'
+    | '/profile'
+    | '/quests'
+    | '/api/public/revenuecat-webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,6 +106,7 @@ export interface RootRouteChildren {
   LegacyRoute: typeof LegacyRoute
   ProfileRoute: typeof ProfileRoute
   QuestsRoute: typeof QuestsRoute
+  ApiPublicRevenuecatWebhookRoute: typeof ApiPublicRevenuecatWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -116,6 +146,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/revenuecat-webhook': {
+      id: '/api/public/revenuecat-webhook'
+      path: '/api/public/revenuecat-webhook'
+      fullPath: '/api/public/revenuecat-webhook'
+      preLoaderRoute: typeof ApiPublicRevenuecatWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -125,6 +162,7 @@ const rootRouteChildren: RootRouteChildren = {
   LegacyRoute: LegacyRoute,
   ProfileRoute: ProfileRoute,
   QuestsRoute: QuestsRoute,
+  ApiPublicRevenuecatWebhookRoute: ApiPublicRevenuecatWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
