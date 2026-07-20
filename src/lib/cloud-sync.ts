@@ -2,6 +2,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuests, type LegacyEvent } from "@/lib/quests-store";
 import type { Quest, Category, QuestType, Priority, Difficulty } from "@/lib/demo-data";
 import { character as seedCharacter } from "@/lib/demo-data";
+import { EMPTY_ONBOARDING } from "@/lib/onboarding-types";
+import { useAuth } from "@/lib/auth-store";
 
 type Row = Record<string, any>;
 
@@ -77,6 +79,7 @@ export async function attachSync(userId: string) {
   if (currentUserId === userId) return;
   await detachSync();
   currentUserId = userId;
+  useAuth.getState().setCloudLoaded(false);
   pushedEventIds.clear();
   pushedAchievements.clear();
 
@@ -112,9 +115,10 @@ export async function attachSync(userId: string) {
   const store = useQuests.getState();
 
   if (hasRemoteData) {
+    const charState = (profile?.character_state as Record<string, any>) ?? {};
     const character = {
       ...seedCharacter,
-      ...((profile?.character_state as Record<string, any>) ?? {}),
+      ...charState,
       categoryXp: {
         ...seedCharacter.categoryXp,
         ...((profile?.category_xp as Record<string, number>) ?? {}),
@@ -129,7 +133,17 @@ export async function attachSync(userId: string) {
       character,
       events: (remoteEvents ?? []).map(eventFromRow),
       unlockedAchievements: (remoteAchievements ?? []).map((r: Row) => r.achievement_id),
+      onboardingCompleted: !!charState.onboardingCompleted,
+      onboardingProfile: (charState.onboardingProfile as any) ?? EMPTY_ONBOARDING,
     });
+    (remoteEvents ?? []).forEach((r: Row) => pushedEventIds.add(r.id));
+    (remoteAchievements ?? []).forEach((r: Row) => pushedAchievements.add(r.achievement_id));
+  } else {
+    // First sign-in: push current local state up as seed
+    await pushAll(userId);
+  }
+
+  useAuth.getState().setCloudLoaded(true);
     (remoteEvents ?? []).forEach((r: Row) => pushedEventIds.add(r.id));
     (remoteAchievements ?? []).forEach((r: Row) => pushedAchievements.add(r.achievement_id));
   } else {
