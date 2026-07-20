@@ -54,6 +54,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           category_xp: Json
+          character_state: Json
           character_title: string | null
           created_at: string
           day_start_hour: number
@@ -67,6 +68,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           category_xp?: Json
+          character_state?: Json
           character_title?: string | null
           created_at?: string
           day_start_hour?: number
@@ -80,6 +82,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           category_xp?: Json
+          character_state?: Json
           character_title?: string | null
           created_at?: string
           day_start_hour?: number
