@@ -183,6 +183,8 @@ async function pushAll(userId: string) {
       momentum: s.character.momentum,
       streakDays: s.character.streakDays,
       season: s.character.season,
+      onboardingCompleted: s.onboardingCompleted,
+      onboardingProfile: s.onboardingProfile,
     },
   }, { onConflict: "user_id" });
 
