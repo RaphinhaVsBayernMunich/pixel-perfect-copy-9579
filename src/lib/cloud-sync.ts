@@ -180,8 +180,9 @@ async function pushAll(userId: string) {
   // Quests upsert
   if (s.quests.length > 0) {
     await supabase.from("quests").upsert(
-      s.quests.map((q) => questToRow(userId, q)),
+      s.quests.map((q) => questToRow(userId, q)) as any,
     );
+
   }
 
   // Handle deletions
@@ -195,8 +196,9 @@ async function pushAll(userId: string) {
   const newEvents = s.events.filter((e) => !pushedEventIds.has(e.id));
   if (newEvents.length > 0) {
     const { error } = await supabase.from("legacy_events").upsert(
-      newEvents.map((e) => eventToRow(userId, e)),
+      newEvents.map((e) => eventToRow(userId, e)) as any,
     );
+
     if (!error) newEvents.forEach((e) => pushedEventIds.add(e.id));
   }
 
