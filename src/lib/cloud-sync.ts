@@ -184,8 +184,8 @@ async function pushAll(userId: string) {
       streakDays: s.character.streakDays,
       season: s.character.season,
       onboardingCompleted: s.onboardingCompleted,
-      onboardingProfile: s.onboardingProfile,
-    },
+      onboardingProfile: s.onboardingProfile as any,
+    } as any,
   }, { onConflict: "user_id" });
 
   // Quests upsert
