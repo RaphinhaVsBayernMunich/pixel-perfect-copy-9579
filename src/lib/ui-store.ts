@@ -2,18 +2,25 @@ import { create } from "zustand";
 
 type UIState = {
   quickAddOpen: boolean;
-  editorQuestId?: string; // undefined = closed, "new" = new quest
+  editorQuestId?: string;
+  aiCoachOpen: boolean;
   openQuickAdd: () => void;
   closeQuickAdd: () => void;
   openEditor: (id: string) => void;
   closeEditor: () => void;
+  openAICoach: () => void;
+  closeAICoach: () => void;
 };
 
 export const useUI = create<UIState>((set) => ({
   quickAddOpen: false,
   editorQuestId: undefined,
+  aiCoachOpen: false,
   openQuickAdd: () => set({ quickAddOpen: true }),
   closeQuickAdd: () => set({ quickAddOpen: false }),
   openEditor: (id) => set({ editorQuestId: id }),
   closeEditor: () => set({ editorQuestId: undefined }),
+  openAICoach: () => set({ aiCoachOpen: true }),
+  closeAICoach: () => set({ aiCoachOpen: false }),
 }));
+

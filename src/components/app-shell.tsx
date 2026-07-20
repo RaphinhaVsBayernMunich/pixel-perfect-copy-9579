@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { QuestQuickAdd } from "@/components/quest-quick-add";
 import { QuestEditor } from "@/components/quest-editor";
 import { QuestCelebration } from "@/components/quest-celebration";
+import { AICoach } from "@/components/ai-coach";
 
 
 const NAV = [
@@ -125,6 +126,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <QuestQuickAdd />
       <QuestEditor />
       <QuestCelebration />
+      <AICoach />
     </div>
   );
 }
