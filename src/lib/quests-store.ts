@@ -51,6 +51,7 @@ export interface QuestsState {
   character: Character;
   events: LegacyEvent[];
   unlockedAchievements: string[];
+  pendingDeletions: string[];
   lastCompletion?: { questId: string; ts: number };
   add: (q: Omit<Quest, "id"> & { id?: string }) => Quest;
   update: (id: string, patch: Partial<Quest>) => void;
@@ -63,7 +64,10 @@ export interface QuestsState {
   addJournal: (title: string, body: string) => void;
   removeEvent: (id: string) => void;
   syncAchievements: () => void;
+  hydrate: (patch: Partial<Pick<QuestsState, "quests" | "character" | "events" | "unlockedAchievements">>) => void;
+  clearPendingDeletions: () => void;
 }
+
 
 function uid() {
   return `q_${Math.random().toString(36).slice(2, 9)}${Date.now().toString(36).slice(-4)}`;
@@ -76,6 +80,8 @@ export const useQuests = create<QuestsState>()(
       character: seedCharacter,
       events: [],
       unlockedAchievements: [],
+      pendingDeletions: [],
+
 
       add: (q) => {
         const quest: Quest = { id: q.id ?? uid(), ...q } as Quest;
@@ -89,7 +95,11 @@ export const useQuests = create<QuestsState>()(
         })),
 
       remove: (id) =>
-        set((s) => ({ quests: s.quests.filter((q) => q.id !== id) })),
+        set((s) => ({
+          quests: s.quests.filter((q) => q.id !== id),
+          pendingDeletions: [...s.pendingDeletions, id],
+        })),
+
 
       complete: (id) => {
         const q = get().quests.find((x) => x.id === id);
@@ -169,7 +179,12 @@ export const useQuests = create<QuestsState>()(
         }));
       },
 
-      archive: (id) => set((s) => ({ quests: s.quests.filter((q) => q.id !== id) })),
+      archive: (id) =>
+        set((s) => ({
+          quests: s.quests.filter((q) => q.id !== id),
+          pendingDeletions: [...s.pendingDeletions, id],
+        })),
+
 
       duplicate: (id) => {
         const q = get().quests.find((x) => x.id === id);
@@ -234,8 +249,11 @@ export const useQuests = create<QuestsState>()(
           unlockedAchievements: [...unlocked],
           events: [...newEvents, ...s.events],
         });
-      },
+
+      hydrate: (patch) => set((s) => ({ ...s, ...patch, pendingDeletions: [] })),
+      clearPendingDeletions: () => set({ pendingDeletions: [] }),
     }),
+
     {
       name: "questos:v1",
       version: 1,
