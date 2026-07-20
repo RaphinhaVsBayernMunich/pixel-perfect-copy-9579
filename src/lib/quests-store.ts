@@ -11,8 +11,10 @@ import {
   type QuestType,
 } from "./demo-data";
 import { evaluateAchievements } from "./achievements";
+import { EMPTY_ONBOARDING, type OnboardingProfile } from "./onboarding-types";
 
 export type { Quest, Category, Priority, Difficulty, QuestType, Character };
+export type { OnboardingProfile };
 
 const XP_BY_DIFFICULTY: Record<Difficulty, number> = {
   "very-easy": 20,
@@ -53,6 +55,8 @@ export interface QuestsState {
   unlockedAchievements: string[];
   pendingDeletions: string[];
   lastCompletion?: { questId: string; ts: number };
+  onboardingCompleted: boolean;
+  onboardingProfile: OnboardingProfile;
   add: (q: Omit<Quest, "id"> & { id?: string }) => Quest;
   update: (id: string, patch: Partial<Quest>) => void;
   remove: (id: string) => void;
@@ -64,9 +68,11 @@ export interface QuestsState {
   addJournal: (title: string, body: string) => void;
   removeEvent: (id: string) => void;
   syncAchievements: () => void;
-  hydrate: (patch: Partial<Pick<QuestsState, "quests" | "character" | "events" | "unlockedAchievements">>) => void;
+  hydrate: (patch: Partial<Pick<QuestsState, "quests" | "character" | "events" | "unlockedAchievements" | "onboardingCompleted" | "onboardingProfile">>) => void;
   clearPendingDeletions: () => void;
+  setOnboarding: (profile: OnboardingProfile, completed: boolean) => void;
 }
+
 
 
 function uid() {
@@ -81,6 +87,12 @@ export const useQuests = create<QuestsState>()(
       events: [],
       unlockedAchievements: [],
       pendingDeletions: [],
+      onboardingCompleted: false,
+      onboardingProfile: EMPTY_ONBOARDING,
+
+      setOnboarding: (profile, completed) =>
+        set({ onboardingProfile: profile, onboardingCompleted: completed }),
+
 
 
       add: (q) => {
