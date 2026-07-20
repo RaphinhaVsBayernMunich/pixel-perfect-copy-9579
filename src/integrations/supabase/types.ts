@@ -14,7 +14,162 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      legacy_events: {
+        Row: {
+          category: string | null
+          content: string | null
+          id: string
+          kind: string
+          metadata: Json | null
+          occurred_at: string
+          quest_id: string | null
+          user_id: string
+          xp_earned: number | null
+        }
+        Insert: {
+          category?: string | null
+          content?: string | null
+          id?: string
+          kind: string
+          metadata?: Json | null
+          occurred_at?: string
+          quest_id?: string | null
+          user_id: string
+          xp_earned?: number | null
+        }
+        Update: {
+          category?: string | null
+          content?: string | null
+          id?: string
+          kind?: string
+          metadata?: Json | null
+          occurred_at?: string
+          quest_id?: string | null
+          user_id?: string
+          xp_earned?: number | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          category_xp: Json
+          character_title: string | null
+          created_at: string
+          day_start_hour: number
+          display_name: string | null
+          level: number
+          timezone: string
+          total_xp: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          category_xp?: Json
+          character_title?: string | null
+          created_at?: string
+          day_start_hour?: number
+          display_name?: string | null
+          level?: number
+          timezone?: string
+          total_xp?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          category_xp?: Json
+          character_title?: string | null
+          created_at?: string
+          day_start_hour?: number
+          display_name?: string | null
+          level?: number
+          timezone?: string
+          total_xp?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      quests: {
+        Row: {
+          category: string
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          difficulty: string
+          estimated_duration: number | null
+          id: string
+          priority: string
+          scheduled_for: string | null
+          start_time: string | null
+          status: string
+          title: string
+          type: string
+          updated_at: string
+          user_id: string
+          xp_reward: number
+        }
+        Insert: {
+          category: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          difficulty: string
+          estimated_duration?: number | null
+          id?: string
+          priority?: string
+          scheduled_for?: string | null
+          start_time?: string | null
+          status?: string
+          title: string
+          type: string
+          updated_at?: string
+          user_id: string
+          xp_reward?: number
+        }
+        Update: {
+          category?: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          difficulty?: string
+          estimated_duration?: number | null
+          id?: string
+          priority?: string
+          scheduled_for?: string | null
+          start_time?: string | null
+          status?: string
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+          xp_reward?: number
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          id: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          id?: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          id?: string
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
