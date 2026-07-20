@@ -249,10 +249,12 @@ export const useQuests = create<QuestsState>()(
           unlockedAchievements: [...unlocked],
           events: [...newEvents, ...s.events],
         });
+      },
 
       hydrate: (patch) => set((s) => ({ ...s, ...patch, pendingDeletions: [] })),
       clearPendingDeletions: () => set({ pendingDeletions: [] }),
     }),
+
 
     {
       name: "questos:v1",
