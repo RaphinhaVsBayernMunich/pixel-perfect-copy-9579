@@ -144,12 +144,7 @@ export async function attachSync(userId: string) {
   }
 
   useAuth.getState().setCloudLoaded(true);
-    (remoteEvents ?? []).forEach((r: Row) => pushedEventIds.add(r.id));
-    (remoteAchievements ?? []).forEach((r: Row) => pushedAchievements.add(r.achievement_id));
-  } else {
-    // First sign-in: push current local state up as seed
-    await pushAll(userId);
-  }
+
 
   // Subscribe to changes
   unsub = useQuests.subscribe(() => scheduleSync());
