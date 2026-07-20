@@ -39,9 +39,17 @@ export function suggestXp(type: QuestType, difficulty: Difficulty, priority: Pri
   return Math.round(base * bump);
 }
 
+export type LegacyEvent =
+  | { id: string; ts: number; kind: "completion"; questId: string; title: string; category: Category; type: QuestType; xp: number }
+  | { id: string; ts: number; kind: "levelup"; level: number }
+  | { id: string; ts: number; kind: "achievement"; achievementId: string }
+  | { id: string; ts: number; kind: "journal"; title: string; body: string };
+
 export interface QuestsState {
   quests: Quest[];
   character: Character;
+  events: LegacyEvent[];
+  unlockedAchievements: string[];
   lastCompletion?: { questId: string; ts: number };
   add: (q: Omit<Quest, "id"> & { id?: string }) => Quest;
   update: (id: string, patch: Partial<Quest>) => void;
@@ -51,6 +59,9 @@ export interface QuestsState {
   archive: (id: string) => void;
   duplicate: (id: string) => void;
   clearCompletion: () => void;
+  addJournal: (title: string, body: string) => void;
+  removeEvent: (id: string) => void;
+  syncAchievements: () => void;
 }
 
 function uid() {
