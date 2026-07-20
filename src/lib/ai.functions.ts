@@ -140,3 +140,64 @@ The prompt should invite reflection on patterns, meaning, or what to change. Ret
     });
     return { prompt: text.trim() };
   });
+
+// ============================================================
+// 4. Starter quests from onboarding profile
+// ============================================================
+const starterInput = z.object({
+  preferredName: z.string().optional(),
+  profession: z.string().optional(),
+  yearGoal: z.string().optional(),
+  fiveYearGoal: z.string().optional(),
+  dreamLife: z.string().optional(),
+  interests: z.array(z.string()).optional(),
+  skills: z.array(z.string()).optional(),
+  chronotype: z.string().optional(),
+});
+
+export const generateStarterQuests = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => starterInput.parse(input))
+  .handler(async ({ data }) => {
+    const gateway = await getGateway();
+    try {
+      const { output } = await generateText({
+        model: gateway(MODEL),
+        output: Output.object({
+          schema: z.object({
+            mainQuest: questSchema,
+            starters: z.array(questSchema),
+            welcome: z.string(),
+          }),
+        }),
+        prompt: `You are the AI Coach for QuestOS. A new player just finished onboarding. Design their opening game state.
+
+Player:
+- Name: ${data.preferredName || "Player"}
+- Profession: ${data.profession || "unspecified"}
+- ${data.chronotype ?? "flexible"} chronotype
+- Interests: ${(data.interests ?? []).join(", ") || "unspecified"}
+- Skills they want to level up: ${(data.skills ?? []).join(", ") || "unspecified"}
+- Goal this year: ${data.yearGoal || "unspecified"}
+- 5-year goal: ${data.fiveYearGoal || "unspecified"}
+- Dream life: ${data.dreamLife || "unspecified"}
+
+Return:
+1. mainQuest — one "main" type quest that anchors their year-goal.
+2. starters — 5 to 7 quests mixing daily habits, weekly rituals, and side quests that build the skills and interests above.
+3. welcome — a single-sentence AI Coach welcome addressed to the player (no emoji, no markdown).
+
+Titles: short imperative phrases (max 6 words). Descriptions: one sentence, concrete action. Realistic minutes. Pick categories that match interests/skills.`,
+      });
+      return output;
+    } catch (error) {
+      if (NoObjectGeneratedError.isInstance(error)) {
+        return {
+          mainQuest: null as any,
+          starters: [] as z.infer<typeof questSchema>[],
+          welcome: "Your journey begins. Set your first quest.",
+        };
+      }
+      throw error;
+    }
+  });
