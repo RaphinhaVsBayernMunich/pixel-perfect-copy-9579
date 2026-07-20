@@ -10,6 +10,7 @@ import {
   type Difficulty,
   type QuestType,
 } from "./demo-data";
+import { ACHIEVEMENTS, evaluateAchievements } from "./achievements";
 
 export type { Quest, Category, Priority, Difficulty, QuestType, Character };
 
@@ -73,6 +74,8 @@ export const useQuests = create<QuestsState>()(
     (set, get) => ({
       quests: seedQuests,
       character: seedCharacter,
+      events: [],
+      unlockedAchievements: [],
 
       add: (q) => {
         const quest: Quest = { id: q.id ?? uid(), ...q } as Quest;
@@ -100,11 +103,32 @@ export const useQuests = create<QuestsState>()(
           let level = s.character.level;
           let xpToNext = s.character.xpToNext;
           let remaining = nextXp;
+          const levelUps: number[] = [];
           while (remaining >= xpToNext) {
             remaining -= xpToNext;
             level += 1;
+            levelUps.push(level);
             xpToNext = Math.round(xpToNext * 1.15);
           }
+          const now = Date.now();
+          const newEvents: LegacyEvent[] = [
+            {
+              id: `ev_${uid()}`,
+              ts: now,
+              kind: "completion",
+              questId: id,
+              title: q.title,
+              category: q.category,
+              type: q.type,
+              xp: q.xp,
+            },
+            ...levelUps.map((lv, i) => ({
+              id: `ev_lv_${lv}_${now + i}`,
+              ts: now + i + 1,
+              kind: "levelup" as const,
+              level: lv,
+            })),
+          ];
           return {
             quests: s.quests.map((x) =>
               x.id === id ? { ...x, completed: true } : x,
@@ -117,9 +141,11 @@ export const useQuests = create<QuestsState>()(
               categoryXp: nextCatXp,
               momentum: Math.min(1, s.character.momentum + 0.02),
             },
-            lastCompletion: { questId: id, ts: Date.now() },
+            events: [...newEvents, ...s.events],
+            lastCompletion: { questId: id, ts: now },
           };
         });
+        get().syncAchievements();
       },
 
       uncomplete: (id) => {
@@ -153,6 +179,62 @@ export const useQuests = create<QuestsState>()(
       },
 
       clearCompletion: () => set({ lastCompletion: undefined }),
+
+      addJournal: (title, body) =>
+        set((s) => ({
+          events: [
+            {
+              id: `ev_${uid()}`,
+              ts: Date.now(),
+              kind: "journal",
+              title: title.trim() || "Untitled entry",
+              body: body.trim(),
+            },
+            ...s.events,
+          ],
+        })),
+
+      removeEvent: (id) =>
+        set((s) => ({ events: s.events.filter((e) => e.id !== id) })),
+
+      syncAchievements: () => {
+        const s = get();
+        const completions = s.quests.filter((q) => q.completed);
+        const completionsByType = {
+          main: 0, daily: 0, weekly: 0, side: 0, boss: 0,
+        } as Record<QuestType, number>;
+        const completionsByCategory = {} as Record<Category, number>;
+        for (const q of completions) {
+          completionsByType[q.type]++;
+          completionsByCategory[q.category] = (completionsByCategory[q.category] ?? 0) + 1;
+        }
+        const totalXp =
+          Object.values(s.character.categoryXp).reduce((a, b) => a + b, 0);
+        const snap = {
+          totalCompletions: completions.length,
+          completionsByType,
+          completionsByCategory: completionsByCategory as Record<Category, number>,
+          categoryXp: s.character.categoryXp,
+          level: s.character.level,
+          streakDays: s.character.streakDays,
+          totalXp,
+        };
+        const unlocked = evaluateAchievements(snap);
+        const prev = new Set(s.unlockedAchievements);
+        const newlyUnlocked = [...unlocked].filter((id) => !prev.has(id));
+        if (newlyUnlocked.length === 0 && unlocked.size === prev.size) return;
+        const now = Date.now();
+        const newEvents: LegacyEvent[] = newlyUnlocked.map((achievementId, i) => ({
+          id: `ev_ach_${achievementId}_${now + i}`,
+          ts: now + i,
+          kind: "achievement",
+          achievementId,
+        }));
+        set({
+          unlockedAchievements: [...unlocked],
+          events: [...newEvents, ...s.events],
+        });
+      },
     }),
     {
       name: "questos:v1",
