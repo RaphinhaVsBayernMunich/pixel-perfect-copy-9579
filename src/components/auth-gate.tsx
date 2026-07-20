@@ -1,18 +1,21 @@
 import { useEffect, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-store";
+import { useQuests } from "@/lib/quests-store";
 import { attachSync, detachSync } from "@/lib/cloud-sync";
 import { AuthPage } from "./auth-page";
+import { OnboardingWizard } from "./onboarding/wizard";
 
 export function AuthGate({ children }: { children: ReactNode }) {
   const user = useAuth((s) => s.user);
   const loading = useAuth((s) => s.loading);
+  const cloudLoaded = useAuth((s) => s.cloudLoaded);
   const setUser = useAuth((s) => s.setUser);
+  const onboardingCompleted = useQuests((s) => s.onboardingCompleted);
 
   useEffect(() => {
     let mounted = true;
 
-    // Subscribe first, then check session
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!mounted) return;
       setUser(session?.user ?? null);
@@ -44,6 +47,16 @@ export function AuthGate({ children }: { children: ReactNode }) {
   }
 
   if (!user) return <AuthPage />;
+
+  if (!cloudLoaded) {
+    return (
+      <div className="min-h-screen bg-ambient flex items-center justify-center">
+        <div className="animate-pulse text-sm text-muted-foreground">Syncing your legacy...</div>
+      </div>
+    );
+  }
+
+  if (!onboardingCompleted) return <OnboardingWizard />;
 
   return <>{children}</>;
 }
