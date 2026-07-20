@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN character_state JSONB NOT NULL DEFAULT '{}'::jsonb;

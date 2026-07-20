@@ -1,12 +1,15 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Swords, CalendarDays, Scroll, User, Plus } from "lucide-react";
+import { Home, Swords, CalendarDays, Scroll, User, Plus, LogOut } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { useUI } from "@/lib/ui-store";
 import { useQuests } from "@/lib/quests-store";
+import { useAuth } from "@/lib/auth-store";
+import { supabase } from "@/integrations/supabase/client";
 import { QuestQuickAdd } from "@/components/quest-quick-add";
 import { QuestEditor } from "@/components/quest-editor";
 import { QuestCelebration } from "@/components/quest-celebration";
+
 
 const NAV = [
   { to: "/", label: "Home", icon: Home },
@@ -74,7 +77,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             </p>
             <p className="mt-1">Day 17 · keep the fire lit.</p>
           </div>
+          <SignOutButton />
         </aside>
+
 
         <main className="relative flex min-h-screen w-full flex-col pb-24 md:pb-8">
           {children}
@@ -131,3 +136,21 @@ function LogoMark() {
     </div>
   );
 }
+
+function SignOutButton() {
+  const user = useAuth((s) => s.user);
+  if (!user) return null;
+  return (
+    <button
+      type="button"
+      onClick={async () => {
+        await supabase.auth.signOut();
+      }}
+      className="mt-3 flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-muted-foreground transition-colors hover:bg-sidebar-accent/50 hover:text-foreground"
+    >
+      <LogOut className="h-3.5 w-3.5" />
+      <span className="truncate">{user.email ?? "Sign out"}</span>
+    </button>
+  );
+}
+

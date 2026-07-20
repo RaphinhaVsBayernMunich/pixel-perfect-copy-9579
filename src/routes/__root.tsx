@@ -12,6 +12,9 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppShell } from "../components/app-shell";
+import { AuthGate } from "../components/auth-gate";
+import { Toaster } from "@/components/ui/sonner";
+
 
 function NotFoundComponent() {
   return (
@@ -135,10 +138,14 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AppShell>
-        {/* Required: nested routes render here. */}
-        <Outlet />
-      </AppShell>
+      <AuthGate>
+        <AppShell>
+          {/* Required: nested routes render here. */}
+          <Outlet />
+        </AppShell>
+      </AuthGate>
+      <Toaster />
     </QueryClientProvider>
   );
 }
+
