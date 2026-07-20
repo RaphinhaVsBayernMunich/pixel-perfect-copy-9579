@@ -10,7 +10,7 @@ import {
   type Difficulty,
   type QuestType,
 } from "./demo-data";
-import { ACHIEVEMENTS, evaluateAchievements } from "./achievements";
+import { evaluateAchievements } from "./achievements";
 
 export type { Quest, Category, Priority, Difficulty, QuestType, Character };
 
