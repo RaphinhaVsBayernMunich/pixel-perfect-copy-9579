@@ -1,8 +1,9 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, Swords, CalendarDays, Scroll, User, Plus } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { useUI } from "@/lib/ui-store";
+import { useQuests } from "@/lib/quests-store";
 import { QuestQuickAdd } from "@/components/quest-quick-add";
 import { QuestEditor } from "@/components/quest-editor";
 import { QuestCelebration } from "@/components/quest-celebration";
@@ -18,6 +19,12 @@ const NAV = [
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const openQuickAdd = useUI((s) => s.openQuickAdd);
+  const syncAchievements = useQuests((s) => s.syncAchievements);
+
+  useEffect(() => {
+    syncAchievements();
+  }, [syncAchievements]);
+
 
   return (
     <div className="min-h-screen bg-ambient text-foreground">
