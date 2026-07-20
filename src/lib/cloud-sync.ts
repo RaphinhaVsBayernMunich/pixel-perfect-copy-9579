@@ -114,11 +114,12 @@ export async function attachSync(userId: string) {
   if (hasRemoteData) {
     const character = {
       ...seedCharacter,
-      ...(profile?.character_state ?? {}),
+      ...((profile?.character_state as Record<string, any>) ?? {}),
       categoryXp: {
         ...seedCharacter.categoryXp,
-        ...(profile?.category_xp ?? {}),
+        ...((profile?.category_xp as Record<string, number>) ?? {}),
       },
+
       level: profile?.level ?? seedCharacter.level,
       name: profile?.display_name ?? seedCharacter.name,
       title: profile?.character_title ?? seedCharacter.title,
