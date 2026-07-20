@@ -135,10 +135,14 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AppShell>
-        {/* Required: nested routes render here. */}
-        <Outlet />
-      </AppShell>
+      <AuthGate>
+        <AppShell>
+          {/* Required: nested routes render here. */}
+          <Outlet />
+        </AppShell>
+      </AuthGate>
+      <Toaster />
     </QueryClientProvider>
   );
 }
+
