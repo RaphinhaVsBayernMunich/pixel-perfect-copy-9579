@@ -94,7 +94,7 @@ export const Route = createFileRoute("/api/public/revenuecat-webhook")({
         }
 
         try {
-          await supabaseAdmin.from("profiles").update(update).eq("user_id", userId);
+          await supabaseAdmin.from("profiles").update(update as any).eq("user_id", userId);
           await supabaseAdmin.from("subscription_events").insert({
             user_id: userId,
             kind: kind.toLowerCase(),
