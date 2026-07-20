@@ -10,6 +10,9 @@ import { QuestQuickAdd } from "@/components/quest-quick-add";
 import { QuestEditor } from "@/components/quest-editor";
 import { QuestCelebration } from "@/components/quest-celebration";
 import { AICoach } from "@/components/ai-coach";
+import { Paywall } from "@/components/subscription/paywall";
+import { TrialEndedGate } from "@/components/subscription/trial-ended";
+import { TrialBadge } from "@/components/subscription/trial-badge";
 
 
 const NAV = [
@@ -127,6 +130,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       <QuestEditor />
       <QuestCelebration />
       <AICoach />
+      <Paywall />
+      <TrialEndedGate />
+      <TrialBadge />
     </div>
   );
 }
