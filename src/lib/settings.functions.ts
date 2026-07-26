@@ -9,14 +9,15 @@ const settingsShape = z.record(z.unknown()); // Loose — validated client-side.
 
 export const loadSettings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .handler(async ({ context }): Promise<{ settings: string | null }> => {
     const { supabase, userId } = context;
     const { data } = await supabase
       .from("profiles")
       .select("settings")
       .eq("user_id", userId)
       .maybeSingle();
-    return (data?.settings as Record<string, unknown> | null) ?? null;
+    // Return serialized JSON to sidestep TanStack's record<string,unknown> serialization guard.
+    return { settings: data?.settings ? JSON.stringify(data.settings) : null };
   });
 
 export const saveSettings = createServerFn({ method: "POST" })
