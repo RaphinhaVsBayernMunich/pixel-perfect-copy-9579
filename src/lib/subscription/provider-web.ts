@@ -1,11 +1,11 @@
 /**
- * Web subscription provider.
+ * Web subscription provider — Stripe Embedded Checkout.
  *
- * On the web we don't ship a browser billing SDK yet — purchases go through
- * a server function that will (in a follow-up wire-up) call RevenueCat Web
- * Billing or Stripe Checkout. Until then this provider surfaces catalog
- * pricing and defers purchase to the backend, which is the correct
- * abstraction shape: the UI never learns which processor ran the charge.
+ * The provider intentionally never renders UI; it hands a `clientSecret`
+ * back through the returned error object's discriminator, and the
+ * subscription store forwards it to the Paywall which mounts the
+ * <EmbeddedCheckoutProvider>. That keeps `SubscriptionProvider` a pure
+ * data contract shared with the native RevenueCat provider.
  */
 import type {
   Entitlement,
@@ -15,6 +15,13 @@ import type {
   SubscriptionProvider,
 } from "./types";
 import { PLANS, planById, toOfferingPackage } from "./plans";
+import { createStripeCheckout, createStripePortal } from "./stripe-checkout.functions";
+import { getStripeEnvironment, paymentsConfigured } from "@/lib/stripe";
+
+export interface WebPurchaseResult extends PurchaseResult {
+  /** Present on success — the Paywall mounts EmbeddedCheckout with this. */
+  clientSecret?: string;
+}
 
 export function createWebProvider(): SubscriptionProvider {
   const listeners = new Set<(e: Entitlement) => void>();
@@ -22,7 +29,7 @@ export function createWebProvider(): SubscriptionProvider {
   return {
     kind: "web",
     async init() {
-      /* no SDK to initialize on web today */
+      /* nothing to init on the web — Stripe.js loads lazily */
     },
     async identify() {
       /* handled by Supabase auth */
@@ -30,29 +37,58 @@ export function createWebProvider(): SubscriptionProvider {
     async getOfferings(): Promise<Offerings> {
       return { current: PLANS.map((p) => toOfferingPackage(p)) };
     },
-    async purchase(planId: PlanId): Promise<PurchaseResult> {
+
+    async purchase(planId: PlanId): Promise<WebPurchaseResult> {
       const plan = planById(planId);
       if (!plan) return { ok: false, entitlement: "free", error: "Unknown plan" };
-      // Real web checkout is wired via startWebCheckout() in the store.
-      return {
-        ok: false,
-        entitlement: "free",
-        error: "Web checkout is not yet configured. See docs/subscription-setup.md.",
-      };
+      if (!paymentsConfigured()) {
+        return {
+          ok: false,
+          entitlement: "free",
+          error: "Payments are not configured for this build.",
+        };
+      }
+
+      const returnUrl = `${window.location.origin}/?checkout=success&session_id={CHECKOUT_SESSION_ID}`;
+      const res = await createStripeCheckout({
+        data: {
+          priceId: plan.productId,
+          returnUrl,
+          environment: getStripeEnvironment(),
+        },
+      });
+
+      if ("error" in res) return { ok: false, entitlement: "free", error: res.error };
+      // Purchase itself completes asynchronously inside embedded checkout;
+      // the webhook updates entitlement, and refreshFromBackend picks it up.
+      return { ok: true, entitlement: "free", clientSecret: res.clientSecret };
     },
+
     async restore(): Promise<PurchaseResult> {
-      // On the web, entitlement lives in the backend — the subscription
-      // store's refreshFromBackend() call is the effective "restore".
+      // Web entitlement is server-authoritative; the store's
+      // refreshFromBackend() call is the effective "restore".
       return { ok: true, entitlement: "free" };
     },
+
     async refreshEntitlement(): Promise<Entitlement> {
-      // Web entitlement is authoritative from Supabase; the store handles
-      // that read directly.
       return "free";
     },
+
     onEntitlementChange(cb) {
       listeners.add(cb);
       return () => listeners.delete(cb);
     },
   };
+}
+
+/** Open the Stripe billing portal in a new tab for the current user. */
+export async function openStripeBillingPortal(): Promise<void> {
+  const res = await createStripePortal({
+    data: {
+      returnUrl: `${window.location.origin}/profile`,
+      environment: getStripeEnvironment(),
+    },
+  });
+  if ("error" in res) throw new Error(res.error);
+  window.open(res.url, "_blank", "noopener,noreferrer");
 }
