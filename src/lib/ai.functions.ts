@@ -51,7 +51,8 @@ const morningBriefInput = z.object({
 export const morningBrief = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => morningBriefInput.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await enforceAiQuota(context, "morning_brief");
     const gateway = await getGateway();
     const pending = data.todayQuests.filter((q) => !q.completed);
     const done = data.todayQuests.length - pending.length;
