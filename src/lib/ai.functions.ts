@@ -144,7 +144,8 @@ const reflectionInput = z.object({
 export const reflectionPrompt = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => reflectionInput.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await enforceAiQuota(context, "reflection_prompt");
     const gateway = await getGateway();
     const { text } = await generateText({
       model: gateway(MODEL),
