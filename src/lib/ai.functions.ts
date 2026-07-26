@@ -2,8 +2,22 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { generateText, Output, NoObjectGeneratedError } from "ai";
 import { z } from "zod";
+import { checkAndConsumeAiQuota } from "@/lib/subscription/ai-quota.functions";
 
 const MODEL = "google/gemini-2.5-flash";
+
+class QuotaExceededError extends Error {
+  constructor(public used: number, public limit: number) {
+    super(`AI daily quota exceeded (${used}/${limit}).`);
+    this.name = "QuotaExceededError";
+  }
+}
+
+async function enforceAiQuota(context: any, feature: string) {
+  const result = await checkAndConsumeAiQuota(context.supabase, context.userId, feature);
+  if (!result.allowed) throw new QuotaExceededError(result.used, result.limit);
+  return result;
+}
 
 function getGateway() {
   const key = process.env.LOVABLE_API_KEY;
