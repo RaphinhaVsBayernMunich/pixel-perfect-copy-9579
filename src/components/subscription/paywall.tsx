@@ -9,13 +9,15 @@
  * this component. Swap it out or feature-flag variants without touching
  * feature gates or the subscription store.
  */
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { Check, Loader2, Sparkles, X } from "lucide-react";
+import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useUI } from "@/lib/ui-store";
 import { useSubscription, trialDaysLeft } from "@/lib/subscription/service";
 import { PREMIUM_FEATURES } from "@/lib/subscription/types";
+import { getStripe, paymentsConfigured } from "@/lib/stripe";
 import { cn } from "@/lib/utils";
 
 const BENEFIT_KEYS: (keyof typeof PREMIUM_FEATURES)[] = [
@@ -32,8 +34,11 @@ const BENEFIT_KEYS: (keyof typeof PREMIUM_FEATURES)[] = [
 export function Paywall() {
   const open = useUI((s) => s.paywallOpen);
   const close = useUI((s) => s.closePaywall);
+  const clientSecret = useUI((s) => s.checkoutClientSecret);
+  const setClientSecret = useUI((s) => s.setCheckoutClientSecret);
   const state = useSubscription();
   const refreshOfferings = useSubscription((s) => s.refreshOfferings);
+  const refreshFromBackend = useSubscription((s) => s.refreshFromBackend);
   const purchase = useSubscription((s) => s.purchase);
   const restore = useSubscription((s) => s.restore);
 
@@ -41,13 +46,68 @@ export function Paywall() {
     if (open) void refreshOfferings();
   }, [open, refreshOfferings]);
 
-  const daysLeft = trialDaysLeft(state);
-  const featured = state.offerings?.current.find((p) => p.featured) ?? state.offerings?.current[0];
+  const fetchClientSecret = useCallback(async () => clientSecret ?? "", [clientSecret]);
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && close()}>
       <DialogContent className="max-w-lg overflow-hidden p-0">
-        {/* Hero */}
+        {clientSecret ? (
+          <div className="px-2 pt-8 pb-2">
+            <button
+              onClick={() => setClientSecret(null)}
+              className="absolute right-4 top-4 z-10 rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              aria-label="Back to plans"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <EmbeddedCheckoutProvider
+              stripe={getStripe()}
+              options={{
+                fetchClientSecret,
+                onComplete: () => {
+                  // Webhook is authoritative — just re-read the profile.
+                  void refreshFromBackend();
+                  setTimeout(() => {
+                    setClientSecret(null);
+                    close();
+                  }, 1500);
+                },
+              }}
+            >
+              <EmbeddedCheckout />
+            </EmbeddedCheckoutProvider>
+          </div>
+        ) : (
+          <PaywallPlans
+            state={state}
+            close={close}
+            purchase={purchase}
+            restore={restore}
+          />
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function PaywallPlans({
+  state,
+  close,
+  purchase,
+  restore,
+}: {
+  state: ReturnType<typeof useSubscription.getState>;
+  close: () => void;
+  purchase: (id: any) => Promise<boolean>;
+  restore: () => Promise<boolean>;
+}) {
+  const daysLeft = trialDaysLeft(state);
+  const featured = state.offerings?.current.find((p) => p.featured) ?? state.offerings?.current[0];
+  const configured = paymentsConfigured();
+
+  return (
+    <>
+      {/* Hero */}
         <div className="relative bg-gradient-to-b from-primary/20 via-primary/5 to-transparent px-6 pt-8 pb-6">
           <button
             onClick={close}
@@ -161,7 +221,6 @@ export function Paywall() {
             </a>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </>
   );
 }

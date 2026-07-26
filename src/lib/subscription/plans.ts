@@ -23,15 +23,15 @@ export interface PlanDef {
 export const PLANS: PlanDef[] = [
   {
     id: "premium_annual",
-    productId: "questos_premium_annual",
+    // On web `productId` is the Stripe price lookup_key; on native it's the
+    // Google Play SKU that RevenueCat resolves. Keep in sync with both
+    // dashboards.
+    productId: "premium_annual",
     displayName: "Premium — Annual",
     period: "annual",
     defaultPriceString: "$19.99 / year",
     featured: true,
   },
-  // Future plans — commented out until priced & configured in the stores.
-  // { id: "premium_monthly",  productId: "questos_premium_monthly",  displayName: "Premium — Monthly",  period: "monthly",  defaultPriceString: "$2.99 / month" },
-  // { id: "premium_lifetime", productId: "questos_premium_lifetime", displayName: "Premium — Lifetime", period: "lifetime", defaultPriceString: "$79.99 once" },
 ];
 
 export function planById(id: PlanId): PlanDef | undefined {
