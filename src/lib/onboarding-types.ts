@@ -19,7 +19,7 @@ export type PlanningStyle = "strict" | "balanced" | "flexible";
 export type CoachStyle = "gentle" | "balanced" | "challenging" | "minimal";
 export type FocusLength = 25 | 45 | 60 | 90;
 export type Theme = "dark" | "light" | "cyberpunk" | "minimal" | "forest" | "space" | "football";
-export type CelebrationStyle = "mission-passed" | "minecraft" | "modern" | "silent";
+export type CelebrationStyle = "mission-passed" | "modern" | "silent";
 
 export interface OnboardingProfile {
   // Basics
@@ -121,7 +121,7 @@ export const THEMES: { id: Theme; label: string; swatch: string }[] = [
 
 export const CELEBRATIONS: { id: CelebrationStyle; label: string; blurb: string }[] = [
   { id: "mission-passed", label: "Mission Passed", blurb: "Cinematic GTA-style banner + golden reward flash." },
-  { id: "minecraft", label: "Minecraft XP", blurb: "Colorful floating XP with a pickup sound." },
+  
   { id: "modern", label: "Modern", blurb: "Minimal premium animation. Soft, elegant." },
   { id: "silent", label: "Silent", blurb: "No animation, no sound. Instant." },
 ];

@@ -19,6 +19,7 @@ export function QuestCelebration() {
   );
   const style = useQuests((s) => s.onboardingProfile.celebration) ?? "modern";
   const [visible, setVisible] = useState(false);
+  const [fading, setFading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -29,7 +30,12 @@ export function QuestCelebration() {
     }
 
     setVisible(true);
-    const duration = style === "mission-passed" ? 4200 : 1500;
+    setFading(false);
+
+    // Mission Passed: play the full jingle (~9.4s), then fade out for 700ms.
+    const MISSION_AUDIO_MS = 9400;
+    const FADE_MS = 700;
+    const holdMs = style === "mission-passed" ? MISSION_AUDIO_MS : 1500;
 
     if (style === "mission-passed") {
       try {
@@ -42,11 +48,13 @@ export function QuestCelebration() {
       }
     }
 
-    const t = setTimeout(() => setVisible(false), duration);
-    const t2 = setTimeout(() => clear(), duration + 200);
+    const tFade = setTimeout(() => setFading(true), holdMs);
+    const tHide = setTimeout(() => setVisible(false), holdMs + FADE_MS);
+    const tClear = setTimeout(() => clear(), holdMs + FADE_MS + 100);
     return () => {
-      clearTimeout(t);
-      clearTimeout(t2);
+      clearTimeout(tFade);
+      clearTimeout(tHide);
+      clearTimeout(tClear);
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
@@ -61,7 +69,7 @@ export function QuestCelebration() {
       <div
         role="status"
         aria-live="polite"
-        className="pointer-events-none fixed inset-0 z-50 flex flex-col items-center justify-center px-6"
+        className={`pointer-events-none fixed inset-0 z-50 flex flex-col items-center justify-center px-6 transition-opacity duration-700 ${fading ? "opacity-0" : "opacity-100"}`}
       >
         <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px] animate-in fade-in duration-300" />
         <div className="relative flex flex-col items-center gap-6 animate-in fade-in zoom-in-95 slide-in-from-bottom-6 duration-500">
