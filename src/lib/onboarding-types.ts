@@ -19,7 +19,7 @@ export type PlanningStyle = "strict" | "balanced" | "flexible";
 export type CoachStyle = "gentle" | "balanced" | "challenging" | "minimal";
 export type FocusLength = 25 | 45 | 60 | 90;
 export type Theme = "dark" | "light" | "cyberpunk" | "minimal" | "forest" | "space" | "football";
-export type CelebrationStyle = "mission-passed" | "minecraft" | "modern" | "silent";
+export type CelebrationStyle = "mission-passed" | "modern" | "silent";
 
 export interface OnboardingProfile {
   // Basics
