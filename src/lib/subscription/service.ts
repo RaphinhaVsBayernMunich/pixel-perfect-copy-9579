@@ -279,8 +279,12 @@ export function hasPremiumEntitlement(state: SubscriptionState): boolean {
 }
 
 export function trialDaysLeft(state: SubscriptionState): number | null {
-  if (state.status !== "trial" || !state.trialEnd) return null;
-  const ms = new Date(state.trialEnd).getTime() - Date.now();
+  return trialDaysLeftFor(state.status, state.trialEnd);
+}
+
+function trialDaysLeftFor(status: string, trialEnd: string | null): number | null {
+  if (status !== "trial" || !trialEnd) return null;
+  const ms = new Date(trialEnd).getTime() - Date.now();
   return Math.max(0, Math.ceil(ms / (24 * 60 * 60 * 1000)));
 }
 
