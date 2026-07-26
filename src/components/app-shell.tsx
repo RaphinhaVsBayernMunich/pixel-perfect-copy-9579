@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Swords, CalendarDays, Scroll, User, Plus, LogOut } from "lucide-react";
+import { Home, Swords, CalendarDays, Scroll, User, Plus, LogOut, Settings } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { useUI } from "@/lib/ui-store";
