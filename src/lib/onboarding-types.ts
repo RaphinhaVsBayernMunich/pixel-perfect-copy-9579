@@ -121,7 +121,7 @@ export const THEMES: { id: Theme; label: string; swatch: string }[] = [
 
 export const CELEBRATIONS: { id: CelebrationStyle; label: string; blurb: string }[] = [
   { id: "mission-passed", label: "Mission Passed", blurb: "Cinematic GTA-style banner + golden reward flash." },
-  { id: "minecraft", label: "Minecraft XP", blurb: "Colorful floating XP with a pickup sound." },
+  
   { id: "modern", label: "Modern", blurb: "Minimal premium animation. Soft, elegant." },
   { id: "silent", label: "Silent", blurb: "No animation, no sound. Instant." },
 ];
