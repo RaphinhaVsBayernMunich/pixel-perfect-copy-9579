@@ -12,6 +12,7 @@
  * imports RevenueCat or Stripe directly.
  */
 import { create } from "zustand";
+import { useUI } from "@/lib/ui-store";
 import { isNative } from "@/lib/native/platform";
 import { createNativeProvider } from "./provider-native";
 import { createWebProvider } from "./provider-web";
@@ -144,6 +145,14 @@ export const useSubscription = create<Store>((set, get) => ({
     set({ pending: true });
     try {
       const result = await getProvider().purchase(planId);
+      // Web: the provider returned a Stripe Embedded Checkout client secret.
+      // Hand it to the Paywall to mount the form; entitlement flips server-side
+      // when the webhook fires, then refreshFromBackend picks it up.
+      const clientSecret = (result as { clientSecret?: string }).clientSecret;
+      if (clientSecret) {
+        useUI.getState().setCheckoutClientSecret(clientSecret);
+        return true;
+      }
       if (result.ok) {
         toast.success("Welcome to QuestOS Premium.");
         await get().refreshFromBackend();
