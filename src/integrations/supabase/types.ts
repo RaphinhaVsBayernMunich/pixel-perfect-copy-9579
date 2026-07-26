@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_usage: {
+        Row: {
+          last_feature: string | null
+          request_count: number
+          updated_at: string
+          usage_date: string
+          user_id: string
+        }
+        Insert: {
+          last_feature?: string | null
+          request_count?: number
+          updated_at?: string
+          usage_date?: string
+          user_id: string
+        }
+        Update: {
+          last_feature?: string | null
+          request_count?: number
+          updated_at?: string
+          usage_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      analytics_events: {
+        Row: {
+          event: string
+          id: string
+          occurred_at: string
+          platform: string | null
+          properties: Json
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          event: string
+          id?: string
+          occurred_at?: string
+          platform?: string | null
+          properties?: Json
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          event?: string
+          id?: string
+          occurred_at?: string
+          platform?: string | null
+          properties?: Json
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       installations: {
         Row: {
           fingerprint: string
@@ -101,6 +155,7 @@ export type Database = {
           level: number
           premium_expiration: string | null
           revenuecat_customer_id: string | null
+          settings: Json
           stripe_customer_id: string | null
           subscription_status: string
           timezone: string
@@ -124,6 +179,7 @@ export type Database = {
           level?: number
           premium_expiration?: string | null
           revenuecat_customer_id?: string | null
+          settings?: Json
           stripe_customer_id?: string | null
           subscription_status?: string
           timezone?: string
@@ -147,6 +203,7 @@ export type Database = {
           level?: number
           premium_expiration?: string | null
           revenuecat_customer_id?: string | null
+          settings?: Json
           stripe_customer_id?: string | null
           subscription_status?: string
           timezone?: string
@@ -275,6 +332,10 @@ export type Database = {
     }
     Functions: {
       has_active_premium: { Args: { _user_id: string }; Returns: boolean }
+      increment_ai_usage: {
+        Args: { _feature: string; _user_id: string }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
