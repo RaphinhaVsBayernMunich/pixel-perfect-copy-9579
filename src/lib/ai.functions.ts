@@ -175,7 +175,8 @@ const starterInput = z.object({
 export const generateStarterQuests = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => starterInput.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await enforceAiQuota(context, "starter_quests");
     const gateway = await getGateway();
     try {
       const { output } = await generateText({
