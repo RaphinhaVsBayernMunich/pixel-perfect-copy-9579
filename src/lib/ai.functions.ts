@@ -2,8 +2,22 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { generateText, Output, NoObjectGeneratedError } from "ai";
 import { z } from "zod";
+import { checkAndConsumeAiQuota } from "@/lib/subscription/ai-quota.functions";
 
 const MODEL = "google/gemini-2.5-flash";
+
+class QuotaExceededError extends Error {
+  constructor(public used: number, public limit: number) {
+    super(`AI daily quota exceeded (${used}/${limit}).`);
+    this.name = "QuotaExceededError";
+  }
+}
+
+async function enforceAiQuota(context: any, feature: string) {
+  const result = await checkAndConsumeAiQuota(context.supabase, context.userId, feature);
+  if (!result.allowed) throw new QuotaExceededError(result.used, result.limit);
+  return result;
+}
 
 function getGateway() {
   const key = process.env.LOVABLE_API_KEY;
@@ -37,7 +51,8 @@ const morningBriefInput = z.object({
 export const morningBrief = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => morningBriefInput.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await enforceAiQuota(context, "morning_brief");
     const gateway = await getGateway();
     const pending = data.todayQuests.filter((q) => !q.completed);
     const done = data.todayQuests.length - pending.length;
@@ -86,7 +101,8 @@ const questSchema = z.object({
 export const goalToQuests = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => goalInput.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await enforceAiQuota(context, "goal_to_quests");
     const gateway = await getGateway();
     try {
       const { output } = await generateText({
@@ -128,7 +144,8 @@ const reflectionInput = z.object({
 export const reflectionPrompt = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => reflectionInput.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await enforceAiQuota(context, "reflection_prompt");
     const gateway = await getGateway();
     const { text } = await generateText({
       model: gateway(MODEL),
@@ -158,7 +175,8 @@ const starterInput = z.object({
 export const generateStarterQuests = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => starterInput.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await enforceAiQuota(context, "starter_quests");
     const gateway = await getGateway();
     try {
       const { output } = await generateText({

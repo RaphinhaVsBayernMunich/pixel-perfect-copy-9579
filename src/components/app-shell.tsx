@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Swords, CalendarDays, Scroll, User, Plus, LogOut } from "lucide-react";
+import { Home, Swords, CalendarDays, Scroll, User, Plus, LogOut, Settings } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { useUI } from "@/lib/ui-store";
@@ -21,6 +21,7 @@ const NAV = [
   { to: "/calendar", label: "Calendar", icon: CalendarDays },
   { to: "/legacy", label: "Legacy", icon: Scroll },
   { to: "/profile", label: "Profile", icon: User },
+  { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {

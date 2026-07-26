@@ -13,7 +13,7 @@
  */
 import { create } from "zustand";
 import { useUI } from "@/lib/ui-store";
-import { isNative } from "@/lib/native/platform";
+import { isNative, nativePlatform } from "@/lib/native/platform";
 import { createNativeProvider } from "./provider-native";
 import { createWebProvider } from "./provider-web";
 import {
@@ -21,6 +21,8 @@ import {
   startTrial,
   listSubscriptionEvents,
 } from "./subscription.functions";
+import { createStripePortal } from "./stripe-checkout.functions";
+import { getStripeEnvironment, paymentsConfigured } from "@/lib/stripe";
 import { getInstallFingerprint } from "./install-id";
 import type {
   Entitlement,
@@ -31,6 +33,9 @@ import type {
   SubscriptionState,
 } from "./types";
 import { toast } from "sonner";
+import { track } from "@/lib/analytics";
+import { notify } from "@/lib/notifications";
+import { APP_CONFIG } from "@/lib/config/admin-config";
 
 // ---- store ----------------------------------------------------------------
 
@@ -43,6 +48,7 @@ interface Store extends SubscriptionState {
   refreshEvents: () => Promise<void>;
   purchase: (planId: PlanId) => Promise<boolean>;
   restore: () => Promise<boolean>;
+  openBillingPortal: () => Promise<void>;
   reset: () => void;
 }
 
@@ -97,16 +103,28 @@ export const useSubscription = create<Store>((set, get) => ({
     p.onEntitlementChange(() => {
       void get().refreshFromBackend();
     });
+
+    // Periodic silent refresh (offline-safe: silent on failure).
+    if (typeof window !== "undefined" && !refreshIntervalStarted) {
+      refreshIntervalStarted = true;
+      setInterval(() => {
+        void get().refreshFromBackend();
+      }, APP_CONFIG.subscriptionRefreshIntervalMs);
+      // Refresh whenever the tab regains focus / connectivity returns.
+      window.addEventListener("focus", () => void get().refreshFromBackend());
+      window.addEventListener("online", () => void get().refreshFromBackend());
+    }
   },
 
   async refreshFromBackend() {
     try {
+      const prev = get();
       const data = await getSubscription();
       if (!data) {
         set({ loaded: true });
         return;
       }
-      set({
+      const next = {
         status: (data.subscription_status as any) ?? "free",
         entitlement: (data.entitlement as Entitlement) ?? "free",
         currentPlan: (data.current_plan as PlanId | null) ?? null,
@@ -116,7 +134,15 @@ export const useSubscription = create<Store>((set, get) => ({
         revenueCatCustomerId: data.revenuecat_customer_id ?? null,
         lastVerification: data.last_verification ?? null,
         loaded: true,
-      });
+      };
+      set(next);
+      dispatchLifecycleNotifications(prev, next);
+      // Emit trial-ending nudges (once per threshold per user).
+      const daysLeft = trialDaysLeftFor(next.status, next.trialEnd);
+      if (daysLeft !== null) {
+        if (daysLeft === 1) notify("trial_ending_1d", { once: true, key: next.trialEnd ?? "" });
+        else if (daysLeft <= 3) notify("trial_ending_3d", { once: true, key: next.trialEnd ?? "" });
+      }
     } catch (e) {
       console.warn("refreshFromBackend failed", e);
       set({ loaded: true });
@@ -143,22 +169,24 @@ export const useSubscription = create<Store>((set, get) => ({
 
   async purchase(planId: PlanId) {
     set({ pending: true });
+    track("checkout_started", { plan: planId });
     try {
       const result = await getProvider().purchase(planId);
-      // Web: the provider returned a Stripe Embedded Checkout client secret.
-      // Hand it to the Paywall to mount the form; entitlement flips server-side
-      // when the webhook fires, then refreshFromBackend picks it up.
       const clientSecret = (result as { clientSecret?: string }).clientSecret;
       if (clientSecret) {
         useUI.getState().setCheckoutClientSecret(clientSecret);
         return true;
       }
       if (result.ok) {
-        toast.success("Welcome to QuestOS Premium.");
+        track("checkout_completed", { plan: planId });
+        track("purchase", { plan: planId });
+        notify("purchase_success");
         await get().refreshFromBackend();
         return true;
       }
-      if (result.error && result.error !== "cancelled") toast.error(result.error);
+      if (result.error && result.error !== "cancelled") {
+        toast.error(result.error);
+      }
       return false;
     } finally {
       set({ pending: false });
@@ -170,8 +198,9 @@ export const useSubscription = create<Store>((set, get) => ({
     try {
       const result = await getProvider().restore();
       await get().refreshFromBackend();
+      track("subscription_restored", { ok: result.ok, entitlement: result.entitlement });
       if (result.ok && result.entitlement === "premium") {
-        toast.success("Premium restored.");
+        notify("restore_success");
         return true;
       }
       toast.message("No prior purchase found on this account.");
@@ -181,10 +210,67 @@ export const useSubscription = create<Store>((set, get) => ({
     }
   },
 
+  async openBillingPortal() {
+    track("portal_opened", { platform: nativePlatform() });
+    // Native: send to Google Play subscriptions surface.
+    if (isNative()) {
+      const url =
+        nativePlatform() === "android"
+          ? "https://play.google.com/store/account/subscriptions"
+          : "https://apps.apple.com/account/subscriptions";
+      window.open(url, "_blank", "noopener,noreferrer");
+      return;
+    }
+    // Web: Stripe Billing Portal — MUST open in a new tab (cannot iframe).
+    if (!paymentsConfigured()) {
+      toast.error("Billing portal is not configured for this build.");
+      return;
+    }
+    try {
+      const res = await createStripePortal({
+        data: {
+          returnUrl: `${window.location.origin}/profile`,
+          environment: getStripeEnvironment(),
+        },
+      });
+      if ("error" in res) {
+        toast.error(res.error);
+        return;
+      }
+      window.open(res.url, "_blank", "noopener,noreferrer");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to open billing portal");
+    }
+  },
+
   reset() {
     set({ ...initial, offerings: null, events: [] });
   },
 }));
+
+let refreshIntervalStarted = false;
+
+/**
+ * Fire notifications for status transitions the user should know about.
+ * Called from `refreshFromBackend` after every successful refresh.
+ */
+function dispatchLifecycleNotifications(prev: SubscriptionState, next: Pick<SubscriptionState, "status" | "premiumExpiration">) {
+  if (!prev.loaded) return; // Skip the very first hydration.
+  const wasPremium = prev.status === "premium";
+  const nowPremium = next.status === "premium";
+  const wasExpired = prev.status === "expired";
+  const nowExpired = next.status === "expired";
+
+  if (!wasPremium && nowPremium) notify("premium_unlocked");
+  if (wasPremium && nowExpired) notify("subscription_expired");
+  if (wasPremium && nowPremium && prev.premiumExpiration !== next.premiumExpiration) {
+    notify("subscription_renewed", { once: true, key: next.premiumExpiration ?? "" });
+    track("renewal");
+  }
+  if (wasPremium && !nowPremium) track("cancellation");
+  if (!wasExpired && nowExpired && prev.status === "trial") track("trial_expired");
+}
+
 
 // ---- selectors ------------------------------------------------------------
 
@@ -193,8 +279,12 @@ export function hasPremiumEntitlement(state: SubscriptionState): boolean {
 }
 
 export function trialDaysLeft(state: SubscriptionState): number | null {
-  if (state.status !== "trial" || !state.trialEnd) return null;
-  const ms = new Date(state.trialEnd).getTime() - Date.now();
+  return trialDaysLeftFor(state.status, state.trialEnd);
+}
+
+function trialDaysLeftFor(status: string, trialEnd: string | null): number | null {
+  if (status !== "trial" || !trialEnd) return null;
+  const ms = new Date(trialEnd).getTime() - Date.now();
   return Math.max(0, Math.ceil(ms / (24 * 60 * 60 * 1000)));
 }
 

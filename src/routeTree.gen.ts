@@ -9,14 +9,22 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as QuestsRouteImport } from './routes/quests'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as LegacyRouteImport } from './routes/legacy'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LegalTermsRouteImport } from './routes/legal.terms'
+import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
 import { Route as ApiPublicRevenuecatWebhookRouteImport } from './routes/api/public/revenuecat-webhook'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const QuestsRoute = QuestsRouteImport.update({
   id: '/quests',
   path: '/quests',
@@ -42,6 +50,16 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LegalTermsRoute = LegalTermsRouteImport.update({
+  id: '/legal/terms',
+  path: '/legal/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalPrivacyRoute = LegalPrivacyRouteImport.update({
+  id: '/legal/privacy',
+  path: '/legal/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicRevenuecatWebhookRoute =
   ApiPublicRevenuecatWebhookRouteImport.update({
     id: '/api/public/revenuecat-webhook',
@@ -61,6 +79,9 @@ export interface FileRoutesByFullPath {
   '/legacy': typeof LegacyRoute
   '/profile': typeof ProfileRoute
   '/quests': typeof QuestsRoute
+  '/settings': typeof SettingsRoute
+  '/legal/privacy': typeof LegalPrivacyRoute
+  '/legal/terms': typeof LegalTermsRoute
   '/api/public/revenuecat-webhook': typeof ApiPublicRevenuecatWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -70,6 +91,9 @@ export interface FileRoutesByTo {
   '/legacy': typeof LegacyRoute
   '/profile': typeof ProfileRoute
   '/quests': typeof QuestsRoute
+  '/settings': typeof SettingsRoute
+  '/legal/privacy': typeof LegalPrivacyRoute
+  '/legal/terms': typeof LegalTermsRoute
   '/api/public/revenuecat-webhook': typeof ApiPublicRevenuecatWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -80,6 +104,9 @@ export interface FileRoutesById {
   '/legacy': typeof LegacyRoute
   '/profile': typeof ProfileRoute
   '/quests': typeof QuestsRoute
+  '/settings': typeof SettingsRoute
+  '/legal/privacy': typeof LegalPrivacyRoute
+  '/legal/terms': typeof LegalTermsRoute
   '/api/public/revenuecat-webhook': typeof ApiPublicRevenuecatWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -91,6 +118,9 @@ export interface FileRouteTypes {
     | '/legacy'
     | '/profile'
     | '/quests'
+    | '/settings'
+    | '/legal/privacy'
+    | '/legal/terms'
     | '/api/public/revenuecat-webhook'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -100,6 +130,9 @@ export interface FileRouteTypes {
     | '/legacy'
     | '/profile'
     | '/quests'
+    | '/settings'
+    | '/legal/privacy'
+    | '/legal/terms'
     | '/api/public/revenuecat-webhook'
     | '/api/public/payments/webhook'
   id:
@@ -109,6 +142,9 @@ export interface FileRouteTypes {
     | '/legacy'
     | '/profile'
     | '/quests'
+    | '/settings'
+    | '/legal/privacy'
+    | '/legal/terms'
     | '/api/public/revenuecat-webhook'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
@@ -119,12 +155,22 @@ export interface RootRouteChildren {
   LegacyRoute: typeof LegacyRoute
   ProfileRoute: typeof ProfileRoute
   QuestsRoute: typeof QuestsRoute
+  SettingsRoute: typeof SettingsRoute
+  LegalPrivacyRoute: typeof LegalPrivacyRoute
+  LegalTermsRoute: typeof LegalTermsRoute
   ApiPublicRevenuecatWebhookRoute: typeof ApiPublicRevenuecatWebhookRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/quests': {
       id: '/quests'
       path: '/quests'
@@ -160,6 +206,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/legal/terms': {
+      id: '/legal/terms'
+      path: '/legal/terms'
+      fullPath: '/legal/terms'
+      preLoaderRoute: typeof LegalTermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/privacy': {
+      id: '/legal/privacy'
+      path: '/legal/privacy'
+      fullPath: '/legal/privacy'
+      preLoaderRoute: typeof LegalPrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/revenuecat-webhook': {
       id: '/api/public/revenuecat-webhook'
       path: '/api/public/revenuecat-webhook'
@@ -183,6 +243,9 @@ const rootRouteChildren: RootRouteChildren = {
   LegacyRoute: LegacyRoute,
   ProfileRoute: ProfileRoute,
   QuestsRoute: QuestsRoute,
+  SettingsRoute: SettingsRoute,
+  LegalPrivacyRoute: LegalPrivacyRoute,
+  LegalTermsRoute: LegalTermsRoute,
   ApiPublicRevenuecatWebhookRoute: ApiPublicRevenuecatWebhookRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
