@@ -1,11 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Zap } from "lucide-react";
 import { useQuests } from "@/lib/quests-store";
 import { CATEGORY_LABEL, CATEGORY_TOKEN } from "@/lib/demo-data";
+import missionPassedImg from "@/assets/mission-passed.png.asset.json";
+import missionPassedSfx from "@/assets/mission-passed.mp3.asset.json";
 
 /**
- * Modern celebration style — subtle, satisfying, never childish.
- * Shows an overlay for ~1.6s after any quest completion.
+ * Celebrations. Style comes from the user's onboarding profile:
+ *   - "mission-passed" → GTA San Andreas banner + sound.
+ *   - "silent"         → no visual, no sound.
+ *   - default          → subtle modern toast.
  */
 export function QuestCelebration() {
   const last = useQuests((s) => s.lastCompletion);
@@ -13,20 +17,75 @@ export function QuestCelebration() {
   const quest = useQuests((s) =>
     last ? s.quests.find((q) => q.id === last.questId) : undefined,
   );
+  const style = useQuests((s) => s.onboardingProfile.celebration) ?? "modern";
   const [visible, setVisible] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     if (!last || !quest) return;
+    if (style === "silent") {
+      clear();
+      return;
+    }
+
     setVisible(true);
-    const t = setTimeout(() => setVisible(false), 1500);
-    const t2 = setTimeout(() => clear(), 1700);
+    const duration = style === "mission-passed" ? 4200 : 1500;
+
+    if (style === "mission-passed") {
+      try {
+        const audio = new Audio(missionPassedSfx.url);
+        audio.volume = 0.85;
+        audioRef.current = audio;
+        void audio.play().catch(() => {});
+      } catch {
+        /* autoplay blocked */
+      }
+    }
+
+    const t = setTimeout(() => setVisible(false), duration);
+    const t2 = setTimeout(() => clear(), duration + 200);
     return () => {
       clearTimeout(t);
       clearTimeout(t2);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
     };
   }, [last?.ts]);
 
   if (!last || !quest || !visible) return null;
+
+  if (style === "mission-passed") {
+    return (
+      <div
+        role="status"
+        aria-live="polite"
+        className="pointer-events-none fixed inset-0 z-50 flex flex-col items-center justify-center px-6"
+      >
+        <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px] animate-in fade-in duration-300" />
+        <div className="relative flex flex-col items-center gap-6 animate-in fade-in zoom-in-95 slide-in-from-bottom-6 duration-500">
+          <img
+            src={missionPassedImg.url}
+            alt="Mission Passed — Respect +99"
+            className="w-[min(88vw,720px)] drop-shadow-[0_10px_30px_rgba(0,0,0,0.6)] select-none"
+            draggable={false}
+          />
+          <div className="rounded-xl border border-white/15 bg-black/60 px-5 py-2 text-center">
+            <p className="text-[11px] tracking-[0.25em] text-white/60 uppercase">
+              {CATEGORY_LABEL[quest.category]}
+            </p>
+            <p className="font-display text-lg font-semibold text-white">
+              {quest.title}
+            </p>
+            <p className="font-display text-2xl font-bold text-[#f6a41c]">
+              +{quest.xp} XP
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const color = CATEGORY_TOKEN[quest.category];
 
@@ -36,9 +95,7 @@ export function QuestCelebration() {
       aria-live="polite"
       className="pointer-events-none fixed inset-x-0 top-6 z-50 flex justify-center px-4"
     >
-      <div
-        className="animate-in fade-in slide-in-from-top-4 flex items-center gap-3 rounded-2xl border border-hairline bg-card/90 px-5 py-3 shadow-glow-xp backdrop-blur-xl duration-300"
-      >
+      <div className="animate-in fade-in slide-in-from-top-4 flex items-center gap-3 rounded-2xl border border-hairline bg-card/90 px-5 py-3 shadow-glow-xp backdrop-blur-xl duration-300">
         <div
           className="flex h-9 w-9 items-center justify-center rounded-lg"
           style={{ background: `color-mix(in oklch, ${color} 22%, transparent)`, color }}
