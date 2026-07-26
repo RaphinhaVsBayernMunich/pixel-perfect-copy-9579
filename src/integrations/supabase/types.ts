@@ -101,6 +101,7 @@ export type Database = {
           level: number
           premium_expiration: string | null
           revenuecat_customer_id: string | null
+          stripe_customer_id: string | null
           subscription_status: string
           timezone: string
           total_xp: number
@@ -123,6 +124,7 @@ export type Database = {
           level?: number
           premium_expiration?: string | null
           revenuecat_customer_id?: string | null
+          stripe_customer_id?: string | null
           subscription_status?: string
           timezone?: string
           total_xp?: number
@@ -145,6 +147,7 @@ export type Database = {
           level?: number
           premium_expiration?: string | null
           revenuecat_customer_id?: string | null
+          stripe_customer_id?: string | null
           subscription_status?: string
           timezone?: string
           total_xp?: number
