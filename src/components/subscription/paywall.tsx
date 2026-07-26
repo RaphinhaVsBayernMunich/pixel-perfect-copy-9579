@@ -221,7 +221,7 @@ function PaywallPlans({
             </a>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </>
   );
+}
 }
