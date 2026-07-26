@@ -13,7 +13,7 @@
  */
 import { create } from "zustand";
 import { useUI } from "@/lib/ui-store";
-import { isNative } from "@/lib/native/platform";
+import { isNative, nativePlatform } from "@/lib/native/platform";
 import { createNativeProvider } from "./provider-native";
 import { createWebProvider } from "./provider-web";
 import {
@@ -21,6 +21,8 @@ import {
   startTrial,
   listSubscriptionEvents,
 } from "./subscription.functions";
+import { createStripePortal } from "./stripe-checkout.functions";
+import { getStripeEnvironment, paymentsConfigured } from "@/lib/stripe";
 import { getInstallFingerprint } from "./install-id";
 import type {
   Entitlement,
@@ -31,6 +33,9 @@ import type {
   SubscriptionState,
 } from "./types";
 import { toast } from "sonner";
+import { track } from "@/lib/analytics";
+import { notify } from "@/lib/notifications";
+import { APP_CONFIG } from "@/lib/config/admin-config";
 
 // ---- store ----------------------------------------------------------------
 
@@ -43,6 +48,7 @@ interface Store extends SubscriptionState {
   refreshEvents: () => Promise<void>;
   purchase: (planId: PlanId) => Promise<boolean>;
   restore: () => Promise<boolean>;
+  openBillingPortal: () => Promise<void>;
   reset: () => void;
 }
 
