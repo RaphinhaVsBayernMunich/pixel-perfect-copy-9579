@@ -19,7 +19,6 @@ export function QuestCelebration() {
   );
   const style = useQuests((s) => s.onboardingProfile.celebration) ?? "modern";
   const [visible, setVisible] = useState(false);
-  const [fading, setFading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -30,37 +29,24 @@ export function QuestCelebration() {
     }
 
     setVisible(true);
-    setFading(false);
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    const FADE_MS = 600;
-
-    const finish = () => {
-      setFading(true);
-      timers.push(setTimeout(() => setVisible(false), FADE_MS));
-      timers.push(setTimeout(() => clear(), FADE_MS + 100));
-    };
+    const duration = style === "mission-passed" ? 4200 : 1500;
 
     if (style === "mission-passed") {
       try {
         const audio = new Audio(missionPassedSfx.url);
-        audio.volume = 0.9;
+        audio.volume = 0.85;
         audioRef.current = audio;
-        audio.addEventListener("ended", finish, { once: true });
-        void audio.play().catch(() => {
-          // autoplay blocked — fall back to a fixed duration
-          timers.push(setTimeout(finish, 4200));
-        });
-        // safety net if `ended` never fires
-        timers.push(setTimeout(finish, 12000));
+        void audio.play().catch(() => {});
       } catch {
-        timers.push(setTimeout(finish, 4200));
+        /* autoplay blocked */
       }
-    } else {
-      timers.push(setTimeout(finish, 1500));
     }
 
+    const t = setTimeout(() => setVisible(false), duration);
+    const t2 = setTimeout(() => clear(), duration + 200);
     return () => {
-      timers.forEach(clearTimeout);
+      clearTimeout(t);
+      clearTimeout(t2);
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
@@ -75,7 +61,7 @@ export function QuestCelebration() {
       <div
         role="status"
         aria-live="polite"
-        className={`pointer-events-none fixed inset-0 z-50 flex flex-col items-center justify-center px-6 transition-opacity duration-[600ms] ${fading ? "opacity-0" : "opacity-100"}`}
+        className="pointer-events-none fixed inset-0 z-50 flex flex-col items-center justify-center px-6"
       >
         <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px] animate-in fade-in duration-300" />
         <div className="relative flex flex-col items-center gap-6 animate-in fade-in zoom-in-95 slide-in-from-bottom-6 duration-500">
@@ -100,7 +86,6 @@ export function QuestCelebration() {
       </div>
     );
   }
-
 
   const color = CATEGORY_TOKEN[quest.category];
 
