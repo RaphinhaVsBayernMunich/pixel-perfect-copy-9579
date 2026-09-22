@@ -2,7 +2,9 @@ import { useEffect, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-store";
 import { useQuests } from "@/lib/quests-store";
-import { attachSync, detachSync } from "@/lib/cloud-sync";
+import { attachSync, detachSync, retrySync } from "@/lib/cloud-sync";
+import { useUI } from "@/lib/ui-store";
+import { resetAnalytics } from "@/lib/analytics";
 import { useSubscription } from "@/lib/subscription/service";
 import { AuthPage } from "./auth-page";
 import { OnboardingWizard } from "./onboarding/wizard";
@@ -11,40 +13,57 @@ export function AuthGate({ children }: { children: ReactNode }) {
   const user = useAuth((s) => s.user);
   const loading = useAuth((s) => s.loading);
   const cloudLoaded = useAuth((s) => s.cloudLoaded);
+  const syncError = useAuth((s) => s.syncError);
   const setUser = useAuth((s) => s.setUser);
   const onboardingCompleted = useQuests((s) => s.onboardingCompleted);
   const initSubscription = useSubscription((s) => s.init);
   const resetSubscription = useSubscription((s) => s.reset);
 
+  const userId = user?.id;
   useEffect(() => {
-    if (user && cloudLoaded) void initSubscription(user.id);
+    if (userId && cloudLoaded) void initSubscription(userId);
     if (!user) resetSubscription();
-  }, [user, cloudLoaded, initSubscription, resetSubscription]);
+  }, [userId, cloudLoaded, initSubscription, resetSubscription]);
 
   useEffect(() => {
     let mounted = true;
+    let timer: ReturnType<typeof setTimeout> | undefined;
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!mounted) return;
+      if (useAuth.getState().user?.id !== session?.user?.id) {
+        detachSync();
+        resetSubscription();
+        resetAnalytics();
+        useUI.setState({
+          quickAddOpen: false,
+          editorQuestId: undefined,
+          aiCoachOpen: false,
+          paywallOpen: false,
+          checkoutClientSecret: null,
+        });
+      }
       setUser(session?.user ?? null);
+      clearTimeout(timer);
       if (session?.user) {
-        void attachSync(session.user.id);
+        // Do not perform additional auth/network work inside the Supabase callback.
+        timer = setTimeout(() => {
+          if (mounted && useAuth.getState().user?.id === session.user.id) {
+            void attachSync(session.user.id, session.access_token);
+          }
+        }, 0);
       } else {
         void detachSync();
       }
     });
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (!mounted) return;
-      setUser(data.session?.user ?? null);
-      if (data.session?.user) void attachSync(data.session.user.id);
-    });
-
     return () => {
       mounted = false;
+      clearTimeout(timer);
       sub.subscription.unsubscribe();
+      detachSync();
     };
-  }, [setUser]);
+  }, [setUser, resetSubscription]);
 
   if (loading) {
     return (
@@ -59,12 +78,29 @@ export function AuthGate({ children }: { children: ReactNode }) {
   if (!cloudLoaded) {
     return (
       <div className="min-h-screen bg-ambient flex items-center justify-center">
-        <div className="animate-pulse text-sm text-muted-foreground">Syncing your legacy...</div>
+        {syncError ? (
+          <div role="alert">
+            <p>{syncError}</p>
+            <button onClick={() => void retrySync()}>Retry sync</button>
+          </div>
+        ) : (
+          <div className="animate-pulse text-sm text-muted-foreground">Syncing your legacy...</div>
+        )}
       </div>
     );
   }
 
-  if (!onboardingCompleted) return <OnboardingWizard />;
-
-  return <>{children}</>;
+  return (
+    <div key={user.id}>
+      {syncError && (
+        <div role="alert" className="border-b border-destructive p-3 text-sm">
+          {syncError}{" "}
+          <button className="underline" onClick={() => void retrySync()}>
+            Retry sync
+          </button>
+        </div>
+      )}
+      {!onboardingCompleted ? <OnboardingWizard /> : children}
+    </div>
+  );
 }

@@ -6,11 +6,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import {
-  type StripeEnv,
-  createStripeClient,
-  getStripeErrorMessage,
-} from "@/lib/stripe.server";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
+import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
 
 type CheckoutResult = { clientSecret: string } | { error: string };
 type PortalResult = { url: string } | { error: string };
@@ -20,7 +18,7 @@ const priceIdSchema = z.string().regex(/^[a-zA-Z0-9_-]+$/);
 
 async function resolveOrCreateCustomer(
   stripe: ReturnType<typeof createStripeClient>,
-  supabase: any,
+  supabase: SupabaseClient<Database>,
   userId: string,
   email?: string,
 ): Promise<string> {
@@ -31,8 +29,26 @@ async function resolveOrCreateCustomer(
     .from("profiles")
     .select("stripe_customer_id")
     .eq("user_id", userId)
-    .maybeSingle();
-  if (profile?.stripe_customer_id) return profile.stripe_customer_id;
+    .single()
+    .throwOnError();
+  if (profile?.stripe_customer_id) {
+    const customer = await stripe.customers.retrieve(profile.stripe_customer_id);
+    if (customer.deleted || customer.metadata.userId !== userId) {
+      throw new Error("Billing account ownership could not be verified. Contact support.");
+    }
+    return customer.id;
+  }
+
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  async function saveCustomer(customerId: string) {
+    await supabaseAdmin
+      .from("profiles")
+      .update({ stripe_customer_id: customerId })
+      .eq("user_id", userId)
+      .select("user_id")
+      .single()
+      .throwOnError();
+  }
 
   // 2. Search Stripe by userId metadata.
   const byMeta = await stripe.customers.search({
@@ -40,31 +56,18 @@ async function resolveOrCreateCustomer(
     limit: 1,
   });
   if (byMeta.data.length) {
-    await supabase.from("profiles").update({ stripe_customer_id: byMeta.data[0].id }).eq("user_id", userId);
+    await saveCustomer(byMeta.data[0].id);
     return byMeta.data[0].id;
   }
 
-  // 3. Fall back to email — backfill userId metadata on match.
-  if (email) {
-    const byEmail = await stripe.customers.list({ email, limit: 1 });
-    if (byEmail.data.length) {
-      const c = byEmail.data[0];
-      if (c.metadata?.userId !== userId) {
-        await stripe.customers.update(c.id, {
-          metadata: { ...c.metadata, userId },
-        });
-      }
-      await supabase.from("profiles").update({ stripe_customer_id: c.id }).eq("user_id", userId);
-      return c.id;
-    }
-  }
+  // Email equality alone is not proof of ownership. Never reassign another customer.
 
   // 4. Create.
   const created = await stripe.customers.create({
     ...(email && { email }),
     metadata: { userId },
   });
-  await supabase.from("profiles").update({ stripe_customer_id: created.id }).eq("user_id", userId);
+  await saveCustomer(created.id);
   return created.id;
 }
 
@@ -84,7 +87,9 @@ export const createStripeCheckout = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<CheckoutResult> => {
     try {
       const { supabase, userId } = context;
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       const stripe = createStripeClient(data.environment);
 
@@ -133,11 +138,16 @@ export const createStripePortal = createServerFn({ method: "POST" })
         .from("profiles")
         .select("stripe_customer_id")
         .eq("user_id", userId)
-        .maybeSingle();
+        .single()
+        .throwOnError();
       if (!profile?.stripe_customer_id) {
         return { error: "No Stripe customer on file. Purchase a plan first." };
       }
       const stripe = createStripeClient(data.environment);
+      const customer = await stripe.customers.retrieve(profile.stripe_customer_id);
+      if (customer.deleted || customer.metadata.userId !== userId) {
+        return { error: "Billing account ownership could not be verified. Contact support." };
+      }
       const portal = await stripe.billingPortal.sessions.create({
         customer: profile.stripe_customer_id,
         return_url: data.returnUrl,

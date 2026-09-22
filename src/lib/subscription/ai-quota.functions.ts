@@ -7,6 +7,7 @@
  */
 import { APP_CONFIG } from "@/lib/config/admin-config";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { effectiveTier } from "./entitlement";
 
 export type AiQuotaResult =
   | { allowed: true; remaining: number | null; used: number; limit: number | null }
@@ -25,12 +26,14 @@ export async function checkAndConsumeAiQuota(
   // 1. Determine tier + limit.
   const { data: profile } = await supabase
     .from("profiles")
-    .select("subscription_status, entitlement")
+    .select("subscription_status, entitlement, trial_end, premium_expiration")
     .eq("user_id", userId)
-    .maybeSingle();
+    .single()
+    .throwOnError();
 
-  const isPremium = profile?.entitlement === "premium";
-  const isTrial = profile?.subscription_status === "trial";
+  const tier = effectiveTier(profile);
+  const isPremium = tier === "premium";
+  const isTrial = tier === "trial";
   const limit: number | null = isPremium
     ? APP_CONFIG.aiQuota.premium
     : isTrial
@@ -48,7 +51,8 @@ export async function checkAndConsumeAiQuota(
     .select("request_count")
     .eq("user_id", userId)
     .eq("usage_date", today)
-    .maybeSingle();
+    .maybeSingle()
+    .throwOnError();
   const used = usage?.request_count ?? 0;
 
   if (limit !== null && used >= limit) {
@@ -61,11 +65,19 @@ export async function checkAndConsumeAiQuota(
   // 3. Increment. Use the service role via the SECURITY DEFINER RPC so
   //    RLS on ai_usage stays SELECT-only for the user.
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data: newCount } = await supabaseAdmin.rpc("increment_ai_usage", {
-    _user_id: userId,
-    _feature: feature,
-  });
-  const nowUsed = (newCount as number | null) ?? used + 1;
+  const { data: newCount } = await supabaseAdmin
+    .rpc("increment_ai_usage", {
+      _user_id: userId,
+      _feature: feature,
+    })
+    .throwOnError();
+  if (typeof newCount !== "number") throw new Error("AI usage reservation failed");
+  const nowUsed = newCount;
+  // Concurrent requests may all pass the peek. Only the first limit reservations proceed.
+  if (limit !== null && nowUsed > limit)
+    return { allowed: false, reason: "quota_exceeded", used: nowUsed, limit };
+  if (hardCeiling && nowUsed > hardCeiling)
+    return { allowed: false, reason: "hard_ceiling", used: nowUsed, limit: hardCeiling };
   const remaining = limit === null ? null : Math.max(0, limit - nowUsed);
   return { allowed: true, remaining, used: nowUsed, limit };
 }

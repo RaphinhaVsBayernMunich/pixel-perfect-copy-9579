@@ -15,7 +15,8 @@ export const loadSettings = createServerFn({ method: "GET" })
       .from("profiles")
       .select("settings")
       .eq("user_id", userId)
-      .maybeSingle();
+      .single()
+      .throwOnError();
     // Return serialized JSON to sidestep TanStack's record<string,unknown> serialization guard.
     return { settings: data?.settings ? JSON.stringify(data.settings) : null };
   });
@@ -28,7 +29,9 @@ export const saveSettings = createServerFn({ method: "POST" })
     const { error } = await supabase
       .from("profiles")
       .update({ settings: data.settings as any })
-      .eq("user_id", userId);
+      .eq("user_id", userId)
+      .select("user_id")
+      .single();
     if (error) throw error;
     return { ok: true };
   });

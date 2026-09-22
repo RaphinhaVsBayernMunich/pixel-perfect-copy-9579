@@ -13,6 +13,7 @@
 import { APP_CONFIG } from "@/lib/config/admin-config";
 import { recordAnalyticsBatch } from "@/lib/analytics.functions";
 import { nativePlatform } from "@/lib/native/platform";
+import { useAuth } from "@/lib/auth-store";
 
 export type AnalyticsEvent =
   // Auth / onboarding
@@ -90,17 +91,32 @@ function getSessionId(): string {
 }
 
 let buffer: EventPayload[] = [];
+let identityVersion = 0;
+
+export function resetAnalytics() {
+  identityVersion++;
+  buffer = [];
+  sessionId = null;
+  if (typeof sessionStorage !== "undefined") sessionStorage.removeItem("questos.session_id");
+}
 let flushTimer: ReturnType<typeof setInterval> | null = null;
 
 async function flush() {
   if (buffer.length === 0) return;
   const batch = buffer;
+  const version = identityVersion;
   buffer = [];
   try {
-    await recordAnalyticsBatch({ data: { events: batch } });
+    for (let start = 0; start < batch.length; start += 50) {
+      if (version !== identityVersion) return;
+      const result = await recordAnalyticsBatch({
+        data: { events: batch.slice(start, start + 50) },
+      });
+      if (!result.ok) throw new Error("Analytics write failed");
+    }
   } catch (e) {
     // On failure, re-queue up to a soft cap so we don't grow unboundedly.
-    if (buffer.length < 200) buffer.unshift(...batch);
+    if (version === identityVersion && buffer.length < 200) buffer.unshift(...batch);
     console.warn("analytics flush failed", e);
   }
 }
@@ -116,6 +132,7 @@ function ensureTimer() {
 
 /** Fire-and-forget analytics event. */
 export function track(event: AnalyticsEvent, properties: Record<string, unknown> = {}) {
+  if (!useAuth.getState().user) return;
   try {
     ensureTimer();
     const payload: EventPayload = {

@@ -3,8 +3,6 @@
  * settings server functions, and mirrored in Zustand for fast reads.
  */
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import { saveSettings } from "@/lib/settings.functions";
 import { track } from "@/lib/analytics";
 
 export type ThemePref = "dark" | "light" | "system";
@@ -53,30 +51,28 @@ interface SettingsStore {
   hydrate: (remote: Partial<UserSettings> | null) => void;
 }
 
-export const useSettings = create<SettingsStore>()(
-  persist(
-    (set, get) => ({
-      settings: DEFAULT_SETTINGS,
-      loaded: false,
-      set: (key, value) => {
-        const next = { ...get().settings, [key]: value };
-        set({ settings: next });
-        track("settings_changed", { key });
-        void saveSettings({ data: { settings: next } }).catch(() => {});
+export const useSettings = create<SettingsStore>()((set, get) => ({
+  settings: DEFAULT_SETTINGS,
+  loaded: false,
+  set: (key, value) => {
+    const next = { ...get().settings, [key]: value };
+    set({ settings: next });
+    track("settings_changed", { key });
+  },
+  patch: (partial) => {
+    const next = { ...get().settings, ...partial };
+    set({ settings: next });
+    track("settings_changed", { keys: Object.keys(partial) });
+  },
+  hydrate: (remote) => {
+    set({
+      settings: {
+        ...DEFAULT_SETTINGS,
+        ...(remote ?? {}),
+        notifications: { ...DEFAULT_SETTINGS.notifications, ...remote?.notifications },
+        ai: { ...DEFAULT_SETTINGS.ai, ...remote?.ai },
       },
-      patch: (partial) => {
-        const next = { ...get().settings, ...partial };
-        set({ settings: next });
-        track("settings_changed", { keys: Object.keys(partial) });
-        void saveSettings({ data: { settings: next } }).catch(() => {});
-      },
-      hydrate: (remote) => {
-        set({
-          settings: { ...DEFAULT_SETTINGS, ...(remote ?? {}) } as UserSettings,
-          loaded: true,
-        });
-      },
-    }),
-    { name: "questos.settings" },
-  ),
-);
+      loaded: true,
+    });
+  },
+}));

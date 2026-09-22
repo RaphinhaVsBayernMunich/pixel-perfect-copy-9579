@@ -6,13 +6,7 @@
  * source of truth for paid entitlements on device; it also handles
  * offline caching, restore, and store-issued renewals/cancellations.
  */
-import type {
-  Entitlement,
-  Offerings,
-  PlanId,
-  PurchaseResult,
-  SubscriptionProvider,
-} from "./types";
+import type { Entitlement, Offerings, PlanId, PurchaseResult, SubscriptionProvider } from "./types";
 import { PLANS, planById, planByProductId, toOfferingPackage } from "./plans";
 
 const PREMIUM_ENTITLEMENT_ID = "premium";
@@ -37,7 +31,8 @@ export function createNativeProvider(getApiKey: () => string | undefined): Subsc
     async init(userId) {
       if (initialized) return;
       const apiKey = getApiKey();
-      if (!apiKey) throw new Error("Missing RevenueCat public SDK key (VITE_REVENUECAT_ANDROID_KEY).");
+      if (!apiKey)
+        throw new Error("Missing RevenueCat public SDK key (VITE_REVENUECAT_ANDROID_KEY).");
       const Purchases = await getSdk();
       await Purchases.configure({ apiKey, appUserID: userId ?? undefined });
       // Attach entitlement change listener.
@@ -58,6 +53,7 @@ export function createNativeProvider(getApiKey: () => string | undefined): Subsc
         await Purchases.logIn({ appUserID: userId });
       } catch (e) {
         console.warn("RevenueCat logIn failed", e);
+        throw e;
       }
     },
 

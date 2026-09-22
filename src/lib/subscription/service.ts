@@ -16,11 +16,7 @@ import { useUI } from "@/lib/ui-store";
 import { isNative, nativePlatform } from "@/lib/native/platform";
 import { createNativeProvider } from "./provider-native";
 import { createWebProvider } from "./provider-web";
-import {
-  getSubscription,
-  startTrial,
-  listSubscriptionEvents,
-} from "./subscription.functions";
+import { getSubscription, startTrial, listSubscriptionEvents } from "./subscription.functions";
 import { createStripePortal } from "./stripe-checkout.functions";
 import { getStripeEnvironment, paymentsConfigured } from "@/lib/stripe";
 import { getInstallFingerprint } from "./install-id";
@@ -36,6 +32,8 @@ import { toast } from "sonner";
 import { track } from "@/lib/analytics";
 import { notify } from "@/lib/notifications";
 import { APP_CONFIG } from "@/lib/config/admin-config";
+import { useAuth } from "@/lib/auth-store";
+import { effectiveTier } from "./entitlement";
 
 // ---- store ----------------------------------------------------------------
 
@@ -53,6 +51,9 @@ interface Store extends SubscriptionState {
 }
 
 let provider: SubscriptionProvider | null = null;
+let identityVersion = 0;
+let providerOwner: string | null = null;
+let identifyQueue = Promise.resolve();
 
 function getProvider(): SubscriptionProvider {
   if (provider) return provider;
@@ -81,26 +82,40 @@ export const useSubscription = create<Store>((set, get) => ({
   events: [],
 
   async init(userId: string) {
+    const version = identityVersion;
     const p = getProvider();
     try {
-      await p.init(userId);
+      identifyQueue = identifyQueue
+        .catch(() => {})
+        .then(async () => {
+          if (version !== identityVersion) return;
+          await p.init(userId);
+          await p.identify(userId);
+          if (version === identityVersion) providerOwner = userId;
+        });
+      await identifyQueue;
     } catch (e) {
       console.warn("Subscription provider init failed", e);
     }
+    if (version !== identityVersion) return;
 
     // Ensure trial exists (idempotent, backend-authoritative).
     try {
       const { fingerprint, platform } = await getInstallFingerprint();
+      if (version !== identityVersion) return;
       await startTrial({ data: { fingerprint, platform } });
     } catch (e) {
       console.warn("startTrial failed", e);
     }
+    if (version !== identityVersion) return;
 
     await get().refreshFromBackend();
     void get().refreshOfferings();
 
     // Wire entitlement change → server truth refresh.
-    p.onEntitlementChange(() => {
+    unsubscribeProvider?.();
+    unsubscribeProvider = p.onEntitlementChange(() => {
+      if (version !== identityVersion) return;
       void get().refreshFromBackend();
     });
 
@@ -117,9 +132,12 @@ export const useSubscription = create<Store>((set, get) => ({
   },
 
   async refreshFromBackend() {
+    const version = identityVersion;
+    if (!useAuth.getState().user) return;
     try {
       const prev = get();
       const data = await getSubscription();
+      if (version !== identityVersion) return;
       if (!data) {
         set({ loaded: true });
         return;
@@ -144,14 +162,17 @@ export const useSubscription = create<Store>((set, get) => ({
         else if (daysLeft <= 3) notify("trial_ending_3d", { once: true, key: next.trialEnd ?? "" });
       }
     } catch (e) {
+      if (version !== identityVersion) return;
       console.warn("refreshFromBackend failed", e);
       set({ loaded: true });
     }
   },
 
   async refreshOfferings() {
+    const version = identityVersion;
     try {
       const offerings = await getProvider().getOfferings();
+      if (version !== identityVersion) return;
       set({ offerings });
     } catch (e) {
       console.warn("refreshOfferings failed", e);
@@ -159,8 +180,10 @@ export const useSubscription = create<Store>((set, get) => ({
   },
 
   async refreshEvents() {
+    const version = identityVersion;
     try {
       const events = await listSubscriptionEvents();
+      if (version !== identityVersion) return;
       set({ events });
     } catch {
       /* noop */
@@ -168,10 +191,16 @@ export const useSubscription = create<Store>((set, get) => ({
   },
 
   async purchase(planId: PlanId) {
+    const version = identityVersion;
+    if (!providerOwner || providerOwner !== useAuth.getState().user?.id) {
+      toast.error("Billing is not ready for this account. Please sign in again.");
+      return false;
+    }
     set({ pending: true });
     track("checkout_started", { plan: planId });
     try {
       const result = await getProvider().purchase(planId);
+      if (version !== identityVersion) return false;
       const clientSecret = (result as { clientSecret?: string }).clientSecret;
       if (clientSecret) {
         useUI.getState().setCheckoutClientSecret(clientSecret);
@@ -189,15 +218,19 @@ export const useSubscription = create<Store>((set, get) => ({
       }
       return false;
     } finally {
-      set({ pending: false });
+      if (version === identityVersion) set({ pending: false });
     }
   },
 
   async restore() {
+    const version = identityVersion;
+    if (!providerOwner || providerOwner !== useAuth.getState().user?.id) return false;
     set({ pending: true });
     try {
       const result = await getProvider().restore();
+      if (version !== identityVersion) return false;
       await get().refreshFromBackend();
+      if (version !== identityVersion) return false;
       track("subscription_restored", { ok: result.ok, entitlement: result.entitlement });
       if (result.ok && result.entitlement === "premium") {
         notify("restore_success");
@@ -206,11 +239,12 @@ export const useSubscription = create<Store>((set, get) => ({
       toast.message("No prior purchase found on this account.");
       return false;
     } finally {
-      set({ pending: false });
+      if (version === identityVersion) set({ pending: false });
     }
   },
 
   async openBillingPortal() {
+    const version = identityVersion;
     track("portal_opened", { platform: nativePlatform() });
     // Native: send to Google Play subscriptions surface.
     if (isNative()) {
@@ -233,6 +267,7 @@ export const useSubscription = create<Store>((set, get) => ({
           environment: getStripeEnvironment(),
         },
       });
+      if (version !== identityVersion) return;
       if ("error" in res) {
         toast.error(res.error);
         return;
@@ -244,17 +279,25 @@ export const useSubscription = create<Store>((set, get) => ({
   },
 
   reset() {
+    identityVersion++;
+    providerOwner = null;
+    unsubscribeProvider?.();
+    unsubscribeProvider = undefined;
     set({ ...initial, offerings: null, events: [] });
   },
 }));
 
 let refreshIntervalStarted = false;
+let unsubscribeProvider: (() => void) | undefined;
 
 /**
  * Fire notifications for status transitions the user should know about.
  * Called from `refreshFromBackend` after every successful refresh.
  */
-function dispatchLifecycleNotifications(prev: SubscriptionState, next: Pick<SubscriptionState, "status" | "premiumExpiration">) {
+function dispatchLifecycleNotifications(
+  prev: SubscriptionState,
+  next: Pick<SubscriptionState, "status" | "premiumExpiration">,
+) {
   if (!prev.loaded) return; // Skip the very first hydration.
   const wasPremium = prev.status === "premium";
   const nowPremium = next.status === "premium";
@@ -271,11 +314,17 @@ function dispatchLifecycleNotifications(prev: SubscriptionState, next: Pick<Subs
   if (!wasExpired && nowExpired && prev.status === "trial") track("trial_expired");
 }
 
-
 // ---- selectors ------------------------------------------------------------
 
 export function hasPremiumEntitlement(state: SubscriptionState): boolean {
-  return state.entitlement === "premium";
+  return (
+    effectiveTier({
+      entitlement: state.entitlement,
+      subscription_status: state.status,
+      trial_end: state.trialEnd,
+      premium_expiration: state.premiumExpiration,
+    }) !== "free"
+  );
 }
 
 export function trialDaysLeft(state: SubscriptionState): number | null {
@@ -297,5 +346,5 @@ function trialDaysLeftFor(status: string, trialEnd: string | null): number | nul
  */
 export function usePremium(_feature: PremiumFeature): boolean {
   const state = useSubscription();
-  return state.entitlement === "premium";
+  return hasPremiumEntitlement(state);
 }
