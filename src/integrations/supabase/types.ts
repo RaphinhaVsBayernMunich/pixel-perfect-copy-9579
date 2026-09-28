@@ -336,6 +336,10 @@ export type Database = {
         Args: { _feature: string; _user_id: string }
         Returns: number
       }
+      register_signup_trial: {
+        Args: { _fingerprint: string; _platform: string; _user_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never
