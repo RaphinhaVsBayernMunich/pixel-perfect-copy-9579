@@ -21,35 +21,36 @@ function PrivacyPage() {
 
       <h2>What we collect</h2>
       <p>
-        QuestOS stores the account information you provide (email, display name), your
-        quests, legacy events, achievements, journal entries, character stats, and
-        subscription state. We also record anonymous product analytics (event name,
-        timestamp, session id) to improve the app.
+        QuestOS stores the account information you provide (email, display name), your quests,
+        legacy events, achievements, journal entries, character stats, and subscription state. We
+        also record anonymous product analytics (event name, timestamp, session id) to improve the
+        app.
       </p>
 
       <h2>What we do not collect</h2>
       <p>
-        We do not sell your data. We do not run third-party ad trackers. We do not use
-        persistent hardware identifiers such as the Android Advertising ID.
+        We do not sell your data. We do not run third-party ad trackers. We do not use persistent
+        hardware identifiers such as the Android Advertising ID.
       </p>
 
       <h2>Payments</h2>
       <p>
-        Payments on the web are processed by Stripe. On Android they are processed by
-        Google Play Billing (via RevenueCat). QuestOS never sees your full card number.
+        Payments on the web are processed by Stripe. On Android they are processed by Google Play
+        Billing (via RevenueCat). QuestOS never sees your full card number.
       </p>
 
       <h2>AI</h2>
       <p>
-        Prompts you send to the AI Coach are transmitted to the Lovable AI Gateway for
-        model completion. We do not train models on your data.
+        Prompts you send to the AI Coach are transmitted through the QuestOS backend to DeepSeek for
+        model completion. QuestOS records feature usage and token counts, without storing prompts or
+        generated text in its AI usage logs.
       </p>
 
       <h2>Your rights</h2>
       <p>
         You can export a full JSON snapshot of your data at any time from
-        <em> Settings → Data</em>. You can delete your account permanently from the same
-        screen. Deletion is irreversible.
+        <em> Settings → Data</em>. You can delete your account permanently from the same screen.
+        Deletion is irreversible.
       </p>
 
       <h2>Contact</h2>

@@ -24,14 +24,14 @@ export const APP_CONFIG = {
 
   /**
    * AI daily request quotas. Enforced server-side in ai.functions.ts.
-   * `premium` may be `null` for effectively unlimited (still cost-capped
-   * via Lovable AI Gateway credits).
+   * `premium` may be `null`; the finite fair-use ceiling still applies.
+   * The backend passes these limits to the service-only reservation RPC.
    */
   aiQuota: {
     free: 10,
     trial: 40,
     premium: null as number | null,
-    /** Fair-use hard ceiling even for premium (0 = disabled). */
+    /** Required positive fair-use ceiling, even for premium. Invalid values fail closed. */
     premiumHardCeiling: 500,
   },
 

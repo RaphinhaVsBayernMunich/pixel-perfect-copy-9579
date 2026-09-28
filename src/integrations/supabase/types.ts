@@ -325,6 +325,25 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      reserve_ai_request: {
+        Args: {
+          _user_id: string;
+          _feature: string;
+          _free_limit: number;
+          _trial_limit: number;
+          _premium_limit: number;
+        };
+        Returns: Json;
+      };
+      finish_ai_request: {
+        Args: {
+          _request_id: string;
+          _error_code: string | null;
+          _input_tokens: number | null;
+          _output_tokens: number | null;
+        };
+        Returns: boolean;
+      };
       register_signup_trial: {
         Args: { _user_id: string; _fingerprint: string; _platform: string };
         Returns: Json;
