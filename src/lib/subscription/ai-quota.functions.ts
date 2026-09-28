@@ -45,11 +45,12 @@ export async function finishAiRequest(
   usage?: TokenUsage,
 ): Promise<void> {
   const { data, error } = await supabaseAdmin
+    // SQL args are nullable; generated types mark plpgsql args non-null.
     .rpc("finish_ai_request", {
       _request_id: requestId,
-      _error_code: errorCode,
-      _input_tokens: usage?.inputTokens ?? null,
-      _output_tokens: usage?.outputTokens ?? null,
+      _error_code: errorCode as string,
+      _input_tokens: (usage?.inputTokens ?? null) as number,
+      _output_tokens: (usage?.outputTokens ?? null) as number,
     })
     .abortSignal(AbortSignal.timeout(10_000));
   if (error || data !== true) throw new AiError("AI_UNAVAILABLE");
