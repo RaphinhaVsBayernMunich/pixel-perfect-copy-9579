@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_requests: {
+        Row: {
+          completed_at: string | null
+          error_code: string | null
+          feature: string
+          id: string
+          input_tokens: number | null
+          lease_expires_at: string
+          model: string
+          output_tokens: number | null
+          provider: string
+          started_at: string
+          status: string
+          usage_date: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          error_code?: string | null
+          feature: string
+          id?: string
+          input_tokens?: number | null
+          lease_expires_at?: string
+          model?: string
+          output_tokens?: number | null
+          provider?: string
+          started_at?: string
+          status?: string
+          usage_date?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          error_code?: string | null
+          feature?: string
+          id?: string
+          input_tokens?: number | null
+          lease_expires_at?: string
+          model?: string
+          output_tokens?: number | null
+          provider?: string
+          started_at?: string
+          status?: string
+          usage_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_usage: {
         Row: {
           last_feature: string | null
@@ -331,10 +379,33 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      finish_ai_request: {
+        Args: {
+          _error_code: string
+          _input_tokens: number
+          _output_tokens: number
+          _request_id: string
+        }
+        Returns: boolean
+      }
       has_active_premium: { Args: { _user_id: string }; Returns: boolean }
       increment_ai_usage: {
         Args: { _feature: string; _user_id: string }
         Returns: number
+      }
+      register_signup_trial: {
+        Args: { _fingerprint: string; _platform: string; _user_id: string }
+        Returns: Json
+      }
+      reserve_ai_request: {
+        Args: {
+          _feature: string
+          _free_limit: number
+          _premium_limit: number
+          _trial_limit: number
+          _user_id: string
+        }
+        Returns: Json
       }
     }
     Enums: {
