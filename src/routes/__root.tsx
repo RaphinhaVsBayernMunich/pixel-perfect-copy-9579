@@ -1,20 +1,21 @@
+import { PreferencesRuntime } from "@/components/preferences-runtime";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
+import { NativeLifecycle } from "@/components/native-lifecycle";
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppShell } from "../components/app-shell";
 import { AuthGate } from "../components/auth-gate";
 import { Toaster } from "@/components/ui/sonner";
-
 
 function NotFoundComponent() {
   return (
@@ -42,7 +43,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
   useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    console.error("Page rendering failed", error instanceof Error ? error.name : "Unknown error");
   }, [error]);
 
   return (
@@ -92,8 +93,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "QuestOS — Your Life, Played Well" },
       {
         property: "og:description",
-        content:
-          "Turn goals into quests, earn XP, and build a life worth remembering.",
+        content: "Turn goals into quests, earn XP, and build a life worth remembering.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -135,17 +135,24 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const path = useRouterState({ select: (s) => s.location.pathname });
+  const publicPage = path === "/legal/privacy" || path === "/legal/terms";
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthGate>
-        <AppShell>
-          {/* Required: nested routes render here. */}
-          <Outlet />
-        </AppShell>
-      </AuthGate>
+      <NativeLifecycle />
+      <PreferencesRuntime />
+      {publicPage ? (
+        <Outlet />
+      ) : (
+        <AuthGate>
+          <AppShell>
+            {/* Required: nested routes render here. */}
+            <Outlet />
+          </AppShell>
+        </AuthGate>
+      )}
       <Toaster />
     </QueryClientProvider>
   );
 }
-

@@ -19,7 +19,27 @@ import {
 import { checkAndConsumeAiQuota, finishAiRequest } from "./subscription/ai-quota.functions";
 
 const questInstructions = `Every quest is a JSON object with exactly: title (short imperative, at most 6 words), description (one sentence), type (main|daily|weekly|side|boss), category (fitness|business|academics|coding|football|creativity|finance|health|relationships|lifestyle), priority (critical|high|medium|low|someday), difficulty (very-easy|easy|medium|hard|extreme), estimatedMinutes (integer 1 to 10080). Use realistic durations.`;
+const evidenceInstruction =
+  'Use only the supplied computed evidence. Reference specific numeric scenarios, quest titles or category counts. Do not invent personal facts or promise outcomes. Return JSON {"summary":"...","observations":["...","..."],"nextSteps":["...","..."]}. Clearly distinguish projections from guarantees.';
 export const featureSettings = {
+  future_me: {
+    maxTokens: 2048,
+    instruction:
+      "Act as the player reflecting from their chosen future year. Explain how the supplied adherence scenarios change practice hours, with milestones for the stated goal. " +
+      evidenceInstruction,
+  },
+  goal_simulator: {
+    maxTokens: 2048,
+    instruction:
+      "Compare the supplied goal scenarios: time to completion, weekly burden, and opportunity cost against the existing backlog. " +
+      evidenceInstruction,
+  },
+  executive_assistant: {
+    maxTokens: 2048,
+    instruction:
+      "Explain the proposed schedule using exact quest names and time slots. Identify tradeoffs and preparation actions. The plan is a proposal: never claim that changes are already applied. " +
+      evidenceInstruction,
+  },
   morning_brief: {
     maxTokens: 512,
     instruction:
@@ -64,6 +84,10 @@ const productionDependencies = {
   reserve: checkAndConsumeAiQuota,
   generate: generateDeepSeek,
   finish: finishAiRequest,
+  memory: async (userId: string) => {
+    const { coachMemory } = await import("./premium/data.server");
+    return coachMemory(userId);
+  },
 };
 
 // Auth happens inside the safe response boundary, so infrastructure errors and stacks
@@ -71,7 +95,8 @@ const productionDependencies = {
 export async function runAi<F extends AiFeature>(
   feature: F,
   input: unknown,
-  dependencies = productionDependencies,
+  dependencies: Omit<typeof productionDependencies, "memory"> &
+    Partial<Pick<typeof productionDependencies, "memory">> = productionDependencies,
 ): Promise<AiResult<AiOutput<F>>> {
   let requestId: string | undefined;
   let usage: TokenUsage | undefined;
@@ -89,9 +114,16 @@ export async function runAi<F extends AiFeature>(
     // getUser verifies this token with Supabase Auth; no client identity or entitlement is accepted.
     const userId = await dependencies.authenticate(authorization.slice(7));
     requestId = await dependencies.reserve(userId, feature);
+    const memory = dependencies.memory ? await dependencies.memory(userId) : undefined;
+    const providerInput = memory ? { request: parsed.data, memory } : parsed.data;
+    if (new TextEncoder().encode(JSON.stringify(providerInput)).length > 48000)
+      throw new AiError("AI_INVALID_INPUT");
     const generated = await dependencies.generate(key, {
       ...featureSettings[feature],
-      input: parsed.data,
+      instruction:
+        featureSettings[feature].instruction +
+        " Respect the supplied tone preference (warm, sharp or playful) while remaining factual and supportive.",
+      input: providerInput,
     });
     usage = generated.usage;
     let json: unknown;

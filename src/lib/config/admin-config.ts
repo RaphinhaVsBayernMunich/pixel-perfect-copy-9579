@@ -2,15 +2,10 @@
  * QuestOS Admin Configuration
  * ===========================
  *
- * Single source of truth for tunable business rules — plan pricing, trial
- * length, feature limits, AI quotas, and the list of premium features.
- *
- * Read from here everywhere; NEVER hard-code these values in components,
- * server functions, or migrations. To change pricing, trial length, or
- * limits without a code rewrite:
- *   1. Edit the constants below.
- *   2. If it's a paid-plan price change, also update the Stripe Dashboard
- *      and Google Play Console (see docs/BILLING.md).
+ * Client-facing labels and default business rules. Server enforcement lives in
+ * the reviewed database migrations and billing adapters. Changing a label here
+ * does not change trial duration, quotas, limits or provider prices.
+ * Coordinate approved changes with docs/subscription-setup.md.
  *
  * These values are shipped in the bundle — they are not secrets. Anything
  * server-authoritative (webhook secrets, service role key) lives in secrets.

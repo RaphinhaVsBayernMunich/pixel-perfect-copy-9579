@@ -6,6 +6,7 @@ interface AuthState {
   loading: boolean;
   cloudLoaded: boolean;
   syncError: string | null;
+  syncConflict: boolean;
   setSyncError: (error: string | null) => void;
   setUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
@@ -17,6 +18,7 @@ export const useAuth = create<AuthState>((set) => ({
   loading: true,
   cloudLoaded: false,
   syncError: null,
+  syncConflict: false,
   setSyncError: (syncError) => set({ syncError }),
   setUser: (user) =>
     set((state) => ({

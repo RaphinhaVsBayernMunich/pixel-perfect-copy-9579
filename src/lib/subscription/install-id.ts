@@ -3,15 +3,14 @@
  *
  * Policy-compliance notes:
  *  - We do NOT read persistent hardware identifiers on Android (IMEI,
- *    Advertising ID for non-ads use, MAC). Doing so violates Google Play
- *    User Data policy.
+ *    Advertising ID for non-ads use, MAC). These are not needed for QuestOS.
  *  - On Android we use `@capacitor/device` `identifier` which returns the
- *    per-app-signing-key SSAID — this is Play-policy-safe and rotates on
+ *    per-app-signing-key SSAID — this rotates on
  *    factory reset (accepted trade-off; 100% prevention is impossible
  *    without a payment method on file).
  *  - On the web we generate a random UUID and persist it in Capacitor
  *    Preferences (native) or `localStorage` (web).
- *  - The raw value is hashed with a per-server-run pepper before being
+ *  - The raw value is hashed with a stable server secret pepper before being
  *    stored server-side, so the DB never holds a value that can be
  *    correlated back to a device by anyone but the server.
  */
@@ -28,7 +27,8 @@ async function getStore() {
     };
   }
   return {
-    get: async () => (typeof localStorage !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null),
+    get: async () =>
+      typeof localStorage !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null,
     set: async (value: string) => {
       if (typeof localStorage !== "undefined") localStorage.setItem(STORAGE_KEY, value);
     },
@@ -49,7 +49,7 @@ export async function getInstallFingerprint(): Promise<{ fingerprint: string; pl
   const store = await getStore();
   const platform = nativePlatform();
 
-  let cached = await store.get();
+  const cached = await store.get();
   if (cached && cached.length >= 12) return { fingerprint: cached, platform };
 
   let raw: string | null = null;

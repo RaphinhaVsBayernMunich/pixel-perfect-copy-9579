@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Sparkles, Compass, BookOpen, Sunrise, Check, Plus, X } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -42,13 +48,28 @@ export function AICoach() {
 
         <Tabs defaultValue="brief" className="mt-2">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="brief"><Sunrise className="mr-2 h-4 w-4" />Morning brief</TabsTrigger>
-            <TabsTrigger value="goal"><Compass className="mr-2 h-4 w-4" />Goal → Quests</TabsTrigger>
-            <TabsTrigger value="reflect"><BookOpen className="mr-2 h-4 w-4" />Reflect</TabsTrigger>
+            <TabsTrigger value="brief">
+              <Sunrise className="mr-2 h-4 w-4" />
+              Morning brief
+            </TabsTrigger>
+            <TabsTrigger value="goal">
+              <Compass className="mr-2 h-4 w-4" />
+              Goal → Quests
+            </TabsTrigger>
+            <TabsTrigger value="reflect">
+              <BookOpen className="mr-2 h-4 w-4" />
+              Reflect
+            </TabsTrigger>
           </TabsList>
-          <TabsContent value="brief" className="mt-4"><MorningBriefTab /></TabsContent>
-          <TabsContent value="goal" className="mt-4"><GoalToQuestsTab /></TabsContent>
-          <TabsContent value="reflect" className="mt-4"><ReflectionTab /></TabsContent>
+          <TabsContent value="brief" className="mt-4">
+            <MorningBriefTab />
+          </TabsContent>
+          <TabsContent value="goal" className="mt-4">
+            <GoalToQuestsTab />
+          </TabsContent>
+          <TabsContent value="reflect" className="mt-4">
+            <ReflectionTab />
+          </TabsContent>
         </Tabs>
       </DialogContent>
     </Dialog>
@@ -88,7 +109,9 @@ function MorningBriefTab() {
       });
       setBrief(res.brief);
     } catch (e) {
-      toast.error("Couldn't generate brief", { description: e instanceof Error ? e.message : String(e) });
+      toast.error("Couldn't generate brief", {
+        description: e instanceof Error ? e.message : String(e),
+      });
     } finally {
       setLoading(false);
     }
@@ -97,7 +120,8 @@ function MorningBriefTab() {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        A punchy read on today — {todayQuests.length} quest{todayQuests.length === 1 ? "" : "s"} in play.
+        A punchy read on today — {todayQuests.length} quest{todayQuests.length === 1 ? "" : "s"} in
+        play.
       </p>
       {brief ? (
         <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 font-display text-base leading-relaxed text-foreground">
@@ -109,7 +133,11 @@ function MorningBriefTab() {
         </div>
       )}
       <Button onClick={generate} disabled={loading} className="w-full">
-        {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+        {loading ? (
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        ) : (
+          <Sparkles className="mr-2 h-4 w-4" />
+        )}
         {brief ? "Regenerate" : "Generate morning brief"}
       </Button>
     </div>
@@ -134,7 +162,9 @@ function GoalToQuestsTab() {
       setQuests(res.quests as GeneratedQuest[]);
       if (res.quests.length === 0) toast.error("The coach couldn't parse that — try rephrasing.");
     } catch (e) {
-      toast.error("Couldn't break down goal", { description: e instanceof Error ? e.message : String(e) });
+      toast.error("Couldn't break down goal", {
+        description: e instanceof Error ? e.message : String(e),
+      });
     } finally {
       setLoading(false);
     }
@@ -142,7 +172,7 @@ function GoalToQuestsTab() {
 
   function acceptQuest(i: number, q: GeneratedQuest) {
     const xp = suggestXp(q.type, q.difficulty, q.priority);
-    addQuest({ ...q, xp });
+    if (!addQuest({ ...q, xp })) return;
     setAccepted((s) => new Set(s).add(i));
     toast.success(`Added "${q.title}"`);
   }
@@ -170,7 +200,9 @@ function GoalToQuestsTab() {
               onClick={() => setHorizon(h)}
               className={cn(
                 "flex-1 rounded-md border border-hairline px-3 py-1.5 text-xs font-medium capitalize transition-colors",
-                horizon === h ? "border-primary/60 bg-primary/10 text-foreground" : "text-muted-foreground hover:text-foreground",
+                horizon === h
+                  ? "border-primary/60 bg-primary/10 text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               {h}
@@ -178,7 +210,11 @@ function GoalToQuestsTab() {
           ))}
         </div>
         <Button onClick={generate} disabled={loading || goal.trim().length < 3} className="w-full">
-          {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Compass className="mr-2 h-4 w-4" />}
+          {loading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Compass className="mr-2 h-4 w-4" />
+          )}
           Break down goal
         </Button>
       </div>
@@ -186,7 +222,9 @@ function GoalToQuestsTab() {
       {quests.length > 0 && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">{quests.length} proposed quests</p>
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+              {quests.length} proposed quests
+            </p>
             <button
               type="button"
               onClick={acceptAll}
@@ -218,10 +256,16 @@ function GoalToQuestsTab() {
                       <p className="mt-1 text-xs text-muted-foreground">{q.description}</p>
                       <div className="mt-2 flex flex-wrap gap-1.5 text-[10px] uppercase tracking-wide text-muted-foreground">
                         <span className="rounded bg-muted/40 px-1.5 py-0.5">{q.type}</span>
-                        <span className="rounded bg-muted/40 px-1.5 py-0.5">{CATEGORY_LABEL[q.category]}</span>
+                        <span className="rounded bg-muted/40 px-1.5 py-0.5">
+                          {CATEGORY_LABEL[q.category]}
+                        </span>
                         <span className="rounded bg-muted/40 px-1.5 py-0.5">{q.difficulty}</span>
-                        <span className="rounded bg-muted/40 px-1.5 py-0.5">{q.estimatedMinutes}m</span>
-                        <span className="rounded bg-primary/20 px-1.5 py-0.5 text-primary">+{xp} XP</span>
+                        <span className="rounded bg-muted/40 px-1.5 py-0.5">
+                          {q.estimatedMinutes}m
+                        </span>
+                        <span className="rounded bg-primary/20 px-1.5 py-0.5 text-primary">
+                          +{xp} XP
+                        </span>
                       </div>
                     </div>
                     <button
@@ -230,7 +274,9 @@ function GoalToQuestsTab() {
                       disabled={isAdded}
                       className={cn(
                         "flex h-8 w-8 shrink-0 items-center justify-center rounded-md border transition-colors",
-                        isAdded ? "border-hairline text-muted-foreground" : "border-primary/40 text-primary hover:bg-primary/10",
+                        isAdded
+                          ? "border-hairline text-muted-foreground"
+                          : "border-primary/40 text-primary hover:bg-primary/10",
                       )}
                       aria-label={isAdded ? "Added" : "Add"}
                     >
@@ -271,14 +317,21 @@ function ReflectionTab() {
     try {
       const res = await runReflect({
         data: {
-          recentCompletions: recent.length ? recent : quests.filter((q) => q.completed).slice(0, 6).map((q) => q.title),
+          recentCompletions: recent.length
+            ? recent
+            : quests
+                .filter((q) => q.completed)
+                .slice(0, 6)
+                .map((q) => q.title),
           streakDays: character.streakDays,
           totalXp,
         },
       });
       setPrompt(res.prompt);
     } catch (e) {
-      toast.error("Couldn't generate prompt", { description: e instanceof Error ? e.message : String(e) });
+      toast.error("Couldn't generate prompt", {
+        description: e instanceof Error ? e.message : String(e),
+      });
     } finally {
       setLoading(false);
     }
@@ -314,7 +367,13 @@ function ReflectionTab() {
               <Check className="mr-2 h-4 w-4" />
               Save to Memory Vault
             </Button>
-            <Button variant="outline" onClick={() => { setPrompt(""); setAnswer(""); }}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setPrompt("");
+                setAnswer("");
+              }}
+            >
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -322,7 +381,11 @@ function ReflectionTab() {
       )}
       {!prompt && (
         <Button onClick={generate} disabled={loading} className="w-full">
-          {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <BookOpen className="mr-2 h-4 w-4" />}
+          {loading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <BookOpen className="mr-2 h-4 w-4" />
+          )}
           Generate reflection prompt
         </Button>
       )}

@@ -21,28 +21,34 @@ function TermsPage() {
 
       <h2>The service</h2>
       <p>
-        {APP_CONFIG.legal.companyName} provides a gamified life-planning app. You may
-        use it for personal, non-commercial purposes.
+        {APP_CONFIG.legal.companyName} provides a gamified life-planning app. You may use it for
+        personal, non-commercial purposes.
       </p>
 
       <h2>Subscriptions</h2>
       <p>
-        QuestOS offers a 7-day free trial to new accounts, followed by an optional
-        Premium subscription. Subscriptions renew automatically until cancelled from the
-        billing portal (Web) or Google Play (Android). Refunds follow the policy of the
-        billing provider.
+        QuestOS offers a 7-day free trial to new accounts, followed by an optional Premium
+        subscription. Subscriptions renew automatically until cancelled from the billing portal
+        (Web) or Google Play (Android). Refunds follow the policy of the billing provider. The app
+        trial does not charge you automatically; purchasing the annual plan is a separate action.
+        Deleting a QuestOS account does not cancel a store subscription.
       </p>
 
       <h2>Acceptable use</h2>
       <p>
-        Don't attempt to circumvent premium gates, reverse-engineer the app, or abuse
-        the AI endpoints beyond the published quotas.
+        Don't attempt to circumvent premium gates, reverse-engineer the app, or abuse the AI
+        endpoints beyond the published quotas.
       </p>
 
+      <h2>AI and health summaries</h2>
+      <p>
+        AI suggestions and projections may be inaccurate. Health features summarize steps, sleep and
+        exercise totals; they do not diagnose conditions or replace professional care.
+      </p>
       <h2>Warranty</h2>
       <p>
-        QuestOS is provided "as is" without warranty. We aim for zero data loss but
-        strongly recommend using the built-in Data Export tool periodically.
+        QuestOS is provided "as is" without warranty. We aim for zero data loss but strongly
+        recommend using the built-in Data Export tool periodically.
       </p>
 
       <h2>Contact</h2>

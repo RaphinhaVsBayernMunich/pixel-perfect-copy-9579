@@ -12,11 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as QuestsRouteImport } from './routes/quests'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as LegacyRouteImport } from './routes/legacy'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LegalTermsRouteImport } from './routes/legal.terms'
 import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ApiPublicRevenuecatWebhookRouteImport } from './routes/api/public/revenuecat-webhook'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
@@ -33,6 +35,11 @@ const QuestsRoute = QuestsRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PremiumRoute = PremiumRouteImport.update({
+  id: '/premium',
+  path: '/premium',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LegacyRoute = LegacyRouteImport.update({
@@ -60,6 +67,11 @@ const LegalPrivacyRoute = LegalPrivacyRouteImport.update({
   path: '/legal/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicRevenuecatWebhookRoute =
   ApiPublicRevenuecatWebhookRouteImport.update({
     id: '/api/public/revenuecat-webhook',
@@ -77,9 +89,11 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
   '/legacy': typeof LegacyRoute
+  '/premium': typeof PremiumRoute
   '/profile': typeof ProfileRoute
   '/quests': typeof QuestsRoute
   '/settings': typeof SettingsRoute
+  '/api/health': typeof ApiHealthRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
   '/api/public/revenuecat-webhook': typeof ApiPublicRevenuecatWebhookRoute
@@ -89,9 +103,11 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
   '/legacy': typeof LegacyRoute
+  '/premium': typeof PremiumRoute
   '/profile': typeof ProfileRoute
   '/quests': typeof QuestsRoute
   '/settings': typeof SettingsRoute
+  '/api/health': typeof ApiHealthRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
   '/api/public/revenuecat-webhook': typeof ApiPublicRevenuecatWebhookRoute
@@ -102,9 +118,11 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
   '/legacy': typeof LegacyRoute
+  '/premium': typeof PremiumRoute
   '/profile': typeof ProfileRoute
   '/quests': typeof QuestsRoute
   '/settings': typeof SettingsRoute
+  '/api/health': typeof ApiHealthRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
   '/api/public/revenuecat-webhook': typeof ApiPublicRevenuecatWebhookRoute
@@ -116,9 +134,11 @@ export interface FileRouteTypes {
     | '/'
     | '/calendar'
     | '/legacy'
+    | '/premium'
     | '/profile'
     | '/quests'
     | '/settings'
+    | '/api/health'
     | '/legal/privacy'
     | '/legal/terms'
     | '/api/public/revenuecat-webhook'
@@ -128,9 +148,11 @@ export interface FileRouteTypes {
     | '/'
     | '/calendar'
     | '/legacy'
+    | '/premium'
     | '/profile'
     | '/quests'
     | '/settings'
+    | '/api/health'
     | '/legal/privacy'
     | '/legal/terms'
     | '/api/public/revenuecat-webhook'
@@ -140,9 +162,11 @@ export interface FileRouteTypes {
     | '/'
     | '/calendar'
     | '/legacy'
+    | '/premium'
     | '/profile'
     | '/quests'
     | '/settings'
+    | '/api/health'
     | '/legal/privacy'
     | '/legal/terms'
     | '/api/public/revenuecat-webhook'
@@ -153,9 +177,11 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CalendarRoute: typeof CalendarRoute
   LegacyRoute: typeof LegacyRoute
+  PremiumRoute: typeof PremiumRoute
   ProfileRoute: typeof ProfileRoute
   QuestsRoute: typeof QuestsRoute
   SettingsRoute: typeof SettingsRoute
+  ApiHealthRoute: typeof ApiHealthRoute
   LegalPrivacyRoute: typeof LegalPrivacyRoute
   LegalTermsRoute: typeof LegalTermsRoute
   ApiPublicRevenuecatWebhookRoute: typeof ApiPublicRevenuecatWebhookRoute
@@ -183,6 +209,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/premium': {
+      id: '/premium'
+      path: '/premium'
+      fullPath: '/premium'
+      preLoaderRoute: typeof PremiumRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/legacy': {
@@ -220,6 +253,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LegalPrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/revenuecat-webhook': {
       id: '/api/public/revenuecat-webhook'
       path: '/api/public/revenuecat-webhook'
@@ -241,9 +281,11 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CalendarRoute: CalendarRoute,
   LegacyRoute: LegacyRoute,
+  PremiumRoute: PremiumRoute,
   ProfileRoute: ProfileRoute,
   QuestsRoute: QuestsRoute,
   SettingsRoute: SettingsRoute,
+  ApiHealthRoute: ApiHealthRoute,
   LegalPrivacyRoute: LegalPrivacyRoute,
   LegalTermsRoute: LegalTermsRoute,
   ApiPublicRevenuecatWebhookRoute: ApiPublicRevenuecatWebhookRoute,

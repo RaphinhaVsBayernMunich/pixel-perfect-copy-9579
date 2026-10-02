@@ -1,0 +1,10 @@
+{
+ "$schema":"./node_modules/wrangler/config-schema.json",
+ "name":"questos",
+ "compatibility_date":"2026-10-02",
+ "compatibility_flags":["nodejs_compat"],
+ "workers_dev":true,
+ "preview_urls":false,
+ "vars":{"BILLING_ENVIRONMENT":"live"},
+ "observability":{"enabled":false}
+}

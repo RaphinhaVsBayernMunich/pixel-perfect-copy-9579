@@ -104,9 +104,19 @@ export const INTEREST_OPTIONS: { label: string; category: Category }[] = [
 ];
 
 export const SKILL_OPTIONS = [
-  "Discipline", "Confidence", "Leadership", "Creativity",
-  "Communication", "Health", "Strength", "Academics",
-  "Coding", "Football", "Business", "Finance", "Languages",
+  "Discipline",
+  "Confidence",
+  "Leadership",
+  "Creativity",
+  "Communication",
+  "Health",
+  "Strength",
+  "Academics",
+  "Coding",
+  "Football",
+  "Business",
+  "Finance",
+  "Languages",
 ];
 
 export const THEMES: { id: Theme; label: string; swatch: string }[] = [
@@ -120,8 +130,12 @@ export const THEMES: { id: Theme; label: string; swatch: string }[] = [
 ];
 
 export const CELEBRATIONS: { id: CelebrationStyle; label: string; blurb: string }[] = [
-  { id: "mission-passed", label: "Mission Passed", blurb: "Cinematic GTA-style banner + golden reward flash." },
-  
+  {
+    id: "mission-passed",
+    label: "Mission Passed",
+    blurb: "Cinematic QuestOS banner + original reward chime.",
+  },
+
   { id: "modern", label: "Modern", blurb: "Minimal premium animation. Soft, elegant." },
   { id: "silent", label: "Silent", blurb: "No animation, no sound. Instant." },
 ];
@@ -131,6 +145,10 @@ export const AI_FEATURES = [
   { id: "dailyPlanning", label: "Daily Planning", desc: "AI plans your day each morning." },
   { id: "weeklyReview", label: "Weekly Reviews", desc: "Auto-generated Sunday recap." },
   { id: "goalSimulator", label: "Goal Simulator", desc: "Project outcomes 3-12 months out." },
-  { id: "autoQuests", label: "Automatic Quest Generation", desc: "AI adds quests as you set goals." },
+  {
+    id: "autoQuests",
+    label: "Automatic Quest Generation",
+    desc: "AI adds quests as you set goals.",
+  },
   { id: "scheduleOptimizer", label: "Schedule Optimization", desc: "AI reshuffles your calendar." },
 ];

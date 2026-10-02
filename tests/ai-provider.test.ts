@@ -208,6 +208,40 @@ function dependencies() {
     },
   };
 }
+
+for (const [feature, input, output] of [
+  [
+    "morning_brief",
+    { characterName: "Player", level: 1, streakDays: 0, momentum: 0, todayQuests: [] },
+    { brief: "Start with one achievable quest." },
+  ],
+  ["goal_to_quests", goal, { quests: Array(4).fill(quest) }],
+  [
+    "reflection_prompt",
+    { recentCompletions: [], streakDays: 0, totalXp: 0 },
+    { prompt: "What helped you make progress today?" },
+  ],
+  [
+    "starter_quests",
+    { preferredName: "Player", interests: ["coding"] },
+    {
+      mainQuest: quest,
+      starters: Array(5).fill({ ...quest, type: "side" }),
+      welcome: "Welcome to QuestOS.",
+    },
+  ],
+] as const) {
+  test(`${feature} validates its real contract and finishes exactly once`, async () => {
+    const { events, impl } = dependencies();
+    impl.generate = async () => {
+      events.push("provider");
+      return { content: JSON.stringify(output), usage: { inputTokens: 24, outputTokens: 10 } };
+    };
+    const result = await runAi(feature, input, impl);
+    expect(result).toEqual({ ok: true, value: output });
+    expect(events).toEqual(["auth", "reserve", "provider", "finish"]);
+  });
+}
 test("orchestration authenticates, reserves, validates and records before returning existing API", async () => {
   const { events, impl } = dependencies();
   const result = await runAi("goal_to_quests", goal, impl);

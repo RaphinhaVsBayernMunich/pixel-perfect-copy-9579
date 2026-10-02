@@ -7,15 +7,14 @@
  * <EmbeddedCheckoutProvider>. That keeps `SubscriptionProvider` a pure
  * data contract shared with the native RevenueCat provider.
  */
-import type {
-  Entitlement,
-  Offerings,
-  PlanId,
-  PurchaseResult,
-  SubscriptionProvider,
-} from "./types";
-import { PLANS, planById, toOfferingPackage } from "./plans";
-import { createStripeCheckout, createStripePortal } from "./stripe-checkout.functions";
+import type { Entitlement, Offerings, PlanId, PurchaseResult, SubscriptionProvider } from "./types";
+import { planById } from "./plans";
+import {
+  createStripeCheckout,
+  createStripePortal,
+  getStripeOfferings,
+  reconcileBilling,
+} from "./stripe-checkout.functions";
 import { getStripeEnvironment, paymentsConfigured } from "@/lib/stripe";
 
 export interface WebPurchaseResult extends PurchaseResult {
@@ -35,7 +34,9 @@ export function createWebProvider(): SubscriptionProvider {
       /* handled by Supabase auth */
     },
     async getOfferings(): Promise<Offerings> {
-      return { current: PLANS.map((p) => toOfferingPackage(p)) };
+      const result = await getStripeOfferings();
+      if ("error" in result) throw new Error(result.error);
+      return result;
     },
 
     async purchase(planId: PlanId): Promise<WebPurchaseResult> {
@@ -52,7 +53,7 @@ export function createWebProvider(): SubscriptionProvider {
       const returnUrl = `${window.location.origin}/?checkout=success&session_id={CHECKOUT_SESSION_ID}`;
       const res = await createStripeCheckout({
         data: {
-          priceId: plan.productId,
+          priceId: "premium_annual",
           returnUrl,
           environment: getStripeEnvironment(),
         },
@@ -67,11 +68,13 @@ export function createWebProvider(): SubscriptionProvider {
     async restore(): Promise<PurchaseResult> {
       // Web entitlement is server-authoritative; the store's
       // refreshFromBackend() call is the effective "restore".
-      return { ok: true, entitlement: "free" };
+      const state = await reconcileBilling({ data: { provider: "stripe" } });
+      return { ok: true, entitlement: state.tier === "premium" ? "premium" : "free" };
     },
 
     async refreshEntitlement(): Promise<Entitlement> {
-      return "free";
+      const state = await reconcileBilling({ data: { provider: "stripe" } });
+      return state.entitlement;
     },
 
     onEntitlementChange(cb) {

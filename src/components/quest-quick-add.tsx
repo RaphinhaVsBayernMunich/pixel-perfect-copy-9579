@@ -30,8 +30,16 @@ const TYPES: { value: QuestType; label: string }[] = [
 ];
 
 const CATEGORIES: Category[] = [
-  "fitness", "business", "academics", "coding", "football",
-  "creativity", "finance", "health", "relationships", "lifestyle",
+  "fitness",
+  "business",
+  "academics",
+  "coding",
+  "football",
+  "creativity",
+  "finance",
+  "health",
+  "relationships",
+  "lifestyle",
 ];
 
 const DIFFICULTIES: { value: Difficulty; label: string; minutes: number }[] = [
@@ -79,7 +87,7 @@ export function QuestQuickAdd() {
       xp,
       scheduledFor: type === "daily" ? new Date().toISOString().slice(0, 10) : undefined,
     };
-    add(q);
+    if (!add(q)) return;
     reset();
     close();
   }
@@ -213,7 +221,15 @@ function Chip({
           ? "border-primary/60 bg-primary/15 text-primary"
           : "border-hairline bg-background/40 text-muted-foreground hover:text-foreground",
       )}
-      style={active && accentColor ? { borderColor: accentColor, color: accentColor, background: `color-mix(in oklch, ${accentColor} 15%, transparent)` } : undefined}
+      style={
+        active && accentColor
+          ? {
+              borderColor: accentColor,
+              color: accentColor,
+              background: `color-mix(in oklch, ${accentColor} 15%, transparent)`,
+            }
+          : undefined
+      }
     >
       {children}
     </button>

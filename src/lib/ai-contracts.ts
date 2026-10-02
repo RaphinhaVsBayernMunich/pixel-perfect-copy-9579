@@ -1,7 +1,11 @@
 import { z } from "zod";
 const short = z.string().trim().max(240);
 const count = z.number().int().min(0).max(1_000_000_000);
+const premiumEvidence = z.object({ evidence: z.string().min(2).max(16000) }).strict();
 export const aiInputs = {
+  future_me: premiumEvidence,
+  goal_simulator: premiumEvidence,
+  executive_assistant: premiumEvidence,
   morning_brief: z
     .object({
       characterName: short,
@@ -68,7 +72,17 @@ export const questSchema = z
     estimatedMinutes: z.number().int().min(1).max(10080),
   })
   .strict();
+const premiumNarrative = z
+  .object({
+    summary: z.string().min(10).max(2000),
+    observations: z.array(z.string().min(5).max(500)).min(2).max(5),
+    nextSteps: z.array(z.string().min(5).max(500)).min(2).max(5),
+  })
+  .strict();
 export const aiOutputs = {
+  future_me: premiumNarrative,
+  goal_simulator: premiumNarrative,
+  executive_assistant: premiumNarrative,
   morning_brief: z.object({ brief: z.string().trim().min(1).max(2400) }).strict(),
   goal_to_quests: z.object({ quests: z.array(questSchema).min(4).max(7) }).strict(),
   reflection_prompt: z.object({ prompt: z.string().trim().min(1).max(500) }).strict(),

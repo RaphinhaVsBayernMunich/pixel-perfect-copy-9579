@@ -1,160 +1,132 @@
-/**
- * Server functions for Stripe web checkout & billing portal. Keeps the
- * SubscriptionProvider abstraction intact — the web provider only ever
- * calls these, never the Stripe SDK directly.
- */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@/integrations/supabase/types";
-import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "@/lib/stripe.server";
-
-type CheckoutResult = { clientSecret: string } | { error: string };
-type PortalResult = { url: string } | { error: string };
-
-const envSchema = z.enum(["sandbox", "live"]);
-const priceIdSchema = z.string().regex(/^[a-zA-Z0-9_-]+$/);
-
-async function resolveOrCreateCustomer(
-  stripe: ReturnType<typeof createStripeClient>,
-  supabase: SupabaseClient<Database>,
-  userId: string,
-  email?: string,
-): Promise<string> {
-  if (!/^[a-zA-Z0-9_-]+$/.test(userId)) throw new Error("Invalid userId");
-
-  // 1. Try the profile's cached stripe_customer_id first.
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("stripe_customer_id")
-    .eq("user_id", userId)
-    .single()
-    .throwOnError();
-  if (profile?.stripe_customer_id) {
-    const customer = await stripe.customers.retrieve(profile.stripe_customer_id);
-    if (customer.deleted || customer.metadata.userId !== userId) {
-      throw new Error("Billing account ownership could not be verified. Contact support.");
+const request = z
+  .object({
+    priceId: z.literal("premium_annual"),
+    returnUrl: z.string().url(),
+    environment: z.enum(["sandbox", "live"]),
+  })
+  .strict();
+export const getStripeOfferings = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    try {
+      const { annualStripePrice } = await import("./stripe-billing.server");
+      const p = await annualStripePrice();
+      return {
+        current: [
+          {
+            identifier: "premium_annual" as const,
+            displayName: "Premium — Annual",
+            priceString:
+              new Intl.NumberFormat("en-US", { style: "currency", currency: p.currency }).format(
+                p.unit_amount! / 100,
+              ) + " / year",
+            period: "annual" as const,
+            featured: true,
+          },
+        ],
+      };
+    } catch {
+      return {
+        current: [],
+        error: "Annual pricing could not be verified. Please retry or contact support.",
+      };
     }
-    return customer.id;
-  }
-
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  async function saveCustomer(customerId: string) {
-    await supabaseAdmin
-      .from("profiles")
-      .update({ stripe_customer_id: customerId })
-      .eq("user_id", userId)
-      .select("user_id")
-      .single()
-      .throwOnError();
-  }
-
-  // 2. Search Stripe by userId metadata.
-  const byMeta = await stripe.customers.search({
-    query: `metadata['userId']:'${userId}'`,
-    limit: 1,
   });
-  if (byMeta.data.length) {
-    await saveCustomer(byMeta.data[0].id);
-    return byMeta.data[0].id;
-  }
-
-  // Email equality alone is not proof of ownership. Never reassign another customer.
-
-  // 4. Create.
-  const created = await stripe.customers.create({
-    ...(email && { email }),
-    metadata: { userId },
-  });
-  await saveCustomer(created.id);
-  return created.id;
-}
-
-// ---- createStripeCheckout -------------------------------------------------
-
 export const createStripeCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z
-      .object({
-        priceId: priceIdSchema,
-        returnUrl: z.string().url(),
-        environment: envSchema,
-      })
-      .parse(input),
-  )
-  .handler(async ({ data, context }): Promise<CheckoutResult> => {
+  .validator((input: unknown) => request.parse(input))
+  .handler(async ({ data, context }) => {
     try {
-      const { supabase, userId } = context;
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      const stripe = createStripeClient(data.environment);
-
-      const prices = await stripe.prices.list({ lookup_keys: [data.priceId] });
-      if (!prices.data.length) return { error: `Price not found: ${data.priceId}` };
-      const stripePrice = prices.data[0];
-      const isRecurring = stripePrice.type === "recurring";
-
-      const customerId = await resolveOrCreateCustomer(
-        stripe,
-        supabase,
-        userId,
-        user?.email ?? undefined,
+      const { configuredBillingEnvironment, billingDb, takeBillingRequest } =
+        await import("./billing-db.server");
+      await takeBillingRequest(context.userId);
+      const { reconcileStripeUser } = await import("./stripe-billing.server");
+      if (data.environment !== configuredBillingEnvironment()) throw new Error("Wrong environment");
+      if ((await reconcileStripeUser(context.userId)).tier === "premium")
+        return { error: "Premium is already active. Use Manage subscription." };
+      const { annualStripePrice, stripeCustomer, approvedReturnUrl } =
+        await import("./stripe-billing.server");
+      const { createStripeClient } = await import("@/lib/stripe.server");
+      const price = await annualStripePrice();
+      const { data: auth, error } = await context.supabase.auth.getUser();
+      if (error || !auth.user) throw new Error("Authentication required");
+      const customer = await stripeCustomer(context.userId, auth.user.email, true);
+      const existing = await createStripeClient(
+        configuredBillingEnvironment(),
+      ).checkout.sessions.list({ customer: customer!, status: "open", limit: 100 });
+      if (existing.has_more) throw new Error("Checkout history requires support review");
+      const reusable = existing.data.find(
+        (session) =>
+          session.metadata?.userId === context.userId &&
+          session.metadata?.priceId === "premium_annual" &&
+          session.mode === "subscription" &&
+          session.client_secret,
       );
-
-      const session = await stripe.checkout.sessions.create({
-        line_items: [{ price: stripePrice.id, quantity: 1 }],
-        mode: isRecurring ? "subscription" : "payment",
-        ui_mode: "embedded_page",
-        return_url: data.returnUrl,
-        customer: customerId,
-        metadata: { userId, priceId: data.priceId },
-        ...(isRecurring && {
-          subscription_data: { metadata: { userId, priceId: data.priceId } },
-        }),
+      if (reusable?.client_secret) return { clientSecret: reusable.client_secret };
+      const { data: keyData, error: keyError } = await billingDb.rpc("billing_checkout_key", {
+        _user_id: context.userId,
+        _environment: configuredBillingEnvironment(),
       });
-
-      return { clientSecret: session.client_secret ?? "" };
-    } catch (error) {
-      console.error("createStripeCheckout failed", error);
-      return { error: getStripeErrorMessage(error) };
+      if (keyError) throw new Error("Checkout reservation failed");
+      const key = z.object({ key: z.string().uuid(), expiresAt: z.number().int() }).parse(keyData);
+      const session = await createStripeClient(
+        configuredBillingEnvironment(),
+      ).checkout.sessions.create(
+        {
+          mode: "subscription",
+          ui_mode: "embedded_page",
+          expires_at: key.expiresAt,
+          customer: customer!,
+          line_items: [{ price: price.id, quantity: 1 }],
+          return_url: approvedReturnUrl(data.returnUrl),
+          metadata: { userId: context.userId, priceId: "premium_annual" },
+          subscription_data: { metadata: { userId: context.userId, priceId: "premium_annual" } },
+        },
+        { idempotencyKey: `questos-checkout-${key.key}` },
+      );
+      if (!session.client_secret) throw new Error("Missing checkout");
+      return { clientSecret: session.client_secret };
+    } catch {
+      return {
+        error:
+          "Checkout could not start. Verify your account and retry; contact support if this continues.",
+      };
     }
   });
-
-// ---- createStripePortal ---------------------------------------------------
-
 export const createStripePortal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z.object({ returnUrl: z.string().url(), environment: envSchema }).parse(input),
-  )
-  .handler(async ({ data, context }): Promise<PortalResult> => {
+  .validator((input: unknown) => request.omit({ priceId: true }).parse(input))
+  .handler(async ({ data, context }) => {
     try {
-      const { supabase, userId } = context;
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("stripe_customer_id")
-        .eq("user_id", userId)
-        .single()
-        .throwOnError();
-      if (!profile?.stripe_customer_id) {
-        return { error: "No Stripe customer on file. Purchase a plan first." };
-      }
-      const stripe = createStripeClient(data.environment);
-      const customer = await stripe.customers.retrieve(profile.stripe_customer_id);
-      if (customer.deleted || customer.metadata.userId !== userId) {
-        return { error: "Billing account ownership could not be verified. Contact support." };
-      }
-      const portal = await stripe.billingPortal.sessions.create({
-        customer: profile.stripe_customer_id,
-        return_url: data.returnUrl,
-      });
+      const { configuredBillingEnvironment } = await import("./billing-db.server");
+      if (data.environment !== configuredBillingEnvironment()) throw new Error("Wrong environment");
+      const { stripeCustomer, approvedReturnUrl } = await import("./stripe-billing.server");
+      const customer = await stripeCustomer(context.userId);
+      if (!customer) return { error: "No web subscription found for this account." };
+      const { createStripeClient } = await import("@/lib/stripe.server");
+      const portal = await createStripeClient(
+        configuredBillingEnvironment(),
+      ).billingPortal.sessions.create({ customer, return_url: approvedReturnUrl(data.returnUrl) });
       return { url: portal.url };
-    } catch (error) {
-      console.error("createStripePortal failed", error);
-      return { error: getStripeErrorMessage(error) };
+    } catch {
+      return { error: "Billing management is unavailable. Please retry or contact support." };
     }
+  });
+export const reconcileBilling = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((input: unknown) =>
+    z.object({ provider: z.enum(["stripe", "revenuecat"]) }).parse(input),
+  )
+  .handler(async ({ context, data }) => {
+    const { takeBillingRequest } = await import("./billing-db.server");
+    await takeBillingRequest(context.userId);
+    if (data.provider === "revenuecat") {
+      const { reconcileRevenueCatUser } = await import("./revenuecat-billing.server");
+      return reconcileRevenueCatUser(context.userId);
+    }
+    const { reconcileStripeUser } = await import("./stripe-billing.server");
+    return reconcileStripeUser(context.userId);
   });

@@ -1,9 +1,5 @@
-/**
- * Shared Stripe utility — routes ALL Stripe API calls through Lovable's
- * connector gateway. The values in STRIPE_SANDBOX_API_KEY / STRIPE_LIVE_API_KEY
- * are opaque connection identifiers, NOT real secret keys — never pass them
- * directly to the Stripe SDK against api.stripe.com.
- */
+import "@tanstack/react-start/server-only";
+// Direct provider SDK: no connector gateway or development-platform credentials.
 import Stripe from "stripe";
 
 const getEnv = (key: string): string => {
@@ -14,98 +10,36 @@ const getEnv = (key: string): string => {
 
 export type StripeEnv = "sandbox" | "live";
 
-const GATEWAY_STRIPE_BASE = "https://connector-gateway.lovable.dev/stripe";
-
-export function getConnectionApiKey(env: StripeEnv): string {
-  return env === "sandbox"
-    ? getEnv("STRIPE_SANDBOX_API_KEY")
-    : getEnv("STRIPE_LIVE_API_KEY");
-}
-
 export function createStripeClient(env: StripeEnv): Stripe {
-  const connectionApiKey = getConnectionApiKey(env);
-  const lovableApiKey = getEnv("LOVABLE_API_KEY");
-
-  return new Stripe(connectionApiKey, {
+  const key = getEnv(env === "sandbox" ? "STRIPE_SANDBOX_SECRET_KEY" : "STRIPE_LIVE_SECRET_KEY");
+  if (!key.startsWith(env === "sandbox" ? "sk_test_" : "sk_live_"))
+    throw new Error("Stripe key environment does not match billing mode");
+  return new Stripe(key, {
     apiVersion: "2026-03-25.dahlia",
-    httpClient: Stripe.createFetchHttpClient((input, init) => {
-      const stripeUrl = input instanceof Request ? input.url : input.toString();
-      const gatewayUrl = stripeUrl.replace("https://api.stripe.com", GATEWAY_STRIPE_BASE);
-      return fetch(gatewayUrl, {
-        ...init,
-        headers: {
-          ...Object.fromEntries(
-            new Headers(
-              init?.headers ?? (input instanceof Request ? input.headers : undefined),
-            ).entries(),
-          ),
-          "X-Connection-Api-Key": connectionApiKey,
-          "Lovable-API-Key": lovableApiKey,
-        },
-      });
-    }),
+    timeout: 15000,
+    maxNetworkRetries: 1,
+    httpClient: Stripe.createFetchHttpClient(),
   });
 }
 
-export function getStripeErrorMessage(error: unknown): string {
-  if (error && typeof error === "object") {
-    const e = error as {
-      message?: string;
-      type?: string;
-      code?: string;
-      raw?: { message?: string; type?: string; code?: string };
-    };
-    const message = e.raw?.message ?? e.message;
-    if (message) return message;
-  }
-  return "Stripe request failed";
+export function getStripeErrorMessage(_error: unknown): string {
+  return "Billing could not complete this request. Please retry or contact support.";
 }
-
-/**
- * Verifies a Stripe webhook signature without going through the SDK
- * (signature verification is local HMAC, no gateway proxy needed).
- */
-export async function verifyWebhook(
-  req: Request,
-  env: StripeEnv,
-): Promise<{ type: string; data: { object: any } }> {
+export async function verifyWebhook(req: Request, env: StripeEnv): Promise<Stripe.Event> {
   const signature = req.headers.get("stripe-signature");
+  if (!signature || Number(req.headers.get("content-length")) > 262144)
+    throw new Error("Invalid webhook");
   const body = await req.text();
-  const secret =
-    env === "sandbox"
-      ? getEnv("PAYMENTS_SANDBOX_WEBHOOK_SECRET")
-      : getEnv("PAYMENTS_LIVE_WEBHOOK_SECRET");
-
-  if (!signature || !body) throw new Error("Missing signature or body");
-
-  let timestamp: string | undefined;
-  const v1Signatures: string[] = [];
-  for (const part of signature.split(",")) {
-    const [key, value] = part.split("=", 2);
-    if (key === "t") timestamp = value;
-    if (key === "v1") v1Signatures.push(value);
-  }
-  if (!timestamp || v1Signatures.length === 0) throw new Error("Invalid signature format");
-
-  const age = Math.abs(Date.now() / 1000 - Number(timestamp));
-  if (age > 300) throw new Error("Webhook timestamp too old");
-
-  const key = await crypto.subtle.importKey(
-    "raw",
-    new TextEncoder().encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"],
+  if (new TextEncoder().encode(body).length > 262144) throw new Error("Invalid webhook");
+  const secret = getEnv(
+    env === "sandbox" ? "PAYMENTS_SANDBOX_WEBHOOK_SECRET" : "PAYMENTS_LIVE_WEBHOOK_SECRET",
   );
-  const signed = await crypto.subtle.sign(
-    "HMAC",
-    key,
-    new TextEncoder().encode(`${timestamp}.${body}`),
+  const verifier = new Stripe("unused-local-signature-verifier");
+  return verifier.webhooks.constructEventAsync(
+    body,
+    signature,
+    secret,
+    300,
+    Stripe.createSubtleCryptoProvider(),
   );
-  const expected = Array.from(new Uint8Array(signed))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-
-  if (!v1Signatures.includes(expected)) throw new Error("Invalid webhook signature");
-  return JSON.parse(body);
 }

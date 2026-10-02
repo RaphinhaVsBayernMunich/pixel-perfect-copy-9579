@@ -21,7 +21,7 @@ beforeAll(async () => {
 afterAll(() => db.close());
 beforeEach(async () => {
   await db.exec(
-    "RESET ROLE; TRUNCATE public.ai_requests,public.ai_usage; UPDATE public.profiles SET subscription_status='free',entitlement='free',trial_end=NULL,premium_expiration=NULL;",
+    "RESET ROLE; TRUNCATE public.ai_requests,public.ai_usage,public.billing_subscriptions; UPDATE public.profiles SET subscription_status='free',entitlement='free',trial_end=NULL,premium_expiration=NULL;",
   );
 });
 type Reservation = {
@@ -45,9 +45,10 @@ describe("real PostgreSQL migrations and atomic quotas", () => {
   test("signup survives all migrations and profile edits cannot grant premium or billing IDs", async () => {
     await db.query("SELECT set_config('request.jwt.claim.sub',$1,false)", [users[0]]);
     await db.exec("SET ROLE authenticated");
-    await db.query("UPDATE public.profiles SET display_name='Allowed' WHERE user_id=$1", [
-      users[0],
-    ]);
+    await db.query(
+      "UPDATE public.profiles SET display_name='Allowed',total_xp=123,settings=jsonb_build_object('theme','dark') WHERE user_id=$1",
+      [users[0]],
+    );
     for (const assignment of [
       "entitlement='premium'",
       "subscription_status='premium'",
@@ -81,14 +82,14 @@ describe("real PostgreSQL migrations and atomic quotas", () => {
     await db.exec("SET ROLE service_role");
     expect((await reserve()).allowed).toBe(true);
   });
-  test("trial, paid, expired and null-expiry lifetime tiers use database state", async () => {
+  test("trial, paid, expired and null-expiry paid tiers use database state", async () => {
     const cases = [
       ["trial", "premium", "future", null, 40],
       ["trial", "premium", "past", null, 10],
       ["trial", "premium", null, null, 10],
       ["premium", "premium", null, "future", 500],
       ["premium", "premium", null, "past", 10],
-      ["premium", "premium", null, null, 500],
+      ["premium", "premium", null, null, 10],
       ["premium", "free", null, null, 10],
     ] as const;
     for (const [status, entitlement, trial, paid, limit] of cases) {
@@ -100,6 +101,12 @@ describe("real PostgreSQL migrations and atomic quotas", () => {
         "UPDATE profiles SET subscription_status=$2,entitlement=$3,trial_end=$4,premium_expiration=$5 WHERE user_id=$1",
         [users[0], status, entitlement, date(trial), date(paid)],
       );
+      await db.exec("TRUNCATE billing_subscriptions");
+      if (status === "premium" && entitlement === "premium" && paid)
+        await db.query(
+          "INSERT INTO billing_subscriptions(provider,environment,subscription_id,user_id,customer_id,product_id,status,paid_until,event_at) VALUES('stripe','live','sub_test',$1,'cus_test','premium_annual','active',$2,now())",
+          [users[0], date(paid)],
+        );
       const result = await reserve();
       expect(result.limit).toBe(limit);
       await finish(result.requestId!);

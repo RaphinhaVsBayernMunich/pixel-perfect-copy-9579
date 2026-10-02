@@ -1,3 +1,4 @@
+import { ANNUAL_PLAN, PLAY_PRODUCT, PLAY_BASE_PLAN } from "./billing-contracts";
 import type { OfferingPackage, PlanId } from "./types";
 
 /**
@@ -22,11 +23,9 @@ export interface PlanDef {
 
 export const PLANS: PlanDef[] = [
   {
-    id: "premium_annual",
-    // On web `productId` is the Stripe price lookup_key; on native it's the
-    // Google Play SKU that RevenueCat resolves. Keep in sync with both
-    // dashboards.
-    productId: "premium_annual",
+    id: ANNUAL_PLAN,
+    // Google Play SKU. The web price lookup key is premium_annual.
+    productId: PLAY_PRODUCT,
     displayName: "Premium — Annual",
     period: "annual",
     defaultPriceString: "$19.99 / year",
@@ -39,7 +38,9 @@ export function planById(id: PlanId): PlanDef | undefined {
 }
 
 export function planByProductId(productId: string): PlanDef | undefined {
-  return PLANS.find((p) => p.productId === productId);
+  return PLANS.find(
+    (p) => p.productId === productId || `${p.productId}:${PLAY_BASE_PLAN}` === productId,
+  );
 }
 
 export function toOfferingPackage(plan: PlanDef, priceString?: string): OfferingPackage {

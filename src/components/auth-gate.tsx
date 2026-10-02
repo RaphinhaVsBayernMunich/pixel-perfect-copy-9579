@@ -1,8 +1,9 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-store";
 import { useQuests } from "@/lib/quests-store";
-import { attachSync, detachSync, retrySync } from "@/lib/cloud-sync";
+import { attachSync, detachSync, retrySync, resolveSyncConflict } from "@/lib/cloud-sync";
 import { useUI } from "@/lib/ui-store";
 import { resetAnalytics } from "@/lib/analytics";
 import { useSubscription } from "@/lib/subscription/service";
@@ -10,9 +11,11 @@ import { AuthPage } from "./auth-page";
 import { OnboardingWizard } from "./onboarding/wizard";
 
 export function AuthGate({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
   const user = useAuth((s) => s.user);
   const loading = useAuth((s) => s.loading);
   const cloudLoaded = useAuth((s) => s.cloudLoaded);
+  const syncConflict = useAuth((s) => s.syncConflict);
   const syncError = useAuth((s) => s.syncError);
   const setUser = useAuth((s) => s.setUser);
   const onboardingCompleted = useQuests((s) => s.onboardingCompleted);
@@ -22,7 +25,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
   const userId = user?.id;
   useEffect(() => {
     if (userId && cloudLoaded) void initSubscription(userId);
-    if (!user) resetSubscription();
+    if (!userId) resetSubscription();
   }, [userId, cloudLoaded, initSubscription, resetSubscription]);
 
   useEffect(() => {
@@ -32,6 +35,8 @@ export function AuthGate({ children }: { children: ReactNode }) {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!mounted) return;
       if (useAuth.getState().user?.id !== session?.user?.id) {
+        void queryClient.cancelQueries({ queryKey: ["premium"] });
+        queryClient.removeQueries({ queryKey: ["premium"] });
         detachSync();
         resetSubscription();
         resetAnalytics();
@@ -63,7 +68,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
       sub.subscription.unsubscribe();
       detachSync();
     };
-  }, [setUser, resetSubscription]);
+  }, [setUser, resetSubscription, queryClient]);
 
   if (loading) {
     return (
@@ -95,6 +100,16 @@ export function AuthGate({ children }: { children: ReactNode }) {
       {syncError && (
         <div role="alert" className="border-b border-destructive p-3 text-sm">
           {syncError}{" "}
+          {syncConflict && (
+            <span className="flex gap-3">
+              <button className="underline" onClick={() => void resolveSyncConflict("device")}>
+                Keep this device’s changes
+              </button>
+              <button className="underline" onClick={() => void resolveSyncConflict("cloud")}>
+                Use cloud copy (local backup retained)
+              </button>
+            </span>
+          )}
           <button className="underline" onClick={() => void retrySync()}>
             Retry sync
           </button>

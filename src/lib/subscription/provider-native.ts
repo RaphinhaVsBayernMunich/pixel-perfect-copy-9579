@@ -1,125 +1,97 @@
-/**
- * Native subscription provider — RevenueCat + Google Play Billing.
- *
- * We dynamic-import `@revenuecat/purchases-capacitor` so the web bundle
- * doesn't have to resolve native-only code paths. RevenueCat is the single
- * source of truth for paid entitlements on device; it also handles
- * offline caching, restore, and store-issued renewals/cancellations.
- */
-import type { Entitlement, Offerings, PlanId, PurchaseResult, SubscriptionProvider } from "./types";
-import { PLANS, planById, planByProductId, toOfferingPackage } from "./plans";
-
-const PREMIUM_ENTITLEMENT_ID = "premium";
-
+import { PLAY_BASE_PLAN } from "./billing-contracts";
+import type { Entitlement, Offerings, SubscriptionProvider } from "./types";
+import { planById, planByProductId, toOfferingPackage } from "./plans";
+import type { CustomerInfo, PurchasesPackage } from "@revenuecat/purchases-capacitor";
+const eligible = (pkg: PurchasesPackage) =>
+  !!planByProductId(pkg.product.identifier) &&
+  pkg.product.subscriptionPeriod === "P1Y" &&
+  pkg.product.defaultOption?.id === PLAY_BASE_PLAN &&
+  pkg.product.defaultOption.isBasePlan &&
+  !(pkg.product.currencyCode === "USD" && Math.round(pkg.product.price * 100) !== 1999);
 export function createNativeProvider(getApiKey: () => string | undefined): SubscriptionProvider {
   const listeners = new Set<(e: Entitlement) => void>();
   let initialized = false;
-
-  async function getSdk() {
-    const mod = await import("@revenuecat/purchases-capacitor");
-    return mod.Purchases;
-  }
-
-  function entitlementFromInfo(info: any): Entitlement {
-    const active = info?.entitlements?.active ?? {};
-    return active[PREMIUM_ENTITLEMENT_ID] ? "premium" : "free";
-  }
-
+  const sdk = async () => (await import("@revenuecat/purchases-capacitor")).Purchases;
+  const entitlement = (info: CustomerInfo): Entitlement =>
+    info.entitlements.active.premium ? "premium" : "free";
   return {
     kind: "native",
-
     async init(userId) {
       if (initialized) return;
       const apiKey = getApiKey();
-      if (!apiKey)
-        throw new Error("Missing RevenueCat public SDK key (VITE_REVENUECAT_ANDROID_KEY).");
-      const Purchases = await getSdk();
-      await Purchases.configure({ apiKey, appUserID: userId ?? undefined });
-      // Attach entitlement change listener.
-      try {
-        Purchases.addCustomerInfoUpdateListener((info: any) => {
-          const ent = entitlementFromInfo(info);
-          listeners.forEach((cb) => cb(ent));
-        });
-      } catch {
-        /* SDK versions differ slightly across releases */
-      }
+      if (!apiKey?.startsWith("goog_")) throw new Error("Google Play billing is not configured.");
+      const purchases = await sdk();
+      await purchases.configure({ apiKey, appUserID: userId ?? undefined });
+      await purchases.addCustomerInfoUpdateListener((info) =>
+        listeners.forEach((cb) => cb(entitlement(info))),
+      );
       initialized = true;
     },
-
+    async reset() {
+      if (initialized && !(await (await sdk()).isAnonymous()).isAnonymous)
+        await (await sdk()).logOut();
+    },
     async identify(userId) {
-      const Purchases = await getSdk();
-      try {
-        await Purchases.logIn({ appUserID: userId });
-      } catch (e) {
-        console.warn("RevenueCat logIn failed", e);
-        throw e;
-      }
+      await (await sdk()).logIn({ appUserID: userId });
     },
-
     async getOfferings(): Promise<Offerings> {
-      try {
-        const Purchases = await getSdk();
-        const result = await Purchases.getOfferings();
-        const current = result?.current;
-        if (!current) return { current: PLANS.map((p) => toOfferingPackage(p)) };
-        const packages = current.availablePackages ?? [];
-        return {
-          current: packages
-            .map((pkg: any) => {
-              const productId = pkg?.product?.identifier ?? pkg?.identifier;
-              const plan = productId ? planByProductId(productId) : undefined;
-              if (!plan) return null;
-              return toOfferingPackage(plan, pkg?.product?.priceString);
-            })
-            .filter(Boolean) as any,
-        };
-      } catch (e) {
-        console.warn("Failed to load RevenueCat offerings, falling back to catalog", e);
-        return { current: PLANS.map((p) => toOfferingPackage(p)) };
-      }
+      const offerings = await (await sdk()).getOfferings();
+      return {
+        current: (offerings.current?.availablePackages ?? []).flatMap((pkg) => {
+          const plan = planByProductId(pkg.product.identifier);
+          return plan && eligible(pkg)
+            ? [toOfferingPackage(plan, pkg.product.priceString + " / year")]
+            : [];
+        }),
+      };
     },
-
-    async purchase(planId: PlanId): Promise<PurchaseResult> {
-      const plan = planById(planId);
-      if (!plan) return { ok: false, entitlement: "free", error: "Unknown plan" };
+    async purchase(planId) {
+      if (planId !== "premium_annual" || !planById(planId))
+        return { ok: false, entitlement: "free", error: "Only the annual plan is available." };
       try {
-        const Purchases = await getSdk();
-        const offerings = await Purchases.getOfferings();
-        const pkg = offerings?.current?.availablePackages?.find(
-          (p: any) => (p?.product?.identifier ?? p?.identifier) === plan.productId,
+        const purchases = await sdk();
+        const offerings = await purchases.getOfferings();
+        const pkg = offerings.current?.availablePackages.find(
+          (p) => eligible(p) && planByProductId(p.product.identifier)?.id === planId,
         );
-        if (!pkg) return { ok: false, entitlement: "free", error: "Product not available" };
-        const result = await Purchases.purchasePackage({ aPackage: pkg });
-        const entitlement = entitlementFromInfo(result?.customerInfo);
-        return { ok: entitlement === "premium", entitlement };
-      } catch (e: any) {
-        if (e?.userCancelled) return { ok: false, entitlement: "free", error: "cancelled" };
-        return { ok: false, entitlement: "free", error: e?.message ?? "Purchase failed" };
+        if (!pkg)
+          return {
+            ok: false,
+            entitlement: "free",
+            error: "The annual product is unavailable in Google Play.",
+          };
+        const result = await purchases.purchasePackage({ aPackage: pkg });
+        return { ok: true, entitlement: entitlement(result.customerInfo) };
+      } catch (error) {
+        const cancelled =
+          typeof error === "object" &&
+          error !== null &&
+          "userCancelled" in error &&
+          error.userCancelled;
+        return {
+          ok: false,
+          entitlement: "free",
+          error: cancelled
+            ? "cancelled"
+            : "Google Play could not complete the purchase. Please retry.",
+        };
       }
     },
-
-    async restore(): Promise<PurchaseResult> {
+    async restore() {
       try {
-        const Purchases = await getSdk();
-        const info = await Purchases.restorePurchases();
-        const entitlement = entitlementFromInfo(info?.customerInfo ?? info);
-        return { ok: true, entitlement };
-      } catch (e: any) {
-        return { ok: false, entitlement: "free", error: e?.message ?? "Restore failed" };
-      }
-    },
-
-    async refreshEntitlement(): Promise<Entitlement> {
-      try {
-        const Purchases = await getSdk();
-        const info = await Purchases.getCustomerInfo();
-        return entitlementFromInfo(info?.customerInfo ?? info);
+        const info = await (await sdk()).restorePurchases();
+        return { ok: true, entitlement: entitlement(info.customerInfo) };
       } catch {
-        return "free";
+        return {
+          ok: false,
+          entitlement: "free",
+          error: "Restore failed. Check your Google Play account and connection.",
+        };
       }
     },
-
+    async refreshEntitlement() {
+      return entitlement((await (await sdk()).getCustomerInfo()).customerInfo);
+    },
     onEntitlementChange(cb) {
       listeners.add(cb);
       return () => listeners.delete(cb);

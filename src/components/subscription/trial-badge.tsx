@@ -14,13 +14,13 @@ export function TrialBadge() {
   const days = trialDaysLeft(state);
 
   if (!state.loaded) return null;
-  if (state.status === "premium") return null;
+  if (state.status === "premium" || state.status === "grace") return null;
 
   const label =
     state.status === "trial" && days !== null
       ? `Premium · ${days}d left`
       : state.status === "expired"
-        ? "Trial ended · Upgrade"
+        ? "Free · Upgrade"
         : "Get Premium";
 
   return (

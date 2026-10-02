@@ -1,39 +1,22 @@
+import { validateRuntimeOrigin } from "./scripts/runtime-origin.mjs";
 import type { CapacitorConfig } from "@capacitor/cli";
-
-/**
- * Capacitor configuration for the QuestOS native Android build.
- *
- * The web app is unaffected by this file — it's only read by `npx cap sync`
- * / Android Studio. The `server.url` field is intentionally empty so the
- * native build ships with the bundled `dist/` webDir. To point a debug
- * build at your local Cloudflare Worker preview during development, set
- * `server.url` to `http://10.0.2.2:8080` for the Android emulator.
- */
+// TanStack's server functions need the deployed HTTPS runtime. The bundled shell
+// handles offline startup; no secret or service-role key belongs in this config.
+const rawOrigin = process.env.CAPACITOR_SERVER_URL;
+const origin = rawOrigin ? validateRuntimeOrigin(rawOrigin) : undefined;
 const config: CapacitorConfig = {
   appId: "app.questos.android",
   appName: "QuestOS",
-  webDir: "dist",
-  bundledWebRuntime: false,
-  android: {
-    allowMixedContent: false,
-    captureInput: true,
-    webContentsDebuggingEnabled: false,
-  },
+  webDir: "native-shell",
+  server: origin ? { url: new URL(origin).origin, cleartext: false } : undefined,
+  android: { allowMixedContent: false, webContentsDebuggingEnabled: false },
   plugins: {
     SplashScreen: {
       launchShowDuration: 1200,
-      backgroundColor: "#0b0d13",
+      backgroundColor: "#161821",
+      androidSplashResourceName: "questos_splash",
       showSpinner: false,
-      androidSplashResourceName: "splash",
-    },
-    PushNotifications: {
-      presentationOptions: ["badge", "sound", "alert"],
-    },
-    LocalNotifications: {
-      smallIcon: "ic_stat_icon_config_sample",
-      iconColor: "#f5c26b",
     },
   },
 };
-
 export default config;

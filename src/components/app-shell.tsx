@@ -14,6 +14,7 @@ import { Paywall } from "@/components/subscription/paywall";
 import { TrialEndedGate } from "@/components/subscription/trial-ended";
 import { TrialBadge } from "@/components/subscription/trial-badge";
 
+import { PremiumRuntime } from "./premium-runtime";
 
 const NAV = [
   { to: "/", label: "Home", icon: Home },
@@ -21,6 +22,7 @@ const NAV = [
   { to: "/calendar", label: "Calendar", icon: CalendarDays },
   { to: "/legacy", label: "Legacy", icon: Scroll },
   { to: "/profile", label: "Profile", icon: User },
+  { to: "/premium", label: "Premium", icon: Plus },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
@@ -33,7 +35,6 @@ export function AppShell({ children }: { children: ReactNode }) {
     syncAchievements();
   }, [syncAchievements]);
 
-
   return (
     <div className="min-h-screen bg-ambient text-foreground">
       <div className="flex min-h-screen">
@@ -41,17 +42,12 @@ export function AppShell({ children }: { children: ReactNode }) {
         <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-hairline bg-sidebar/60 px-4 py-6 backdrop-blur-md md:flex">
           <Link to="/" className="mb-8 flex items-center gap-2 px-2">
             <LogoMark />
-            <span className="font-display text-lg font-semibold tracking-tight">
-              QuestOS
-            </span>
+            <span className="font-display text-lg font-semibold tracking-tight">QuestOS</span>
           </Link>
 
           <nav className="flex flex-1 flex-col gap-1">
             {NAV.map((item) => {
-              const active =
-                item.to === "/"
-                  ? pathname === "/"
-                  : pathname.startsWith(item.to);
+              const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
               const Icon = item.icon;
               return (
                 <Link
@@ -77,16 +73,14 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
 
           <div className="mt-6 rounded-xl border border-hairline bg-sidebar-accent/40 p-3 text-xs text-muted-foreground">
-            <p className="font-display text-sm text-foreground">
-              Season of Momentum
-            </p>
+            <p className="font-display text-sm text-foreground">Season of Momentum</p>
             <p className="mt-1">Day 17 · keep the fire lit.</p>
           </div>
           <SignOutButton />
         </aside>
 
-
         <main className="relative flex min-h-screen w-full flex-col pb-24 md:pb-8">
+          <PremiumRuntime />
           {children}
         </main>
       </div>
@@ -103,10 +97,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* Mobile bottom nav */}
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-hairline bg-background/85 backdrop-blur-xl md:hidden">
-        <ul className="mx-auto grid max-w-md grid-cols-5">
+        <ul className="mx-auto grid max-w-md grid-cols-7">
           {NAV.map((item) => {
-            const active =
-              item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
+            const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
             const Icon = item.icon;
             return (
               <li key={item.to}>
@@ -162,4 +155,3 @@ function SignOutButton() {
     </button>
   );
 }
-

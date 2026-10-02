@@ -1,6 +1,8 @@
+import { Link } from "@tanstack/react-router";
+import { isNative } from "@/lib/native/platform";
+import { nativeGoogleSignIn } from "@/lib/native/auth";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,11 +18,18 @@ export function AuthPage() {
 
   async function handleGoogle() {
     setLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    if (result.error) {
-      toast.error("Google sign-in failed", { description: (result.error as Error).message });
+    try {
+      if (isNative()) await nativeGoogleSignIn();
+      else {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: { redirectTo: window.location.origin },
+        });
+        if (error) throw error;
+      }
+    } catch {
+      toast.error("Google sign-in failed. Please retry or use email.");
+    } finally {
       setLoading(false);
     }
   }
@@ -73,16 +82,20 @@ export function AuthPage() {
               : "Turn your goals into quests. Level up your real life."}
           </p>
 
-          <Button
-            type="button"
-            onClick={handleGoogle}
-            disabled={loading}
-            variant="outline"
-            className="mt-6 w-full"
-          >
-            <GoogleIcon />
-            Continue with Google
-          </Button>
+          {(isNative()
+            ? import.meta.env.VITE_NATIVE_GOOGLE_AUTH_ENABLED === "true"
+            : import.meta.env.VITE_GOOGLE_AUTH_ENABLED === "true") && (
+            <Button
+              type="button"
+              onClick={handleGoogle}
+              disabled={loading}
+              variant="outline"
+              className="mt-6 w-full"
+            >
+              <GoogleIcon />
+              Continue with Google
+            </Button>
+          )}
 
           <div className="my-5 flex items-center gap-3 text-xs uppercase text-muted-foreground">
             <div className="h-px flex-1 bg-hairline" />
@@ -90,6 +103,15 @@ export function AuthPage() {
             <div className="h-px flex-1 bg-hairline" />
           </div>
 
+          <p className="text-xs text-muted-foreground mb-4">
+            <Link to="/legal/privacy" className="underline">
+              Privacy Policy
+            </Link>{" "}
+            ·{" "}
+            <Link to="/legal/terms" className="underline">
+              Terms
+            </Link>
+          </p>
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "signup" && (
               <div>
@@ -168,7 +190,10 @@ export function AuthPage() {
 function GoogleIcon() {
   return (
     <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" aria-hidden>
-      <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.4-1.6 4.1-5.5 4.1-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.5 14.6 2.5 12 2.5 6.8 2.5 2.6 6.7 2.6 12s4.2 9.5 9.4 9.5c5.4 0 9-3.8 9-9.2 0-.6-.1-1.1-.2-1.6H12z" />
+      <path
+        fill="#EA4335"
+        d="M12 10.2v3.9h5.5c-.2 1.4-1.6 4.1-5.5 4.1-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.5 14.6 2.5 12 2.5 6.8 2.5 2.6 6.7 2.6 12s4.2 9.5 9.4 9.5c5.4 0 9-3.8 9-9.2 0-.6-.1-1.1-.2-1.6H12z"
+      />
     </svg>
   );
 }

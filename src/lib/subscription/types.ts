@@ -6,16 +6,10 @@
  * That keeps feature gates portable between web and native.
  */
 
-export type SubscriptionStatus = "trial" | "free" | "premium" | "expired";
+export type SubscriptionStatus = "trial" | "free" | "premium" | "grace" | "expired";
 export type Entitlement = "free" | "premium";
 
-export type PlanId =
-  | "trial"
-  | "premium_annual"
-  | "premium_monthly"
-  | "premium_lifetime"
-  | "premium_family"
-  | "premium_student";
+export type PlanId = "trial" | "premium_annual";
 
 export interface SubscriptionState {
   status: SubscriptionStatus;
@@ -26,6 +20,10 @@ export interface SubscriptionState {
   premiumExpiration: string | null;
   revenueCatCustomerId: string | null;
   lastVerification: string | null;
+  graceEnd?: string | null;
+  cancelAtPeriodEnd?: boolean;
+  billingProvider?: string | null;
+  error?: string | null;
   /** True when we've hydrated from the backend at least once this session. */
   loaded: boolean;
   /** True while a purchase or restore is in flight. */
@@ -58,6 +56,7 @@ export interface SubscriptionProvider {
   readonly kind: "web" | "native";
   init(userId: string | null): Promise<void>;
   identify(userId: string): Promise<void>;
+  reset?(): Promise<void>;
   getOfferings(): Promise<Offerings>;
   purchase(planId: PlanId): Promise<PurchaseResult>;
   restore(): Promise<PurchaseResult>;
@@ -88,17 +87,44 @@ export type PremiumFeature =
   | "features.experimental";
 
 export const PREMIUM_FEATURES: Record<PremiumFeature, { label: string; description: string }> = {
-  "ai.unlimited": { label: "Unlimited AI", description: "No caps on coach, briefs, breakdowns." },
+  "ai.unlimited": {
+    label: "Expanded AI",
+    description: "500 shared AI requests per UTC day on paid Premium; 40 during trial.",
+  },
   "ai.memory": { label: "AI Memory", description: "Coach remembers your patterns and history." },
-  "ai.future_me": { label: "Future Me", description: "Simulate the version of you in 1, 5, 10 years." },
-  "ai.goal_simulator": { label: "Goal Simulator", description: "Model tradeoffs before committing." },
-  "ai.executive_assistant": { label: "AI Executive Assistant", description: "Autonomous planning for your day." },
-  "analytics.advanced": { label: "Advanced Analytics", description: "Deep insight into every category." },
+  "ai.future_me": {
+    label: "Future Me",
+    description: "Simulate the version of you in 1, 5, 10 years.",
+  },
+  "ai.goal_simulator": {
+    label: "Goal Simulator",
+    description: "Model tradeoffs before committing.",
+  },
+  "ai.executive_assistant": {
+    label: "AI Executive Assistant",
+    description: "Review and confirm a schedule built from your actual quests.",
+  },
+  "analytics.advanced": {
+    label: "Advanced Analytics",
+    description: "Deep insight into every category.",
+  },
   "themes.premium": { label: "Premium Themes", description: "Curated visual worlds." },
   "sounds.premium": { label: "Premium Sound Packs", description: "Ambient audio for focus." },
   "widgets.premium": { label: "Premium Widgets", description: "Beautiful home-screen widgets." },
-  "widgets.dashboard_advanced": { label: "Advanced Dashboard", description: "Custom panels on your home." },
-  "integrations.calendar": { label: "Calendar Integrations", description: "Two-way sync with Google, Apple, Outlook." },
-  "integrations.health": { label: "Health Integrations", description: "Import steps, sleep, workouts." },
-  "features.experimental": { label: "Experimental Features", description: "Early access to what's next." },
+  "widgets.dashboard_advanced": {
+    label: "Advanced Dashboard",
+    description: "Custom panels on your home.",
+  },
+  "integrations.calendar": {
+    label: "Calendar Integrations",
+    description: "Import/export events and sync Android device calendars.",
+  },
+  "integrations.health": {
+    label: "Health Integrations",
+    description: "Import steps, sleep and workout history with your permission.",
+  },
+  "features.experimental": {
+    label: "Experimental Features",
+    description: "Early access to what's next.",
+  },
 };

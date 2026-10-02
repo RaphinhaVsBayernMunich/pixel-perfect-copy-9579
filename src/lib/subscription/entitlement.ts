@@ -14,8 +14,8 @@ export function effectiveTier(
   if (profile.subscription_status === "trial") {
     return profile.trial_end && Date.parse(profile.trial_end) > now ? "trial" : "free";
   }
-  if (profile.subscription_status === "premium") {
-    return profile.premium_expiration === null || Date.parse(profile.premium_expiration) > now
+  if (["premium", "grace"].includes(profile.subscription_status)) {
+    return profile.premium_expiration !== null && Date.parse(profile.premium_expiration) > now
       ? "premium"
       : "free";
   }

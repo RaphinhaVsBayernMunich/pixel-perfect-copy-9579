@@ -1,3 +1,4 @@
+import { PremiumDashboard } from "@/components/premium-runtime";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Sparkles, Target, Trophy, Zap } from "lucide-react";
 import { CATEGORY_TOKEN, CATEGORY_LABEL } from "@/lib/demo-data";
@@ -34,15 +35,15 @@ function Home() {
       {/* Hero — character HUD */}
       <header className="mb-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
-            {dateStr}
-          </p>
+          <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">{dateStr}</p>
           <h1 className="mt-2 font-display text-3xl leading-tight font-semibold md:text-5xl">
             Welcome back, <span className="text-primary">{character.name}</span>.
           </h1>
           <p className="mt-2 max-w-lg text-sm text-muted-foreground">
             {character.season} · Day {character.streakDays}. You've completed{" "}
-            <span className="text-foreground">{doneToday} of {daily.length}</span>{" "}
+            <span className="text-foreground">
+              {doneToday} of {daily.length}
+            </span>{" "}
             quests today. One more and momentum holds.
           </p>
         </div>
@@ -56,19 +57,25 @@ function Home() {
             <Sparkles className="h-3.5 w-3.5" />
             AI Coach
           </button>
-          <StatChip icon={<Zap className="h-3.5 w-3.5" />} label="Streak" value={`${character.streakDays}d`} />
-          <StatChip icon={<Trophy className="h-3.5 w-3.5" />} label="Level" value={String(character.level)} accent />
+          <StatChip
+            icon={<Zap className="h-3.5 w-3.5" />}
+            label="Streak"
+            value={`${character.streakDays}d`}
+          />
+          <StatChip
+            icon={<Trophy className="h-3.5 w-3.5" />}
+            label="Level"
+            value={String(character.level)}
+            accent
+          />
         </div>
       </header>
-
 
       {/* Level + XP bar */}
       <section className="mb-6 overflow-hidden rounded-2xl border border-hairline bg-card/60 p-5 shadow-glow-xp/50 backdrop-blur-sm">
         <div className="flex items-baseline justify-between gap-4">
           <div>
-            <p className="text-xs tracking-widest text-muted-foreground uppercase">
-              Life Level
-            </p>
+            <p className="text-xs tracking-widest text-muted-foreground uppercase">Life Level</p>
             <p className="mt-1 font-display text-3xl font-bold">
               {character.level}
               <span className="ml-2 align-middle text-sm text-muted-foreground">
@@ -79,7 +86,10 @@ function Home() {
           <div className="text-right">
             <p className="font-display text-xl font-semibold text-xp">
               {character.xp.toLocaleString()}
-              <span className="text-muted-foreground"> / {character.xpToNext.toLocaleString()}</span>
+              <span className="text-muted-foreground">
+                {" "}
+                / {character.xpToNext.toLocaleString()}
+              </span>
             </p>
             <p className="text-[10px] tracking-widest text-muted-foreground uppercase">
               XP to next level
@@ -87,13 +97,11 @@ function Home() {
           </div>
         </div>
         <div className="mt-4 h-2 overflow-hidden rounded-full bg-background/60 ring-hairline">
-          <div
-            className="h-full rounded-full bg-primary"
-            style={{ width: `${xpPct}%` }}
-          />
+          <div className="h-full rounded-full bg-primary" style={{ width: `${xpPct}%` }} />
         </div>
       </section>
 
+      <PremiumDashboard />
       {/* Grid */}
       <div className="grid gap-5 md:grid-cols-3">
         {/* Main quest */}
@@ -109,12 +117,9 @@ function Home() {
             />
             <div className="relative">
               <PanelHeading icon={<Target className="h-4 w-4" />} title="Main Quest" />
-              <h3 className="mt-3 font-display text-2xl font-semibold">
-                {main.title}
-              </h3>
+              <h3 className="mt-3 font-display text-2xl font-semibold">{main.title}</h3>
               <p className="mt-1 text-xs text-muted-foreground">
-                {main.subtasksDone}/{main.subtasksTotal} milestones · deadline{" "}
-                {main.deadline}
+                {main.subtasksDone}/{main.subtasksTotal} milestones · deadline {main.deadline}
               </p>
 
               <div className="mt-5">
@@ -152,24 +157,17 @@ function Home() {
               aria-hidden
               className="absolute inset-0 opacity-30"
               style={{
-                background:
-                  "radial-gradient(80% 80% at 100% 0%, var(--boss), transparent 60%)",
+                background: "radial-gradient(80% 80% at 100% 0%, var(--boss), transparent 60%)",
               }}
             />
             <div className="relative">
               <PanelHeading icon={<Flame />} title="Boss Battle" tone="boss" />
-              <h3 className="mt-3 font-display text-xl font-semibold">
-                {boss.title}
-              </h3>
+              <h3 className="mt-3 font-display text-xl font-semibold">{boss.title}</h3>
               <p className="mt-4 font-display text-4xl font-bold text-boss">
                 {daysUntil(boss.deadline!)}
-                <span className="ml-1 text-sm font-medium text-muted-foreground">
-                  days
-                </span>
+                <span className="ml-1 text-sm font-medium text-muted-foreground">days</span>
               </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {boss.deadline}
-              </p>
+              <p className="mt-1 text-xs text-muted-foreground">{boss.deadline}</p>
             </div>
           </Panel>
         )}
@@ -195,9 +193,8 @@ function Home() {
             <PanelHeading icon={<Sparkles className="h-4 w-4" />} title="AI Coach" />
             <p className="mt-3 text-sm leading-relaxed">
               Your afternoon is light. Move{" "}
-              <span className="text-primary font-medium">Ship auth flow refactor</span>{" "}
-              into a 90-minute focus block at 3:00pm — you complete coding quests
-              23% faster after 2pm.
+              <span className="text-primary font-medium">Ship auth flow refactor</span> into a
+              90-minute focus block at 3:00pm — you complete coding quests 23% faster after 2pm.
             </p>
             <div className="mt-4 flex gap-2">
               <button className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90">
@@ -220,8 +217,8 @@ function Home() {
                 />
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
-                {Math.round((weekly[0].progress ?? 0) * 100)}% complete · +
-                {weekly[0].xp} XP on finish
+                {Math.round((weekly[0].progress ?? 0) * 100)}% complete · +{weekly[0].xp} XP on
+                finish
               </p>
             </Panel>
           )}
@@ -237,10 +234,7 @@ function Home() {
                 const max = Math.max(...Object.values(character.categoryXp));
                 const pct = max ? (val / max) * 100 : 0;
                 return (
-                  <div
-                    key={cat}
-                    className="rounded-xl border border-hairline bg-background/40 p-3"
-                  >
+                  <div key={cat} className="rounded-xl border border-hairline bg-background/40 p-3">
                     <div className="flex items-center justify-between">
                       <span
                         className="text-[11px] font-medium tracking-wide uppercase"
@@ -274,7 +268,16 @@ function Home() {
 
 function Flame(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" {...props}>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-4 w-4"
+      {...props}
+    >
       <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
     </svg>
   );
@@ -307,11 +310,7 @@ function PanelHeading({
 }) {
   return (
     <div className="flex items-center gap-2 text-[10px] font-medium tracking-[0.2em] uppercase">
-      {icon && (
-        <span className={tone === "boss" ? "text-boss" : "text-primary"}>
-          {icon}
-        </span>
-      )}
+      {icon && <span className={tone === "boss" ? "text-boss" : "text-primary"}>{icon}</span>}
       <span className="text-muted-foreground">{title}</span>
     </div>
   );
@@ -330,13 +329,9 @@ function StatChip({
 }) {
   return (
     <div className="flex items-center gap-2 rounded-xl border border-hairline bg-card/60 px-3 py-2 backdrop-blur-sm">
-      <span className={accent ? "text-primary" : "text-muted-foreground"}>
-        {icon}
-      </span>
+      <span className={accent ? "text-primary" : "text-muted-foreground"}>{icon}</span>
       <div>
-        <p className="text-[10px] tracking-widest text-muted-foreground uppercase">
-          {label}
-        </p>
+        <p className="text-[10px] tracking-widest text-muted-foreground uppercase">{label}</p>
         <p className={`font-display text-sm font-semibold ${accent ? "text-primary" : ""}`}>
           {value}
         </p>

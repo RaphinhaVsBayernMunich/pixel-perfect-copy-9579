@@ -39,3 +39,11 @@ dist-ssr
 *.sw?
 
 supabase/.temp/
+# Local signing credentials and service configuration
+*.jks
+*.keystore
+keystore.properties
+android/app/google-services.json
+
+# Local verified runtime origin
+.questos-runtime-origin

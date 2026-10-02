@@ -1,3 +1,5 @@
+import { useSubscription, hasPremiumEntitlement } from "./subscription/service";
+import { toast } from "sonner";
 import { create } from "zustand";
 import { isUuid, newRecordId } from "./record-ids";
 import {
@@ -71,7 +73,7 @@ export interface QuestsState {
   lastCompletion?: { questId: string; ts: number };
   onboardingCompleted: boolean;
   onboardingProfile: OnboardingProfile;
-  add: (q: Omit<Quest, "id"> & { id?: string }) => Quest;
+  add: (q: Omit<Quest, "id"> & { id?: string }) => Quest | undefined;
   update: (id: string, patch: Partial<Quest>) => void;
   remove: (id: string) => void;
   complete: (id: string) => void;
@@ -100,6 +102,26 @@ export interface QuestsState {
 }
 
 const uid = newRecordId;
+export function canCreateQuest(
+  quests: Quest[],
+  candidate: Pick<Quest, "type" | "completed">,
+  previous?: Quest,
+) {
+  if (hasPremiumEntitlement(useSubscription.getState()) || candidate.completed) return true;
+  const active = quests.filter((q) => !q.completed && q.id !== previous?.id);
+  const adding = !previous || previous.completed;
+  const project =
+    candidate.type === "main" && (!previous || previous.completed || previous.type !== "main");
+  if (adding && active.length >= 25) {
+    toast.error("Free allows 25 active quests. Complete or archive one first.");
+    return false;
+  }
+  if (project && active.filter((q) => q.type === "main").length >= 3) {
+    toast.error("Free allows 3 active main quests (projects). Complete or archive one first.");
+    return false;
+  }
+  return true;
+}
 
 export function emptyQuestState() {
   return {
@@ -133,15 +155,17 @@ export const useQuests = create<QuestsState>()((set, get) => ({
     set({ onboardingProfile: profile, onboardingCompleted: completed }),
 
   add: (q) => {
+    if (!canCreateQuest(get().quests, q)) return;
     const quest: Quest = { ...q, id: q.id && isUuid(q.id) ? q.id : uid() };
     set((s) => ({ quests: [quest, ...s.quests] }));
     return quest;
   },
 
-  update: (id, patch) =>
-    set((s) => ({
-      quests: s.quests.map((q) => (q.id === id ? { ...q, ...patch, id: q.id } : q)),
-    })),
+  update: (id, patch) => {
+    const old = get().quests.find((q) => q.id === id);
+    if (!old || !canCreateQuest(get().quests, { ...old, ...patch }, old)) return;
+    set((s) => ({ quests: s.quests.map((q) => (q.id === id ? { ...q, ...patch, id: q.id } : q)) }));
+  },
 
   remove: (id) =>
     set((s) => ({
@@ -205,6 +229,8 @@ export const useQuests = create<QuestsState>()((set, get) => ({
   },
 
   uncomplete: (id) => {
+    const old = get().quests.find((q) => q.id === id);
+    if (!old || !canCreateQuest(get().quests, { ...old, completed: false }, old)) return;
     const q = get().quests.find((x) => x.id === id);
     if (!q || !q.completed) return;
     set((s) => ({
@@ -229,8 +255,7 @@ export const useQuests = create<QuestsState>()((set, get) => ({
   duplicate: (id) => {
     const q = get().quests.find((x) => x.id === id);
     if (!q) return;
-    const copy: Quest = { ...q, id: uid(), completed: false, title: `${q.title} (copy)` };
-    set((s) => ({ quests: [copy, ...s.quests] }));
+    get().add({ ...q, id: uid(), completed: false, title: `${q.title} (copy)` });
   },
 
   clearCompletion: () => set({ lastCompletion: undefined }),

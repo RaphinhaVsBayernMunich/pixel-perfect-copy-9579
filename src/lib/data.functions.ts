@@ -16,47 +16,52 @@ export const exportUserData = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
-    const [profile, quests, events, achievements, subEvents, aiUsage] = await Promise.all([
-      supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle(),
-      supabase.from("quests").select("*").eq("user_id", userId),
-      supabase.from("legacy_events").select("*").eq("user_id", userId),
-      supabase.from("user_achievements").select("*").eq("user_id", userId),
-      supabase.from("subscription_events").select("*").eq("user_id", userId),
-      supabase.from("ai_usage").select("*").eq("user_id", userId),
-    ]);
+    const { data: core, error: coreError } = await supabase.rpc("read_account_save" as never);
+    if (coreError || !core) throw new Error("Export failed. Please retry; no data was removed.");
+    const { billingDb } = await import("./subscription/billing-db.server");
+    const { data: premium, error: premiumError } = await billingDb
+      .from("premium_documents")
+      .select("kind,value,updated_at")
+      .eq("user_id", userId);
+    if (premiumError) throw new Error("Premium data export failed. Please retry.");
     return {
+      premium_documents_json: JSON.stringify(premium ?? []),
       exported_at: new Date().toISOString(),
       user_id: userId,
-      profile: profile.data ?? null,
-      quests: quests.data ?? [],
-      legacy_events: events.data ?? [],
-      achievements: achievements.data ?? [],
-      subscription_events: subEvents.data ?? [],
-      ai_usage: aiUsage.data ?? [],
+      // Snapshot includes only editable profile fields and owned core records.
+      core_json: JSON.stringify(core),
     };
   });
 
 export const deleteAccount = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z.object({ confirm: z.literal("DELETE") }).parse(input),
-  )
+  .inputValidator((input: unknown) => z.object({ confirm: z.literal("DELETE") }).parse(input))
   .handler(async ({ context }) => {
     const { userId } = context;
     // ON DELETE CASCADE on auth.users FK removes rows in public tables that
     // reference user_id. Deleting the auth user is authoritative.
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    // Best-effort cleanup for anything not cascaded.
-    await Promise.all([
-      supabaseAdmin.from("quests").delete().eq("user_id", userId),
-      supabaseAdmin.from("legacy_events").delete().eq("user_id", userId),
-      supabaseAdmin.from("user_achievements").delete().eq("user_id", userId),
-      supabaseAdmin.from("subscription_events").delete().eq("user_id", userId),
-      supabaseAdmin.from("analytics_events").delete().eq("user_id", userId),
-      supabaseAdmin.from("ai_usage").delete().eq("user_id", userId),
-      supabaseAdmin.from("profiles").delete().eq("user_id", userId),
-    ]);
+    // All user-owned tables use ON DELETE CASCADE. Do not partially erase data before auth deletion succeeds.
     const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
     if (error) throw error;
+    return { ok: true };
+  });
+
+export const clearHealthSummary = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((input: unknown) =>
+    z
+      .object({ confirm: z.literal("CLEAR_HEALTH") })
+      .strict()
+      .parse(input),
+  )
+  .handler(async ({ context }) => {
+    const { billingDb } = await import("./subscription/billing-db.server");
+    const { error } = await billingDb
+      .from("premium_documents")
+      .delete()
+      .eq("user_id", context.userId)
+      .eq("kind", "health");
+    if (error) throw new Error("Health summary could not be cleared.");
     return { ok: true };
   });

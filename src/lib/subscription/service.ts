@@ -1,70 +1,51 @@
-/**
- * SubscriptionService — the singleton the app talks to.
- *
- * It picks the right provider (web / native) at runtime, mirrors the
- * backend-authoritative subscription state into a Zustand store, and
- * exposes a tiny surface to the UI:
- *
- *   const state = useSubscription();
- *   const canUse = usePremium("ai.unlimited");
- *
- * The provider objects encapsulate billing-SDK details so no component
- * imports RevenueCat or Stripe directly.
- */
+import { openExternal } from "../native/auth";
+import { reconcileUntilVerified } from "./reconcile";
 import { create } from "zustand";
-import { useUI } from "@/lib/ui-store";
-import { isNative, nativePlatform } from "@/lib/native/platform";
+import { toast } from "sonner";
+import { useUI } from "../ui-store";
+import { useAuth } from "../auth-store";
+import { isNative } from "../native/platform";
 import { createNativeProvider } from "./provider-native";
 import { createWebProvider } from "./provider-web";
 import { getSubscription, startTrial, listSubscriptionEvents } from "./subscription.functions";
-import { createStripePortal } from "./stripe-checkout.functions";
-import { getStripeEnvironment, paymentsConfigured } from "@/lib/stripe";
+import { createStripePortal, reconcileBilling } from "./stripe-checkout.functions";
+import { getStripeEnvironment } from "../stripe";
 import { getInstallFingerprint } from "./install-id";
+import { accessTier } from "./billing-contracts";
 import type {
-  Entitlement,
   Offerings,
   PlanId,
   PremiumFeature,
   SubscriptionProvider,
   SubscriptionState,
 } from "./types";
-import { toast } from "sonner";
-import { track } from "@/lib/analytics";
-import { notify } from "@/lib/notifications";
-import { APP_CONFIG } from "@/lib/config/admin-config";
-import { useAuth } from "@/lib/auth-store";
-import { effectiveTier } from "./entitlement";
-
-// ---- store ----------------------------------------------------------------
-
 interface Store extends SubscriptionState {
   offerings: Offerings | null;
-  events: any[];
+  events: Awaited<ReturnType<typeof listSubscriptionEvents>>;
   init: (userId: string) => Promise<void>;
   refreshFromBackend: () => Promise<void>;
   refreshOfferings: () => Promise<void>;
   refreshEvents: () => Promise<void>;
-  purchase: (planId: PlanId) => Promise<boolean>;
+  purchase: (plan: PlanId) => Promise<boolean>;
   restore: () => Promise<boolean>;
+  reconcile: () => Promise<boolean>;
   openBillingPortal: () => Promise<void>;
   reset: () => void;
 }
-
+let reconciliation: { version: number; promise: Promise<boolean> } | null = null;
 let provider: SubscriptionProvider | null = null;
 let identityVersion = 0;
-let providerOwner: string | null = null;
-let identifyQueue = Promise.resolve();
-
-function getProvider(): SubscriptionProvider {
-  if (provider) return provider;
-  provider = isNative()
+let owner: string | null = null;
+let queue = Promise.resolve();
+let unsubscribe: (() => void) | undefined;
+let interval: ReturnType<typeof setInterval> | undefined;
+const getProvider = () =>
+  provider ??
+  (provider = isNative()
     ? createNativeProvider(() => import.meta.env.VITE_REVENUECAT_ANDROID_KEY)
-    : createWebProvider();
-  return provider;
-}
-
+    : createWebProvider());
 const initial: SubscriptionState = {
-  status: "trial",
+  status: "free",
   entitlement: "free",
   currentPlan: null,
   trialStart: null,
@@ -74,277 +55,251 @@ const initial: SubscriptionState = {
   lastVerification: null,
   loaded: false,
   pending: false,
+  error: null,
+  graceEnd: null,
+  cancelAtPeriodEnd: false,
+  billingProvider: null,
 };
-
 export const useSubscription = create<Store>((set, get) => ({
   ...initial,
   offerings: null,
   events: [],
-
-  async init(userId: string) {
+  async init(userId) {
     const version = identityVersion;
     const p = getProvider();
     try {
-      identifyQueue = identifyQueue
+      queue = queue
         .catch(() => {})
         .then(async () => {
           if (version !== identityVersion) return;
           await p.init(userId);
           await p.identify(userId);
-          if (version === identityVersion) providerOwner = userId;
+          if (version === identityVersion) owner = userId;
         });
-      await identifyQueue;
-    } catch (e) {
-      console.warn("Subscription provider init failed", e);
+      await queue;
+    } catch {
+      if (version === identityVersion)
+        set({ error: "Billing could not initialize. Please retry or sign in again." });
     }
     if (version !== identityVersion) return;
-
-    // Ensure trial exists (idempotent, backend-authoritative).
     try {
-      const { fingerprint, platform } = await getInstallFingerprint();
+      const fingerprint = await getInstallFingerprint();
       if (version !== identityVersion) return;
-      await startTrial({ data: { fingerprint, platform } });
-    } catch (e) {
-      console.warn("startTrial failed", e);
+      await startTrial({ data: fingerprint });
+    } catch {
+      /* Existing server trial remains authoritative; refresh reports failures. */
     }
     if (version !== identityVersion) return;
-
     await get().refreshFromBackend();
+    if (version !== identityVersion) return;
     void get().refreshOfferings();
-
-    // Wire entitlement change → server truth refresh.
-    unsubscribeProvider?.();
-    unsubscribeProvider = p.onEntitlementChange(() => {
-      if (version !== identityVersion) return;
-      void get().refreshFromBackend();
+    unsubscribe?.();
+    unsubscribe = p.onEntitlementChange(() => {
+      if (version === identityVersion) void get().reconcile();
     });
-
-    // Periodic silent refresh (offline-safe: silent on failure).
-    if (typeof window !== "undefined" && !refreshIntervalStarted) {
-      refreshIntervalStarted = true;
-      setInterval(() => {
-        void get().refreshFromBackend();
-      }, APP_CONFIG.subscriptionRefreshIntervalMs);
-      // Refresh whenever the tab regains focus / connectivity returns.
-      window.addEventListener("focus", () => void get().refreshFromBackend());
-      window.addEventListener("online", () => void get().refreshFromBackend());
-    }
+    if (interval) clearInterval(interval);
+    interval = setInterval(() => void get().refreshFromBackend(), 60000);
+    if (
+      typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).get("checkout") === "success"
+    )
+      void get().reconcile();
   },
-
   async refreshFromBackend() {
     const version = identityVersion;
     if (!useAuth.getState().user) return;
     try {
-      const prev = get();
       const data = await getSubscription();
       if (version !== identityVersion) return;
-      if (!data) {
-        set({ loaded: true });
-        return;
-      }
-      const next = {
-        status: (data.subscription_status as any) ?? "free",
-        entitlement: (data.entitlement as Entitlement) ?? "free",
-        currentPlan: (data.current_plan as PlanId | null) ?? null,
-        trialStart: data.trial_start ?? null,
-        trialEnd: data.trial_end ?? null,
-        premiumExpiration: data.premium_expiration ?? null,
-        revenueCatCustomerId: data.revenuecat_customer_id ?? null,
-        lastVerification: data.last_verification ?? null,
+      set({
+        status: data.subscription_status,
+        entitlement: data.entitlement,
+        currentPlan: data.current_plan,
+        trialStart: data.trial_start,
+        trialEnd: data.trial_end,
+        premiumExpiration: data.premium_expiration,
+        revenueCatCustomerId: data.revenuecat_customer_id,
+        lastVerification: data.last_verification,
+        graceEnd: data.grace_end,
+        cancelAtPeriodEnd: data.cancel_at_period_end,
+        billingProvider: data.billing_provider,
         loaded: true,
-      };
-      set(next);
-      dispatchLifecycleNotifications(prev, next);
-      // Emit trial-ending nudges (once per threshold per user).
-      const daysLeft = trialDaysLeftFor(next.status, next.trialEnd);
-      if (daysLeft !== null) {
-        if (daysLeft === 1) notify("trial_ending_1d", { once: true, key: next.trialEnd ?? "" });
-        else if (daysLeft <= 3) notify("trial_ending_3d", { once: true, key: next.trialEnd ?? "" });
-      }
-    } catch (e) {
-      if (version !== identityVersion) return;
-      console.warn("refreshFromBackend failed", e);
-      set({ loaded: true });
+        error: null,
+      });
+    } catch {
+      if (version === identityVersion)
+        set({
+          entitlement: "free",
+          loaded: true,
+          error: "Subscription status could not be verified. Retry when connected.",
+        });
     }
   },
-
   async refreshOfferings() {
     const version = identityVersion;
     try {
       const offerings = await getProvider().getOfferings();
-      if (version !== identityVersion) return;
-      set({ offerings });
-    } catch (e) {
-      console.warn("refreshOfferings failed", e);
+      if (version === identityVersion)
+        set({
+          offerings,
+          error: offerings.current.length
+            ? null
+            : "No verified annual plan is available. Retry or contact support.",
+        });
+    } catch {
+      if (version === identityVersion)
+        set({
+          offerings: { current: [] },
+          error: "Annual pricing could not be loaded. Retry or contact support.",
+        });
     }
   },
-
   async refreshEvents() {
     const version = identityVersion;
     try {
       const events = await listSubscriptionEvents();
-      if (version !== identityVersion) return;
-      set({ events });
+      if (version === identityVersion) set({ events });
     } catch {
-      /* noop */
+      if (version === identityVersion) set({ error: "Billing history could not be loaded." });
     }
   },
-
-  async purchase(planId: PlanId) {
+  async purchase(plan) {
     const version = identityVersion;
-    if (!providerOwner || providerOwner !== useAuth.getState().user?.id) {
-      toast.error("Billing is not ready for this account. Please sign in again.");
+    if (plan !== "premium_annual" || owner !== useAuth.getState().user?.id) {
+      set({ error: "Billing is not ready for this account. Sign in again." });
       return false;
     }
-    set({ pending: true });
-    track("checkout_started", { plan: planId });
+    set({ pending: true, error: null });
     try {
-      const result = await getProvider().purchase(planId);
+      const result = await getProvider().purchase(plan);
       if (version !== identityVersion) return false;
       const clientSecret = (result as { clientSecret?: string }).clientSecret;
       if (clientSecret) {
         useUI.getState().setCheckoutClientSecret(clientSecret);
         return true;
       }
-      if (result.ok) {
-        track("checkout_completed", { plan: planId });
-        track("purchase", { plan: planId });
-        notify("purchase_success");
-        await get().refreshFromBackend();
-        return true;
-      }
-      if (result.error && result.error !== "cancelled") {
-        toast.error(result.error);
-      }
+      if (result.ok) return await get().reconcile();
+      if (result.error !== "cancelled")
+        set({ error: result.error ?? "Purchase failed. Please retry." });
+      return false;
+    } catch {
+      if (version === identityVersion)
+        set({ error: "Purchase could not complete. Check the store before retrying." });
       return false;
     } finally {
       if (version === identityVersion) set({ pending: false });
     }
   },
-
+  reconcile() {
+    const version = identityVersion;
+    if (reconciliation?.version === version) return reconciliation.promise;
+    const promise = (async () => {
+      set({ pending: true, error: null });
+      try {
+        const result = await reconcileUntilVerified({
+          isCurrent: () => version === identityVersion,
+          reconcile: () =>
+            reconcileBilling({ data: { provider: isNative() ? "revenuecat" : "stripe" } }),
+          refresh: () => get().refreshFromBackend(),
+          hasPaidAccess: () => accessTier(get()) === "premium",
+          wait: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+        });
+        if (result === "paid") return true;
+        if (result === "account-changed") return false;
+        set({
+          error: "Verification is pending. No new charge was made. Use Refresh or Restore shortly.",
+        });
+        return false;
+      } finally {
+        if (version === identityVersion) set({ pending: false });
+      }
+    })();
+    reconciliation = { version, promise };
+    void promise
+      .finally(() => {
+        if (reconciliation?.promise === promise) reconciliation = null;
+      })
+      .catch(() => {});
+    return promise;
+  },
   async restore() {
     const version = identityVersion;
-    if (!providerOwner || providerOwner !== useAuth.getState().user?.id) return false;
-    set({ pending: true });
+    if (owner !== useAuth.getState().user?.id) return false;
+    set({ pending: true, error: null });
     try {
       const result = await getProvider().restore();
       if (version !== identityVersion) return false;
-      await get().refreshFromBackend();
-      if (version !== identityVersion) return false;
-      track("subscription_restored", { ok: result.ok, entitlement: result.entitlement });
-      if (result.ok && result.entitlement === "premium") {
-        notify("restore_success");
-        return true;
+      if (!result.ok) {
+        set({ error: result.error ?? "Restore failed. Please retry." });
+        return false;
       }
-      toast.message("No prior purchase found on this account.");
+      const restored = await get().reconcile();
+      if (version !== identityVersion) return false;
+      if (restored) toast.success("Your paid subscription is restored.");
+      else
+        set({
+          error:
+            "No verified paid subscription found yet. Confirm the store account or retry shortly.",
+        });
+      return restored;
+    } catch {
+      if (version === identityVersion)
+        set({ error: "Restore could not verify billing. Please retry." });
       return false;
     } finally {
       if (version === identityVersion) set({ pending: false });
     }
   },
-
   async openBillingPortal() {
     const version = identityVersion;
-    track("portal_opened", { platform: nativePlatform() });
-    // Native: send to Google Play subscriptions surface.
-    if (isNative()) {
-      const url =
-        nativePlatform() === "android"
-          ? "https://play.google.com/store/account/subscriptions"
-          : "https://apps.apple.com/account/subscriptions";
-      window.open(url, "_blank", "noopener,noreferrer");
-      return;
-    }
-    // Web: Stripe Billing Portal — MUST open in a new tab (cannot iframe).
-    if (!paymentsConfigured()) {
-      toast.error("Billing portal is not configured for this build.");
+    if (get().billingProvider === "revenuecat") {
+      await openExternal("https://play.google.com/store/account/subscriptions");
       return;
     }
     try {
-      const res = await createStripePortal({
+      const result = await createStripePortal({
         data: {
           returnUrl: `${window.location.origin}/profile`,
           environment: getStripeEnvironment(),
         },
       });
       if (version !== identityVersion) return;
-      if ("error" in res) {
-        toast.error(res.error);
+      if ("error" in result) {
+        set({ error: result.error });
         return;
       }
-      window.open(res.url, "_blank", "noopener,noreferrer");
-    } catch (e: any) {
-      toast.error(e?.message ?? "Failed to open billing portal");
+      await openExternal(result.url);
+    } catch {
+      if (version === identityVersion)
+        set({ error: "Billing management could not open. Please retry." });
     }
   },
-
   reset() {
     identityVersion++;
-    providerOwner = null;
-    unsubscribeProvider?.();
-    unsubscribeProvider = undefined;
+    owner = null;
+    const p = provider;
+    queue = queue
+      .catch(() => {})
+      .then(async () => {
+        await p?.reset?.();
+      })
+      .catch(() => {});
+    unsubscribe?.();
+    unsubscribe = undefined;
+    if (interval) clearInterval(interval);
+    interval = undefined;
+    useUI.getState().setCheckoutClientSecret(null);
     set({ ...initial, offerings: null, events: [] });
   },
 }));
-
-let refreshIntervalStarted = false;
-let unsubscribeProvider: (() => void) | undefined;
-
-/**
- * Fire notifications for status transitions the user should know about.
- * Called from `refreshFromBackend` after every successful refresh.
- */
-function dispatchLifecycleNotifications(
-  prev: SubscriptionState,
-  next: Pick<SubscriptionState, "status" | "premiumExpiration">,
-) {
-  if (!prev.loaded) return; // Skip the very first hydration.
-  const wasPremium = prev.status === "premium";
-  const nowPremium = next.status === "premium";
-  const wasExpired = prev.status === "expired";
-  const nowExpired = next.status === "expired";
-
-  if (!wasPremium && nowPremium) notify("premium_unlocked");
-  if (wasPremium && nowExpired) notify("subscription_expired");
-  if (wasPremium && nowPremium && prev.premiumExpiration !== next.premiumExpiration) {
-    notify("subscription_renewed", { once: true, key: next.premiumExpiration ?? "" });
-    track("renewal");
-  }
-  if (wasPremium && !nowPremium) track("cancellation");
-  if (!wasExpired && nowExpired && prev.status === "trial") track("trial_expired");
+export function hasPremiumEntitlement(state: SubscriptionState) {
+  return accessTier(state) !== "free";
 }
-
-// ---- selectors ------------------------------------------------------------
-
-export function hasPremiumEntitlement(state: SubscriptionState): boolean {
-  return (
-    effectiveTier({
-      entitlement: state.entitlement,
-      subscription_status: state.status,
-      trial_end: state.trialEnd,
-      premium_expiration: state.premiumExpiration,
-    }) !== "free"
-  );
+export function trialDaysLeft(state: SubscriptionState) {
+  return state.status === "trial" && state.trialEnd
+    ? Math.max(0, Math.ceil((Date.parse(state.trialEnd) - Date.now()) / 86400000))
+    : null;
 }
-
-export function trialDaysLeft(state: SubscriptionState): number | null {
-  return trialDaysLeftFor(state.status, state.trialEnd);
-}
-
-function trialDaysLeftFor(status: string, trialEnd: string | null): number | null {
-  if (status !== "trial" || !trialEnd) return null;
-  const ms = new Date(trialEnd).getTime() - Date.now();
-  return Math.max(0, Math.ceil(ms / (24 * 60 * 60 * 1000)));
-}
-
-/**
- * Feature-level gate.
- *
- * Every premium feature is enforced through this hook rather than a
- * `if (isPremium)` check. Adding a new feature is a one-line change in
- * types.ts.
- */
-export function usePremium(_feature: PremiumFeature): boolean {
-  const state = useSubscription();
-  return hasPremiumEntitlement(state);
+export function usePremium(_feature: PremiumFeature) {
+  return hasPremiumEntitlement(useSubscription());
 }

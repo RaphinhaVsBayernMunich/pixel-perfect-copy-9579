@@ -1,29 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { effectiveTier } from "./entitlement";
 import { z } from "zod";
 
 export const getSubscription = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data } = await context.supabase
-      .from("profiles")
-      .select(
-        "subscription_status, entitlement, current_plan, trial_start, trial_end, premium_expiration, revenuecat_customer_id, last_verification",
-      )
-      .eq("user_id", context.userId)
-      .single()
-      .throwOnError();
-    if (!data) throw new Error("Profile not found");
-    // Compute access at request time without a stale read overwriting a concurrent purchase.
-    if (effectiveTier(data) === "free") {
-      return {
-        ...data,
-        entitlement: "free",
-        subscription_status: data.entitlement === "premium" ? "expired" : data.subscription_status,
-      };
-    }
-    return data;
+    const { getBillingSnapshot } = await import("./billing-db.server");
+    return getBillingSnapshot(context.userId);
   });
 
 export const startTrial = createServerFn({ method: "POST" })

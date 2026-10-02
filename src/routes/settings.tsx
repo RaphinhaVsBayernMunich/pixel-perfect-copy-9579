@@ -1,4 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { requestReminderPermission } from "@/lib/notifications";
+import { isNative } from "@/lib/native/platform";
+import { downloadText } from "@/lib/premium/import-export";
+import { useAuth } from "@/lib/auth-store";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   Bell,
@@ -16,8 +20,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { SubscriptionSection } from "@/components/subscription/subscription-section";
-import { useSettings, type LanguagePref, type SoundPack, type ThemePref } from "@/lib/settings-store";
-import { exportUserData, deleteAccount } from "@/lib/data.functions";
+import {
+  useSettings,
+  type LanguagePref,
+  type SoundPack,
+  type ThemePref,
+} from "@/lib/settings-store";
+import { exportUserData, deleteAccount, clearHealthSummary } from "@/lib/data.functions";
 import { track } from "@/lib/analytics";
 import { APP_CONFIG } from "@/lib/config/admin-config";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,9 +36,15 @@ export const Route = createFileRoute("/settings")({
   head: () => ({
     meta: [
       { title: "Settings — QuestOS" },
-      { name: "description", content: "Manage your QuestOS subscription, notifications, AI, appearance and data." },
+      {
+        name: "description",
+        content: "Manage your QuestOS subscription, notifications, AI, appearance and data.",
+      },
       { property: "og:title", content: "Settings — QuestOS" },
-      { property: "og:description", content: "Manage your QuestOS subscription, notifications, AI, appearance and data." },
+      {
+        property: "og:description",
+        content: "Manage your QuestOS subscription, notifications, AI, appearance and data.",
+      },
     ],
   }),
   component: SettingsPage,
@@ -39,9 +54,7 @@ function SettingsPage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-5 pt-8 pb-16 md:px-10 md:pt-12">
       <header className="mb-8">
-        <p className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
-          Preferences
-        </p>
+        <p className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground">Preferences</p>
         <h1 className="mt-1 font-display text-3xl font-semibold">Settings</h1>
       </header>
 
@@ -52,8 +65,26 @@ function SettingsPage() {
         <NotificationsCard />
         <AiPreferencesCard />
         <AppearanceCard />
+        <Link to="/premium" className="block text-primary">
+          Premium themes, focus sounds and widgets →
+        </Link>
         <LanguageCard />
         <DataCard />
+        <Button
+          variant="outline"
+          onClick={() => {
+            if (
+              window.confirm(
+                "Remove the saved health summary from this QuestOS account? Device Health Connect data stays unchanged.",
+              )
+            )
+              void clearHealthSummary({ data: { confirm: "CLEAR_HEALTH" } })
+                .then(() => toast.success("Saved health summary removed."))
+                .catch(() => toast.error("Health summary was not removed. Retry."));
+          }}
+        >
+          Clear saved health summary
+        </Button>
         <LegalCard />
         <DangerZone />
       </div>
@@ -93,14 +124,48 @@ function NotificationsCard() {
   const patch = useSettings((s) => s.patch);
 
   const rows: { key: keyof typeof settings.notifications; label: string; description: string }[] = [
-    { key: "trialReminders", label: "Trial reminders", description: "Nudges before your trial ends." },
-    { key: "billing", label: "Billing alerts", description: "Renewals, failures, cancellations." },
+    {
+      key: "trialReminders",
+      label: "Trial reminders",
+      description: "Nudges before your trial ends.",
+    },
+    {
+      key: "billing",
+      label: "Billing alerts",
+      description: "In-app alerts when verified subscription status changes.",
+    },
     { key: "achievements", label: "Achievements", description: "New trophies and level-ups." },
-    { key: "dailyBrief", label: "Daily brief", description: "Morning AI brief when you open the app." },
+    {
+      key: "dailyBrief",
+      label: "Daily check-in reminder",
+      description: "Android local reminder at 8 am to open your Coach; no automatic AI request.",
+    },
   ];
 
   return (
-    <Card icon={<Bell className="h-4 w-4" />} title="Notifications" description="Choose which alerts QuestOS can send.">
+    <Card
+      icon={<Bell className="h-4 w-4" />}
+      title="Notifications"
+      description="Local device reminders and in-app alerts. Remote push is not enabled."
+    >
+      {isNative() && (
+        <Button
+          onClick={async () => {
+            try {
+              const result = await requestReminderPermission();
+              toast.info(
+                result === "granted"
+                  ? "Device reminders enabled."
+                  : "Notifications are disabled. Enable QuestOS notifications in Android Settings.",
+              );
+            } catch {
+              toast.error("Notification permission could not be checked.");
+            }
+          }}
+        >
+          Enable device reminders
+        </Button>
+      )}
       <div className="divide-y divide-hairline">
         {rows.map((row) => (
           <label key={row.key} className="flex items-center justify-between gap-4 py-3">
@@ -110,7 +175,9 @@ function NotificationsCard() {
             </div>
             <Switch
               checked={settings.notifications[row.key]}
-              onCheckedChange={(v) => patch({ notifications: { ...settings.notifications, [row.key]: v } })}
+              onCheckedChange={(v) =>
+                patch({ notifications: { ...settings.notifications, [row.key]: v } })
+              }
             />
           </label>
         ))}
@@ -123,17 +190,25 @@ function AiPreferencesCard() {
   const settings = useSettings((s) => s.settings);
   const set = useSettings((s) => s.set);
   return (
-    <Card icon={<Bot className="h-4 w-4" />} title="AI Coach" description="How your Coach speaks and remembers.">
+    <Card
+      icon={<Bot className="h-4 w-4" />}
+      title="AI Coach"
+      description="How your Coach speaks and remembers."
+    >
       <div className="space-y-4">
         <div>
-          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">Tone</p>
+          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Tone
+          </p>
           <div className="flex gap-2">
             {(["warm", "sharp", "playful"] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => set("ai", { ...settings.ai, tone: t })}
                 className={`rounded-lg border px-3 py-1.5 text-sm capitalize ${
-                  settings.ai.tone === t ? "border-primary bg-primary/10 text-primary" : "border-hairline"
+                  settings.ai.tone === t
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-hairline"
                 }`}
               >
                 {t}
@@ -141,16 +216,9 @@ function AiPreferencesCard() {
             ))}
           </div>
         </div>
-        <label className="flex items-center justify-between gap-4 border-t border-hairline pt-4">
-          <div>
-            <p className="text-sm font-medium">Memory</p>
-            <p className="text-xs text-muted-foreground">Let the Coach remember patterns across sessions.</p>
-          </div>
-          <Switch
-            checked={settings.ai.memoryEnabled}
-            onCheckedChange={(v) => set("ai", { ...settings.ai, memoryEnabled: v })}
-          />
-        </label>
+        <Link to="/premium" className="block text-primary">
+          Manage AI Memory and Premium tools →
+        </Link>
         <p className="rounded-lg bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
           Daily AI limit — Free: {APP_CONFIG.aiQuota.free} · Trial: {APP_CONFIG.aiQuota.trial} ·
           Premium: {APP_CONFIG.aiQuota.premium ?? "unlimited"}
@@ -166,22 +234,29 @@ function AppearanceCard() {
   const themes: ThemePref[] = ["dark", "light", "system"];
   const sounds: { id: SoundPack; label: string }[] = [
     { id: "default", label: "Default" },
-    { id: "gta_sa", label: "GTA SA Passed" },
     { id: "minimal", label: "Minimal" },
     { id: "silent", label: "Silent" },
   ];
   return (
-    <Card icon={<Palette className="h-4 w-4" />} title="Appearance" description="Theme and sound pack.">
+    <Card
+      icon={<Palette className="h-4 w-4" />}
+      title="Appearance"
+      description="Theme and sound pack."
+    >
       <div className="space-y-4">
         <div>
-          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">Theme</p>
+          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Theme
+          </p>
           <div className="flex gap-2">
             {themes.map((t) => (
               <button
                 key={t}
                 onClick={() => set("theme", t)}
                 className={`rounded-lg border px-3 py-1.5 text-sm capitalize ${
-                  settings.theme === t ? "border-primary bg-primary/10 text-primary" : "border-hairline"
+                  settings.theme === t
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-hairline"
                 }`}
               >
                 {t}
@@ -199,7 +274,9 @@ function AppearanceCard() {
                 key={s.id}
                 onClick={() => set("soundPack", s.id)}
                 className={`rounded-lg border px-3 py-1.5 text-sm ${
-                  settings.soundPack === s.id ? "border-primary bg-primary/10 text-primary" : "border-hairline"
+                  settings.soundPack === s.id
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-hairline"
                 }`}
               >
                 {s.label}
@@ -215,16 +292,13 @@ function AppearanceCard() {
 function LanguageCard() {
   const settings = useSettings((s) => s.settings);
   const set = useSettings((s) => s.set);
-  const languages: { id: LanguagePref; label: string }[] = [
-    { id: "en", label: "English" },
-    { id: "es", label: "Español" },
-    { id: "fr", label: "Français" },
-    { id: "de", label: "Deutsch" },
-    { id: "pt", label: "Português" },
-    { id: "ja", label: "日本語" },
-  ];
+  const languages: { id: LanguagePref; label: string }[] = [{ id: "en", label: "English" }];
   return (
-    <Card icon={<Globe className="h-4 w-4" />} title="Language" description="Translations roll out progressively.">
+    <Card
+      icon={<Globe className="h-4 w-4" />}
+      title="Language"
+      description="QuestOS currently supports English."
+    >
       <select
         value={settings.language}
         onChange={(e) => set("language", e.target.value as LanguagePref)}
@@ -249,18 +323,18 @@ function DataCard() {
   async function handleExport() {
     setExporting(true);
     try {
+      const owner = useAuth.getState().user?.id;
       const data = await exportUserData();
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `questos-export-${Date.now()}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
+      if (owner !== useAuth.getState().user?.id) return;
+      await downloadText(
+        `questos-export-${Date.now()}.json`,
+        JSON.stringify(data, null, 2),
+        "application/json",
+      );
       track("data_exported");
-      toast.success("Export downloaded.");
-    } catch (e: any) {
-      toast.error(e?.message ?? "Export failed");
+      toast.success("Export is ready to save or share.");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Export failed");
     } finally {
       setExporting(false);
     }
@@ -318,7 +392,10 @@ function LegalCard() {
           Terms of Service
         </a>
         <span className="text-muted-foreground">·</span>
-        <a href={`mailto:${APP_CONFIG.legal.supportEmail}`} className="text-primary hover:underline">
+        <a
+          href={`mailto:${APP_CONFIG.legal.supportEmail}`}
+          className="text-primary hover:underline"
+        >
           Support
         </a>
       </div>
@@ -339,8 +416,8 @@ function DangerZone() {
       toast.success("Account deleted. Signing out…");
       await supabase.auth.signOut();
       window.location.href = "/";
-    } catch (e: any) {
-      toast.error(e?.message ?? "Deletion failed");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Deletion failed");
       setDeleting(false);
     }
   }
@@ -354,8 +431,8 @@ function DangerZone() {
         <div className="flex-1">
           <h2 className="font-display text-base font-semibold text-destructive">Delete account</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Permanently removes your account, quests, legacy, achievements and settings.
-            This cannot be undone.
+            Permanently removes your account, quests, legacy, achievements and settings. This cannot
+            be undone.
           </p>
         </div>
       </div>

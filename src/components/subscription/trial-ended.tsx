@@ -1,3 +1,4 @@
+import { useAuth } from "@/lib/auth-store";
 /**
  * Trial-ended screen.
  *
@@ -15,21 +16,25 @@ import { useUI } from "@/lib/ui-store";
 const SEEN_KEY = "questos.trial_ended_seen";
 
 export function TrialEndedGate() {
+  const userId = useAuth((s) => s.user?.id);
+  const trialEnd = useSubscription((s) => s.trialEnd);
+  const billingProvider = useSubscription((s) => s.billingProvider);
   const status = useSubscription((s) => s.status);
   const loaded = useSubscription((s) => s.loaded);
   const openPaywall = useUI((s) => s.openPaywall);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (!loaded) return;
+    setOpen(false);
+    if (!loaded || !userId || !trialEnd || billingProvider) return;
     if (status !== "expired") return;
     if (typeof localStorage === "undefined") return;
-    const seenAt = localStorage.getItem(SEEN_KEY);
+    const seenAt = localStorage.getItem(`${SEEN_KEY}:${userId}:${trialEnd}`);
     // Show once per week at most.
     if (seenAt && Date.now() - Number(seenAt) < 7 * 24 * 60 * 60 * 1000) return;
     setOpen(true);
-    localStorage.setItem(SEEN_KEY, String(Date.now()));
-  }, [loaded, status]);
+    localStorage.setItem(`${SEEN_KEY}:${userId}:${trialEnd}`, String(Date.now()));
+  }, [loaded, status, userId, trialEnd, billingProvider]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -41,9 +46,8 @@ export function TrialEndedGate() {
           Your free trial has ended.
         </DialogTitle>
         <DialogDescription className="mt-2 text-sm">
-          Continue your journey with QuestOS Premium. All your quests,
-          achievements, projects and history remain available — nothing has
-          been removed.
+          Continue your journey with QuestOS Premium. All your quests, achievements, projects and
+          history remain available — nothing has been removed.
         </DialogDescription>
         <div className="mt-5 flex flex-col gap-2">
           <Button
