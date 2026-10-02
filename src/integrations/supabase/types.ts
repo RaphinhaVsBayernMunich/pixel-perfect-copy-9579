@@ -14,6 +14,21 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_sync_revisions: {
+        Row: {
+          revision: number
+          user_id: string
+        }
+        Insert: {
+          revision?: number
+          user_id: string
+        }
+        Update: {
+          revision?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_requests: {
         Row: {
           completed_at: string | null
@@ -116,6 +131,171 @@ export type Database = {
         }
         Relationships: []
       }
+      assistant_proposals: {
+        Row: {
+          actions: Json
+          applied_at: string | null
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          actions: Json
+          applied_at?: string | null
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          actions?: Json
+          applied_at?: string | null
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      billing_accounts: {
+        Row: {
+          customer_id: string
+          environment: string
+          provider: string
+          user_id: string
+        }
+        Insert: {
+          customer_id: string
+          environment: string
+          provider: string
+          user_id: string
+        }
+        Update: {
+          customer_id?: string
+          environment?: string
+          provider?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      billing_checkout_keys: {
+        Row: {
+          environment: string
+          expires_at: string
+          request_key: string
+          user_id: string
+        }
+        Insert: {
+          environment: string
+          expires_at?: string
+          request_key?: string
+          user_id: string
+        }
+        Update: {
+          environment?: string
+          expires_at?: string
+          request_key?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      billing_configuration: {
+        Row: {
+          environment: string
+          id: boolean
+        }
+        Insert: {
+          environment: string
+          id?: boolean
+        }
+        Update: {
+          environment?: string
+          id?: boolean
+        }
+        Relationships: []
+      }
+      billing_events: {
+        Row: {
+          environment: string
+          event_id: string
+          provider: string
+          received_at: string
+        }
+        Insert: {
+          environment: string
+          event_id: string
+          provider: string
+          received_at?: string
+        }
+        Update: {
+          environment?: string
+          event_id?: string
+          provider?: string
+          received_at?: string
+        }
+        Relationships: []
+      }
+      billing_request_limits: {
+        Row: {
+          attempts: number
+          user_id: string
+          window_start: string
+        }
+        Insert: {
+          attempts?: number
+          user_id: string
+          window_start: string
+        }
+        Update: {
+          attempts?: number
+          user_id?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
+      billing_subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean
+          customer_id: string
+          environment: string
+          event_at: string
+          event_rank: number
+          failure_since: string | null
+          paid_until: string
+          product_id: string
+          provider: string
+          status: string
+          subscription_id: string
+          user_id: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean
+          customer_id: string
+          environment: string
+          event_at: string
+          event_rank?: number
+          failure_since?: string | null
+          paid_until: string
+          product_id: string
+          provider: string
+          status: string
+          subscription_id: string
+          user_id: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean
+          customer_id?: string
+          environment?: string
+          event_at?: string
+          event_rank?: number
+          failure_since?: string | null
+          paid_until?: string
+          product_id?: string
+          provider?: string
+          status?: string
+          subscription_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       installations: {
         Row: {
           fingerprint: string
@@ -185,6 +365,27 @@ export type Database = {
           quest_id?: string | null
           user_id?: string
           xp_earned?: number | null
+        }
+        Relationships: []
+      }
+      premium_documents: {
+        Row: {
+          kind: string
+          updated_at: string
+          user_id: string
+          value: Json
+        }
+        Insert: {
+          kind: string
+          updated_at?: string
+          user_id: string
+          value: Json
+        }
+        Update: {
+          kind?: string
+          updated_at?: string
+          user_id?: string
+          value?: Json
         }
         Relationships: []
       }
@@ -379,6 +580,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_billing_batch: { Args: { _events: Json }; Returns: undefined }
+      apply_billing_event: { Args: { _event: Json }; Returns: boolean }
+      billing_checkout_key: {
+        Args: { _environment: string; _user_id: string }
+        Returns: Json
+      }
+      confirm_assistant_plan: {
+        Args: { _proposal_id: string; _user_id: string }
+        Returns: undefined
+      }
       finish_ai_request: {
         Args: {
           _error_code: string
@@ -393,6 +604,7 @@ export type Database = {
         Args: { _feature: string; _user_id: string }
         Returns: number
       }
+      read_account_save: { Args: never; Returns: Json }
       register_signup_trial: {
         Args: { _fingerprint: string; _platform: string; _user_id: string }
         Returns: Json
@@ -406,6 +618,12 @@ export type Database = {
           _user_id: string
         }
         Returns: Json
+      }
+      subscription_snapshot: { Args: { _user_id: string }; Returns: Json }
+      take_billing_request: { Args: { _user_id: string }; Returns: undefined }
+      write_account_save: {
+        Args: { p_revision: number; p_save: Json }
+        Returns: number
       }
     }
     Enums: {
