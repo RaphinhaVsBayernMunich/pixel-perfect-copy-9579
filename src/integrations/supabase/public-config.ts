@@ -1,4 +1,10 @@
-// Public project coordinates retained from the generated configuration. RLS protects data.
-// These are intentionally public; private service credentials must never be added here.
-export const PUBLIC_SUPABASE_URL = "https://upcwdcumpxxqqxewdjii.supabase.co";
-export const PUBLIC_SUPABASE_KEY = "sb_publishable_BukdTF8Sago01DNs5u9uwg_NW5jdpPY";
+// Owner-controlled QuestOS destination. Only browser-safe coordinates belong here.
+export const PUBLIC_SUPABASE_URL = "https://kqsoccbtookvwelctyhm.supabase.co";
+export const PUBLIC_SUPABASE_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtxc29jY2J0b29rdndlbGN0eWhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA5NTM2NTQsImV4cCI6MjEwNjUyOTY1NH0.4UCwqktVtZqfIHv3EBugVRAwkqnsbHSGtWTLAePNS9k";
+export function requireQuestosSupabaseUrl(value: string): void {
+  if (value !== PUBLIC_SUPABASE_URL)
+    throw new Error(
+      "QuestOS requires its owner-controlled Supabase project. Update stale environment configuration.",
+    );
+}

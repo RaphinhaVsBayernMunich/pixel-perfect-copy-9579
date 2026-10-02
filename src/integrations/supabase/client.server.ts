@@ -5,6 +5,7 @@ import "@tanstack/react-start/server-only";
 // For user-authenticated queries (with RLS), use the auth middleware instead.
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
+import { requireQuestosSupabaseUrl } from "./public-config";
 
 function isNewSupabaseApiKey(value: string): boolean {
   return value.startsWith("sb_publishable_") || value.startsWith("sb_secret_");
@@ -47,6 +48,7 @@ function createSupabaseAdminClient() {
     throw new Error(message);
   }
 
+  requireQuestosSupabaseUrl(SUPABASE_URL);
   return createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     global: {
       fetch: createSupabaseFetch(SUPABASE_SERVICE_ROLE_KEY),

@@ -1,5 +1,7 @@
 # QuestOS release operations — 2026-10-02
 
+Stage 2 update: the owner-controlled Supabase schema, application rows and Google Auth identity have now been transferred to `kqsoccbtookvwelctyhm`. See [the Stage 2 migration record](supabase-stage2.md) for authoritative counts/security checks and the remaining private Google provider setup. The transfer instructions below describe the earlier stage and must not be rerun against either project.
+
 ## What is ready and what is not
 
 The React/TanStack/Supabase/Capacitor architecture is preserved. Backend billing and quotas are authoritative. Annual purchase UI is displayed only after provider catalog validation. The code includes a native Google Play provider, a Stripe web provider, premium workspace, calendar/Health Connect bridge, account-scoped storage, and conflict-aware atomic sync.
@@ -34,7 +36,7 @@ Use your verified owner-controlled Cloudflare Worker secret manager and `.env.ex
 - `REVENUECAT_APP_ID`: exact RevenueCat app identifier from the Android app configuration.
 - `REVENUECAT_WEBHOOK_AUTH`: a random secret; webhook dashboard Authorization value must be `Bearer <that-secret>`.
 
-Public build variables: `VITE_PAYMENTS_CLIENT_TOKEN` is the matching Stripe `pk_live_...`/`pk_test_...`; `VITE_REVENUECAT_ANDROID_KEY` is the Android `goog_...` SDK key. Set through the hosting build environment and rebuild. The existing public Supabase URL/publishable key are preserved in `src/integrations/supabase/public-config.ts` so removing tracked `.env` files does not break login. VITE overrides remain supported. Public keys are not service-role credentials. `.env` and `.env.development` remain locally but are untracked.
+Public build variables: `VITE_PAYMENTS_CLIENT_TOKEN` is the matching Stripe `pk_live_...`/`pk_test_...`; `VITE_REVENUECAT_ANDROID_KEY` is the Android `goog_...` SDK key. Set through the hosting build environment and rebuild. Public Supabase coordinates/key in `src/integrations/supabase/public-config.ts` now target the owner-controlled destination; stale project URL overrides are rejected. Public keys are not service-role credentials. `.env` and `.env.development` remain locally but are untracked.
 
 ## RevenueCat and Play setup (owner dashboard access required)
 
@@ -169,7 +171,7 @@ Cut over to the independent origin only after data/auth preservation and accepta
 
 ## Independent hosting and database cutover
 
-Official TanStack/Nitro Cloudflare output replaces the Lovable wrapper. Supabase OAuth and Stripe APIs are direct. Lovable auth, gateway and runtime dependencies are removed. Existing public Supabase fallback coordinates still point to the managed source project and preserve compatibility; full independence requires the transfer below.
+Official TanStack/Nitro Cloudflare output replaces the Lovable wrapper. Supabase OAuth and Stripe APIs are direct. Lovable auth, gateway and runtime dependencies are removed. Supabase fallback coordinates now target the owner destination. The following transfer steps are historical; use the Stage 2 record above and continue only with Stage 3 hosting after Google provider setup.
 
 1. Create/select a Supabase project in your own account. Use the supported Lovable Cloud export and Supabase restore process; there is no automatic ownership transfer. Preserve existing schema/data, user UUIDs, Auth identities/password records, billing/trial IDs, quota history and storage objects if present. Keep exports private. Do not reset/delete the source or print password records.
 2. Restore into an isolated destination and compare counts/checksums, UUIDs, auth identities, RLS/grants and migration history. Test an existing account's login and profile edits. Verify denied billing writes, finite entitlements, quota and UUID quest persistence. The two migrations above already exist in the source export; do not rerun duplicate migration histories.

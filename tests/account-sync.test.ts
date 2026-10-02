@@ -6,7 +6,7 @@ const a = "11000000-0000-4000-8000-000000000001",
   b = "11000000-0000-4000-8000-000000000002";
 beforeAll(async () => {
   await db.exec(
-    `CREATE ROLE anon;CREATE ROLE authenticated;CREATE ROLE service_role BYPASSRLS;CREATE SCHEMA auth;CREATE TABLE auth.users(id uuid PRIMARY KEY,email text,raw_user_meta_data jsonb DEFAULT '{}');CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql AS $$SELECT nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;GRANT USAGE ON SCHEMA auth TO authenticated,anon,service_role;`,
+    `CREATE ROLE anon;CREATE ROLE authenticated;CREATE ROLE service_role BYPASSRLS;CREATE SCHEMA auth;CREATE TABLE auth.users(id uuid PRIMARY KEY,email text,raw_user_meta_data jsonb DEFAULT '{}');CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql AS $$SELECT nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;GRANT USAGE ON SCHEMA auth TO authenticated,anon,service_role;ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO anon,authenticated;`,
   );
   for (const f of (await readdir("supabase/migrations")).filter((f) => f.endsWith(".sql")).sort())
     await db.exec(await readFile("supabase/migrations/" + f, "utf8"));
@@ -15,6 +15,16 @@ beforeAll(async () => {
   await db.exec("SET ROLE authenticated");
 }, 30000);
 afterAll(() => db.close());
+test("destination removes platform default anonymous writes and server-table writes", async () => {
+  const result = await db.query<{ safe: boolean }>(`SELECT
+    NOT EXISTS (SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+      WHERE n.nspname='public' AND c.relkind='r'
+      AND has_table_privilege('anon',c.oid,'INSERT,UPDATE,DELETE'))
+    AND NOT has_table_privilege('authenticated','public.ai_usage','UPDATE')
+    AND NOT has_table_privilege('authenticated','public.installations','UPDATE')
+    AND NOT has_table_privilege('authenticated','public.subscription_events','INSERT') safe`);
+  expect(result.rows[0].safe).toBe(true);
+});
 async function read() {
   return (
     await db.query<{
