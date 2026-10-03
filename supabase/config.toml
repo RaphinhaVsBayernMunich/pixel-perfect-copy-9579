@@ -1,1 +1,5 @@
 project_id = "kqsoccbtookvwelctyhm"
+
+[auth]
+site_url = "https://questos.questos-1fd92776.workers.dev"
+additional_redirect_urls = ["https://questos.questos-1fd92776.workers.dev", "app.questos.android://auth/callback"]

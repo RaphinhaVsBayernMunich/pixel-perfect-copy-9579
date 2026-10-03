@@ -1,8 +1,9 @@
 import { validateRuntimeOrigin } from "./scripts/runtime-origin.mjs";
 import type { CapacitorConfig } from "@capacitor/cli";
+import deployment from "./wrangler.json";
 // TanStack's server functions need the deployed HTTPS runtime. The bundled shell
 // handles offline startup; no secret or service-role key belongs in this config.
-const rawOrigin = process.env.CAPACITOR_SERVER_URL;
+const rawOrigin = process.env.CAPACITOR_SERVER_URL || deployment.vars.APP_ORIGIN;
 const origin = rawOrigin ? validateRuntimeOrigin(rawOrigin) : undefined;
 const config: CapacitorConfig = {
   appId: "app.questos.android",

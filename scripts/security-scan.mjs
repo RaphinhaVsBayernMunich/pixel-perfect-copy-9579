@@ -14,7 +14,12 @@ function walk(root) {
     .readdirSync(root, { withFileTypes: true })
     .flatMap((d) => (d.isDirectory() ? walk(path.join(root, d.name)) : [path.join(root, d.name)]));
 }
-const built = [...walk("dist"), ...walk(".output"), ...walk("android/app/src/main/assets")];
+const built = [
+  ...walk("dist"),
+  ...walk(".output"),
+  ...walk("android/app/src/main/assets"),
+  ...walk("android/app/build/intermediates/assets"),
+];
 const findings = [];
 let count = 0;
 const patterns = [
@@ -25,12 +30,21 @@ const patterns = [
   ],
 ];
 const extensions =
-  /\.(?:[cm]?[jt]sx?|json|html|css|sql|md|xml|gradle|properties|toml|yml|yaml|txt|env|example|template|map)$/;
+  /\.(?:[cm]?[jt]sx?|json|html|css|sql|md|xml|gradle|properties|toml|yml|yaml|txt|env|example|template|map|ps1)$/;
 for (const file of new Set([...source, ...built])) {
   if (!fs.existsSync(file) || !extensions.test(file) || fs.statSync(file).size > 30000000) continue;
   const content = fs.readFileSync(file, "utf8");
   count++;
   for (const [kind, pattern] of patterns) if (pattern.test(content)) findings.push({ file, kind });
+  const normalizedFile = file.replaceAll("\\", "/");
+  if (
+    (normalizedFile.startsWith(".output/public/") ||
+      normalizedFile.startsWith("dist/client/") ||
+      normalizedFile.startsWith("android/app/src/main/assets/") ||
+      normalizedFile.startsWith("android/app/build/intermediates/assets/")) &&
+    /lovable\.(?:app|dev)|id-preview|ioyqrhwddwikqzoxwrfe/.test(content)
+  )
+    findings.push({ file, kind: "stale-production-reference" });
   for (const match of content.matchAll(/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g))
     try {
       if (

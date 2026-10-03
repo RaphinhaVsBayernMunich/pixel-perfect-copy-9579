@@ -1,10 +1,18 @@
 {
- "$schema":"./node_modules/wrangler/config-schema.json",
- "name":"questos",
- "compatibility_date":"2026-10-02",
- "compatibility_flags":["nodejs_compat"],
- "workers_dev":true,
- "preview_urls":false,
- "vars":{"BILLING_ENVIRONMENT":"live"},
- "observability":{"enabled":false}
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "questos",
+  "compatibility_date": "2026-10-02",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "vars": {
+    "BILLING_ENVIRONMENT": "live",
+    "SUPABASE_URL": "https://kqsoccbtookvwelctyhm.supabase.co",
+    "SUPABASE_PUBLISHABLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtxc29jY2J0b29rdndlbGN0eWhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA5NTM2NTQsImV4cCI6MjEwNjUyOTY1NH0.4UCwqktVtZqfIHv3EBugVRAwkqnsbHSGtWTLAePNS9k",
+    "APP_ORIGIN": "https://questos.questos-1fd92776.workers.dev"
+  },
+  "observability": {
+    "enabled": false
+  },
+  "account_id": "1fd92776e215b9d1950228ce21ed4d1c"
 }

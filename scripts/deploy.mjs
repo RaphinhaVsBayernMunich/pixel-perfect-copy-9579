@@ -1,48 +1,32 @@
 import { validateRuntimeOrigin } from "./runtime-origin.mjs";
-const names = [
-  "SUPABASE_URL",
-  "SUPABASE_SERVICE_ROLE_KEY",
-  "SUPABASE_PUBLISHABLE_KEY",
-  "DEEPSEEK_API_KEY",
-  "INSTALL_FINGERPRINT_PEPPER",
-  "APP_ORIGIN",
-];
-const secrets = {};
-for (const name of names) {
-  if (!process.env[name])
-    throw new Error(name + " is required in your private deployment environment.");
-  secrets[name] = process.env[name];
-}
-validateRuntimeOrigin(secrets.APP_ORIGIN);
-for (const name of [
-  "STRIPE_LIVE_SECRET_KEY",
-  "STRIPE_SANDBOX_SECRET_KEY",
-  "PAYMENTS_LIVE_WEBHOOK_SECRET",
-  "PAYMENTS_SANDBOX_WEBHOOK_SECRET",
-  "REVENUECAT_SECRET_API_KEY",
-  "REVENUECAT_APP_ID",
-  "REVENUECAT_WEBHOOK_AUTH",
-])
-  if (process.env[name]) secrets[name] = process.env[name];
-if (secrets.INSTALL_FINGERPRINT_PEPPER.length < 32)
-  throw new Error("Trial pepper requires at least 32 characters. Preserve an existing pepper.");
-async function run(args, input) {
+const config = JSON.parse(await Bun.file("wrangler.json").text());
+const origin = validateRuntimeOrigin(config.vars?.APP_ORIGIN);
+if (config.account_id !== "1fd92776e215b9d1950228ce21ed4d1c" || config.name !== "questos")
+  throw new Error("Use the verified owner Cloudflare account and QuestOS Worker.");
+if (config.vars.SUPABASE_URL !== "https://kqsoccbtookvwelctyhm.supabase.co")
+  throw new Error("Use the owner-controlled QuestOS Supabase destination.");
+async function run(args, capture = false) {
   const p = Bun.spawn(args, {
-    stdin: input ? new Blob([input]) : "inherit",
-    stdout: "inherit",
+    stdin: "inherit",
+    stdout: capture ? "pipe" : "inherit",
     stderr: "inherit",
   });
-  const status = await p.exited;
-  if (status) throw new Error("Deployment command failed; no success is claimed.");
+  const output = capture ? await new Response(p.stdout).text() : undefined;
+  if (await p.exited) throw new Error("Deployment command failed; no success is claimed.");
+  return output;
 }
 await run(["bun", "run", "build"]);
-await run(
-  ["bun", "x", "wrangler", "secret", "bulk", "--config", ".output/server/wrangler.json"],
-  JSON.stringify(secrets),
+const existing = JSON.parse(
+  await run(["bun", "x", "wrangler", "secret", "list", "--config", "wrangler.json"], true),
 );
+for (const name of ["SUPABASE_SERVICE_ROLE_KEY", "DEEPSEEK_API_KEY", "INSTALL_FINGERPRINT_PEPPER"])
+  if (!existing.some((entry) => entry.name === name))
+    await run(["bun", "x", "wrangler", "secret", "put", name, "--config", "wrangler.json"]);
 await run(["bun", "x", "wrangler", "deploy", "--config", ".output/server/wrangler.json"]);
-console.log(
-  "Check " +
-    secrets.APP_ORIGIN +
-    "/api/health, then use that origin with bun run android:sync:prod.",
-);
+const r = await fetch(origin + "/api/health", {
+  redirect: "error",
+  signal: AbortSignal.timeout(15000),
+});
+if (!r.ok || (await r.json()).status !== "ready")
+  throw new Error("Production health check failed; Android sync remains blocked.");
+console.log("QuestOS production runtime verified: " + origin);
