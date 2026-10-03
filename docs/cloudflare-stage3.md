@@ -13,23 +13,21 @@ Production origin: https://questos.questos-1fd92776.workers.dev
 - Standard Capacitor Android sync passed with 11 plugins; generated native configuration uses the independent HTTPS origin, with cleartext disabled.
 - Secret and stale production reference scan passes across source and generated assets. No literal DeepSeek credentials were found, so no source deletion was needed.
 
-## Remaining blocker
+## Stage 3 complete
 
-Stage 3B fixed the request construction failure: Cloudflare does not support `redirect: "error"`. Direct authentication/model discovery now succeed using manual mode. A private completion test returned HTTP 402 (`AI_BALANCE`), so production readiness and guarded sync remain blocked on provider credit. See [Stage 3B](cloudflare-stage3b.md).
-
-The owner has revoked the compromised key and saved a replacement in Lovable. Save that replacement separately in the private Cloudflare Worker secret manager. A private local Wrangler entry helper is available: `scripts/configure-worker-secrets.ps1`; its default updates only `DEEPSEEK_API_KEY` and preserves the existing trial pepper. Never paste values into chat. Stage 3B verified the deployed key authenticates; provider credit is the remaining owner action. Do not claim Stage 3 complete until health and the guarded Android sync pass.
+Stage 3B fixed the unsupported Cloudflare redirect mode while preserving direct DeepSeek access. The owner funded the account; authenticated `deepseek-flash` completion, schema parsing and accounting passed in one minimal smoke test (63 input tokens, 9 output tokens). The existing DeepSeek key was unchanged. Production health is HTTP 200, `ready`, and `bun run android:sync:prod` passed with 11 plugins. Temporary test code and secret were removed. See [Stage 3B](cloudflare-stage3b.md).
 
 ## Verification
 
 - `bun install --frozen-lockfile`: passed, Bun 1.4.2.
 - `bun run typecheck`: passed.
-- `bun test`: 77 passed, 0 failed, 377 assertions across 10 files.
+- `bun test`: 80 passed, 0 failed, 418 assertions across 10 files.
 - `bun run build`: passed.
 - `bunx wrangler deploy --config .output/server/wrangler.json`: deployed successfully.
 - `bunx eslint capacitor.config.ts scripts/deploy.mjs scripts/android-sync-prod.mjs scripts/security-scan.mjs src/routes/api/health.ts src/lib/ai-readiness.server.ts tests/ai-readiness.test.ts`: passed.
 - `bun run lint`: repository-wide legacy lint backlog: 8,462 errors and 8 warnings. Focused changed-file lint passes.
 - `bunx cap sync android`: passed.
-- `bun run android:sync:prod`: blocked by failing production readiness, as intended.
+- `bun run android:sync:prod`: passed after provider credit became available.
 - `bun run security:scan`: passed, no findings.
 
-No Android signing, AAB, Play Console or RevenueCat dashboard changes were made. No additional database migrations were created in Stage 3. Full interactive Google login and authenticated AI feature acceptance remain unverified.
+No Android signing, AAB, Play Console or RevenueCat dashboard changes were made. No additional database migrations were created in Stage 3. Full interactive Google login and the four end-to-end user feature flows remain unverified; the direct provider smoke test passed.
