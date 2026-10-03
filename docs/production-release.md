@@ -6,7 +6,7 @@ Stage 2 complete (2026-10-03): the owner-controlled Supabase schema, application
 
 The React/TanStack/Supabase/Capacitor architecture is preserved. Backend billing and quotas are authoritative. Annual purchase UI is displayed only after provider catalog validation. The code includes a native Google Play provider, a Stripe web provider, premium workspace, calendar/Health Connect bridge, account-scoped storage, and conflict-aware atomic sync.
 
-Release verdict: **BLOCKED**. Stage 2 Supabase migration is complete. Stage 3 has deployed the independent Worker at https://questos.questos-1fd92776.workers.dev and updated production auth/native configuration. Stage 3B fixed DeepSeek connectivity and verified authentication/model discovery. Stage 3 is now complete: after the owner funded DeepSeek, the minimal completion test, schema parsing and accounting passed; production health returns HTTP 200 and guarded Android sync passed. The Cloudflare DeepSeek key was unchanged. See [Stage 3B](cloudflare-stage3b.md). See [Stage 3 deployment record](cloudflare-stage3.md). The Android debug APK builds with API 36/JDK 21; release signing and real device/provider acceptance belong to later stages.
+Release verdict: **BLOCKED**. Stage 2 Supabase migration is complete. Stage 3 has deployed the independent Worker at https://questos.questos-1fd92776.workers.dev and updated production auth/native configuration. Stage 3B fixed DeepSeek connectivity and verified authentication/model discovery. Stage 3 is now complete: after the owner funded DeepSeek, the minimal completion test, schema parsing and accounting passed; production health returns HTTP 200 and guarded Android sync passed. The Cloudflare DeepSeek key was unchanged. See [Stage 3B](cloudflare-stage3b.md). See [Stage 3 deployment record](cloudflare-stage3.md). Stage 4 signing/build is complete: the owner keystore signed the release AAB, cryptographic owner-certificate matching and bundletool validation passed. See [Stage 4 build record](android-stage4.md). Real device/provider acceptance and Play work remain later stages.
 
 ## Already applied database changes — DO NOT RERUN
 
@@ -113,18 +113,12 @@ TanStack server functions require a deployed HTTPS runtime: Capacitor loads that
 If no existing upload keystore exists, create one outside the repository (interactive password prompts; back it up securely):
 
 ```powershell
-New-Item -ItemType Directory -Force "$env:USERPROFILE\QuestOS-signing"
-keytool -genkeypair -v -keystore "$env:USERPROFILE\QuestOS-signing\questos-upload.jks" -alias questos-upload -keyalg RSA -keysize 2048 -validity 10000
-$env:QUESTOS_KEYSTORE_PATH = "$env:USERPROFILE\QuestOS-signing\questos-upload.jks"
-$env:QUESTOS_KEY_ALIAS = 'questos-upload'
-$env:QUESTOS_KEYSTORE_PASSWORD = [System.Net.NetworkCredential]::new('', (Read-Host 'Keystore password' -AsSecureString)).Password
-$env:QUESTOS_KEY_PASSWORD = [System.Net.NetworkCredential]::new('', (Read-Host 'Key password' -AsSecureString)).Password
-$env:QUESTOS_VERSION_CODE = '1' # Must exceed the highest Play version if the app already exists.
-$env:QUESTOS_VERSION_NAME = '1.0.0'
-.\gradlew.bat bundleRelease
+# Use the existing owner keystore; passwords are prompted privately.
+# Run in PowerShell 7; do not generate or replace the signing key.
+.\scripts\build-android-release.ps1
 ```
 
-Debug APK produced: `android/app/build/outputs/apk/debug/app-debug.apk`. Release AAB was not produced: signing and an independent runtime origin are missing. Its expected path is `android/app/build/outputs/bundle/release/app-release.aab`. Release uses R8/resource shrinking and plugin annotation keep rules; validate the optimized build on device. Do not replace an existing signing key. Keep passwords out of terminal history, Git and Gradle properties.
+Debug APK produced: `android/app/build/outputs/apk/debug/app-debug.apk`. Signed release AAB produced and verified: `android/app/build/outputs/bundle/release/app-release.aab`. The Stage 4 record contains exact paths and hashes. Release uses R8/resource shrinking and plugin annotation keep rules; validate the optimized build on device. Do not replace an existing signing key. Keep passwords out of terminal history, Git and Gradle properties.
 
 ## Play internal testing and disclosures
 
@@ -198,7 +192,7 @@ Automatic approval review rejected an attempted deployment-helper update involvi
 | `bun run security:scan` | 375 files, 0 findings, including web/native build assets |
 | `bunx cap sync android` | Pass; 11 plugins; no production origin configured |
 | `android/gradlew.bat -p android assembleDebug` with JDK 21/API 36 | Pass; 427 tasks, APK produced |
-| `android/gradlew.bat -p android bundleRelease` | Fails intentionally: release signing not configured; no AAB |
+| `android/gradlew.bat -p android bundleRelease --no-daemon` | Stage 4 pass; signed AAB verified against owner certificate and validated by bundletool |
 | `bun run preview --ip 127.0.0.1 --port 8787` and HTTP checks | Home/privacy/terms 200; health 503 configuration-required as expected |
 
 Provider test fixtures exercise Morning Brief, Goal to Quests, Reflection Prompt and Starter Quests through real orchestration/contracts with one completion each. They are not live DeepSeek tests. SQL tests use PGlite PostgreSQL and cannot certify real provider purchases or multi-connection production races. Hosted rollback-only authenticated-role checks also passed without modifying user rows.

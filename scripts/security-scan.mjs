@@ -30,7 +30,7 @@ const patterns = [
   ],
 ];
 const extensions =
-  /\.(?:[cm]?[jt]sx?|json|html|css|sql|md|xml|gradle|properties|toml|yml|yaml|txt|env|example|template|map|ps1)$/;
+  /\.(?:[cm]?[jt]sx?|json|html|css|sql|md|xml|gradle|properties|toml|yml|yaml|txt|env|example|template|map|ps1|java|kt|kts)$/;
 for (const file of new Set([...source, ...built])) {
   if (!fs.existsSync(file) || !extensions.test(file) || fs.statSync(file).size > 30000000) continue;
   const content = fs.readFileSync(file, "utf8");
@@ -63,9 +63,21 @@ for (const file of new Set([...source, ...built])) {
   )
     findings.push({ file, kind: "server-secret-reference-in-client" });
 }
+for (const file of source) {
+  if (!fs.existsSync(file) || !/\.(?:gradle|properties|java|kt|kts)$/.test(file)) continue;
+  const content = fs.readFileSync(file, "utf8");
+  if (/(?:storePassword|keyPassword)\s*(?:=|:)?\s*["'][^"']+["']/.test(content))
+    findings.push({ file, kind: "hardcoded-signing-password" });
+}
 const tracked = execFileSync("git", ["ls-files", "-z"], { encoding: "utf8" }).split("\0");
 for (const file of tracked)
   if (/(?:^|\/)\.env(?:\.|$)/.test(file) && !/(?:example|template)$/.test(file))
     findings.push({ file, kind: "tracked-environment-file" });
+for (const file of tracked)
+  if (
+    /\.(?:jks|keystore|p12)$/.test(file) ||
+    /(?:^|\/)(?:keystore|signing|gradle-signing)\.properties$/.test(file)
+  )
+    findings.push({ file, kind: "tracked-signing-material" });
 console.log(JSON.stringify({ filesScanned: count, findings }, null, 2));
 if (findings.length) process.exitCode = 1;
