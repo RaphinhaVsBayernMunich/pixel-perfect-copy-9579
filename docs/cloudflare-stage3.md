@@ -15,9 +15,9 @@ Production origin: https://questos.questos-1fd92776.workers.dev
 
 ## Remaining blocker
 
-Production health returns 503, `provider-unavailable`, safe reason `network`. The read-only DeepSeek model check fails from the Worker. This does not establish a provider authentication rejection, and authenticated AI generation has not passed production acceptance. The production Android sync guard intentionally rejects this unhealthy backend.
+Stage 3B fixed the request construction failure: Cloudflare does not support `redirect: "error"`. Direct authentication/model discovery now succeed using manual mode. A private completion test returned HTTP 402 (`AI_BALANCE`), so production readiness and guarded sync remain blocked on provider credit. See [Stage 3B](cloudflare-stage3b.md).
 
-The owner has revoked the compromised key and saved a replacement in Lovable. Save that replacement separately in the private Cloudflare Worker secret manager. A private local Wrangler entry helper is available: `scripts/configure-worker-secrets.ps1`; its default updates only `DEEPSEEK_API_KEY` and preserves the existing trial pepper. Never paste values into chat. Recheck `/api/health` after secure entry; investigate provider connectivity if it still fails. Do not claim Stage 3 complete until health and the guarded Android sync pass.
+The owner has revoked the compromised key and saved a replacement in Lovable. Save that replacement separately in the private Cloudflare Worker secret manager. A private local Wrangler entry helper is available: `scripts/configure-worker-secrets.ps1`; its default updates only `DEEPSEEK_API_KEY` and preserves the existing trial pepper. Never paste values into chat. Stage 3B verified the deployed key authenticates; provider credit is the remaining owner action. Do not claim Stage 3 complete until health and the guarded Android sync pass.
 
 ## Verification
 

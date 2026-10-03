@@ -6,7 +6,7 @@ Stage 2 complete (2026-10-03): the owner-controlled Supabase schema, application
 
 The React/TanStack/Supabase/Capacitor architecture is preserved. Backend billing and quotas are authoritative. Annual purchase UI is displayed only after provider catalog validation. The code includes a native Google Play provider, a Stripe web provider, premium workspace, calendar/Health Connect bridge, account-scoped storage, and conflict-aware atomic sync.
 
-Release verdict: **BLOCKED**. Stage 2 Supabase migration is complete. Stage 3 has deployed the independent Worker at https://questos.questos-1fd92776.workers.dev and updated production auth/native configuration. DeepSeek readiness still fails from the Worker, so guarded production sync and AI acceptance remain blocked. See [Stage 3 deployment record](cloudflare-stage3.md). The Android debug APK builds with API 36/JDK 21; release signing and real device/provider acceptance belong to later stages.
+Release verdict: **BLOCKED**. Stage 2 Supabase migration is complete. Stage 3 has deployed the independent Worker at https://questos.questos-1fd92776.workers.dev and updated production auth/native configuration. Stage 3B fixed DeepSeek connectivity and verified authentication/model discovery. The minimal completion test returned HTTP 402 (insufficient balance), so guarded production sync and AI acceptance remain blocked on provider credit. See [Stage 3B](cloudflare-stage3b.md). See [Stage 3 deployment record](cloudflare-stage3.md). The Android debug APK builds with API 36/JDK 21; release signing and real device/provider acceptance belong to later stages.
 
 ## Already applied database changes — DO NOT RERUN
 

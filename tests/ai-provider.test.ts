@@ -26,7 +26,7 @@ test("official server request uses JSON mode, disabled thinking and a bounded mo
       expect(body.max_tokens).toBe(512);
       expect(body.thinking).toEqual({ type: "disabled" });
       expect(body.response_format).toEqual({ type: "json_object" });
-      expect(options?.redirect).toBe("error");
+      expect(options?.redirect).toBe("manual");
       return completion();
     }) as typeof fetch,
   });
@@ -293,4 +293,23 @@ test("safe envelopes contain no raw errors or stacks and all features have finit
       throw new Error("raw server stack");
     }),
   ).rejects.toMatchObject({ code: "AI_NETWORK" });
+});
+
+test("redirect responses fail closed without following credentials or retrying", async () => {
+  for (const status of [301, 302, 303, 307, 308]) {
+    let calls = 0;
+    await expect(
+      generateDeepSeek("test-only", payload, {
+        fetch: (async (_url, options) => {
+          calls++;
+          expect(options?.redirect).toBe("manual");
+          return new Response("private redirect details", {
+            status,
+            headers: { location: "https://example.invalid/" },
+          });
+        }) as typeof fetch,
+      }),
+    ).rejects.toMatchObject({ code: "AI_UNAVAILABLE" });
+    expect(calls).toBe(1);
+  }
 });
