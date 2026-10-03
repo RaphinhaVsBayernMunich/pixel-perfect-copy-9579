@@ -1,6 +1,6 @@
 # QuestOS release operations — 2026-10-02
 
-Stage 2 update: the owner-controlled Supabase schema, application rows and Google Auth identity have now been transferred to `kqsoccbtookvwelctyhm`. See [the Stage 2 migration record](supabase-stage2.md) for authoritative counts/security checks and the remaining private Google provider setup. The transfer instructions below describe the earlier stage and must not be rerun against either project.
+Stage 2 complete (2026-10-03): the owner-controlled Supabase schema, application rows and Google Auth identity have been transferred to `kqsoccbtookvwelctyhm`; Google provider readiness is verified. See [the Stage 2 migration record](supabase-stage2.md) for authoritative counts/security checks. The transfer instructions below describe the earlier stage and must not be rerun against either project.
 
 ## What is ready and what is not
 

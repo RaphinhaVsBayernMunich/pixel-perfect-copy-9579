@@ -44,7 +44,7 @@ One Auth user and one Google identity were transferred with original UUIDs, prov
 
 Verified source/destination checksums: user selected stable fields `d002ea2c9760102ad536d03527308093`; full provider identity excluding generated email column `f5b1a6988ea2e76eb00587001c3ad5d7`. Counts both 1. No profile relink, new user ID, email-based ownership claim or weakened authentication was necessary.
 
-Destination public Auth settings return 200 and report Google disabled, email enabled. The only remaining auth prerequisite is owner Google OAuth configuration. Do not convert this Google-only account into a password account or fabricate credentials.
+On 2026-10-03, destination public Auth settings returned 200 with Google and email enabled. The owner configured a Web application OAuth client privately. Web and native PKCE authorization initiation both returned 302 to Google's endpoint with the exact destination callback and a valid client ID format. The Google Client Secret was neither requested nor inspected. This verifies initiation, not a completed interactive Google login. No password conversion or account relinking is required.
 
 ## Configuration
 
@@ -54,7 +54,7 @@ Destination public Auth settings return 200 and report Google disabled, email en
 - Server `SUPABASE_URL`: exact destination URL. Server `SUPABASE_PUBLISHABLE_KEY`: matching public key. Server `SUPABASE_SERVICE_ROLE_KEY`: destination privileged key, entered as a private server secret during Stage 3, never VITE-prefixed.
 - Browser `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`: safe destination coordinates in `.env.example` / public fallback.
 - Android callback remains `app.questos.android://auth/callback`. Web OAuth/email redirects use the running app origin. Once Stage 3 provides a real HTTPS origin, set Supabase Site URL and exact web redirect to that origin, retain the native callback and set matching server `APP_ORIGIN`. No Lovable auth callbacks are used.
-- Google UI flags remain off until provider/redirect setup is verified; enable `VITE_GOOGLE_AUTH_ENABLED` and `VITE_NATIVE_GOOGLE_AUTH_ENABLED` in the Stage 3 public build after the corresponding acceptance check.
+- Web Google UI is now enabled via `VITE_GOOGLE_AUTH_ENABLED=true`. Native Google remains gated until Stage 3 production redirect and device callback verification; then enable `VITE_NATIVE_GOOGLE_AUTH_ENABLED`. No Lovable redirect is required.
 
 ## Checks
 
@@ -67,15 +67,15 @@ Destination public Auth settings return 200 and report Google disabled, email en
 - `supabase db query --linked --project-ref kqsoccbtookvwelctyhm --file scripts/verify-destination.sql`: pass. Initial test incorrectly expected a userId field absent from the existing snapshot contract; fixed and rerun successfully, no data change.
 - `supabase migration list --linked --project-ref kqsoccbtookvwelctyhm`: all 13 local/remote versions match.
 - Source schema/content checks and destination content checks: pass.
-- No live Google login claim while provider credentials are absent.
+- Google provider readiness and authorization initiation verified on 2026-10-03. No completed interactive login claim.
 
-## Owner-only auth action
+## Owner-only auth action — completed
 
-Supabase Dashboard → project QuestOS (`kqsoccbtookvwelctyhm`) → Authentication → Sign In / Providers → Google. Enable and enter the owner's OAuth Client ID and Client Secret privately. Google Cloud → APIs & Services → Credentials → that OAuth client: authorize `https://kqsoccbtookvwelctyhm.supabase.co/auth/v1/callback`. Success: public Auth settings report Google enabled. Do not paste credentials in chat. Codex can recheck automatically after the owner saves.
+The owner configured Google in project `kqsoccbtookvwelctyhm` and authorized `https://kqsoccbtookvwelctyhm.supabase.co/auth/v1/callback`. Automated recheck confirms Google enabled and correct authorization initiation. No further Stage 2 credential or ownership action remains. Production Site URL/web redirect and native acceptance are Stage 3 tasks once the independent HTTPS origin exists.
 
 Automatic review rejected persisting a complete API-key response. The safer alternative selected only the public key in memory and succeeded; private key storage is not required.
 
 References: [Supabase backup/restore](https://supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore), [Supabase migrations](https://supabase.com/docs/guides/deployment/database-migrations).
 
-Stage 2 schema/data/auth-record transfer is complete. Stage 2 auth readiness remains blocked only by private Google provider configuration. No Cloudflare deployment or Android production URL change was performed.
+Stage 2 schema/data/auth-record transfer and provider readiness are complete. On 2026-10-03 all 18 application counts/checksums still match the source snapshot, rollback-only destination security checks pass, and all 13 migration versions match. No historical migration was rerun. No Cloudflare deployment or Android production URL change was performed.
 
