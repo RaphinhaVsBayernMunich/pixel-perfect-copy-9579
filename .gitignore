@@ -47,3 +47,10 @@ android/app/google-services.json
 
 # Local verified runtime origin
 .questos-runtime-origin
+
+# Private Google service-account credentials (templates stay reviewable).
+*.service-account.json
+*-service-account.json
+!*.service-account.example.json
+!*-service-account.example.json
+questos-510417-*.json

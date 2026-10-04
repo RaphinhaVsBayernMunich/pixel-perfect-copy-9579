@@ -102,3 +102,12 @@ test("native missing or malformed receipt identity fails closed", () => {
       parseRevenueCatRecords(receipt({ store_transaction_id: id }), context, now),
     ).toThrow();
 });
+
+test("internal Stripe plan ID cannot be accepted as a Google Play receipt", () => {
+  const data = receipt();
+  data.subscriber.entitlements.premium.product_identifier = "premium_annual";
+  const subscriptions = data.subscriber.subscriptions as Record<string, unknown>;
+  subscriptions.premium_annual = subscriptions["questos_premium_annual:annual"];
+  delete subscriptions["questos_premium_annual:annual"];
+  expect(parseRevenueCatRecords(data, context, now)).toHaveLength(0);
+});

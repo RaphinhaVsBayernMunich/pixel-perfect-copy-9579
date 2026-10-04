@@ -26,7 +26,7 @@ const patterns = [
   ["private-key", /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/],
   [
     "private-provider-key",
-    /\b(?:sk_(?:live|test)_[A-Za-z0-9]{16,}|sk-[A-Za-z0-9]{24,}|sb_secret_[A-Za-z0-9_-]{16,}|rk_live_[A-Za-z0-9]{16,})\b/,
+    /\b(?:sk_(?:live|test)_[A-Za-z0-9]{16,}|sk_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9]{24,}|sb_secret_[A-Za-z0-9_-]{16,}|rk_live_[A-Za-z0-9]{16,})\b/,
   ],
 ];
 const extensions =
@@ -57,7 +57,7 @@ for (const file of new Set([...source, ...built])) {
     (file.replaceAll("\\", "/").startsWith("dist/client/") ||
       file.includes("assets/public") ||
       file.replaceAll("\\", "/").startsWith(".output/public/")) &&
-    /DEEPSEEK_API_KEY|SUPABASE_SERVICE_ROLE_KEY|REVENUECAT_SECRET_API_KEY|PAYMENTS_LIVE_WEBHOOK_SECRET/.test(
+    /DEEPSEEK_API_KEY|SUPABASE_SERVICE_ROLE_KEY|REVENUECAT_SECRET_API_KEY|REVENUECAT_CONFIGURATION_API_KEY|REVENUECAT_WEBHOOK_AUTH|PAYMENTS_LIVE_WEBHOOK_SECRET/.test(
       content,
     )
   )

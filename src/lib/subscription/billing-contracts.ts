@@ -34,6 +34,9 @@ export type BillingEvent = z.infer<typeof billingEvent>;
 export const ANNUAL_PLAN = "premium_annual" as const;
 export const PLAY_PRODUCT = "questos_premium_annual";
 export const PLAY_BASE_PLAN = "annual";
+export const RC_ENTITLEMENT = "premium";
+export const RC_OFFERING = "default";
+export const RC_PACKAGE = "$rc_annual";
 export function isAnnualPlayProduct(id: string) {
   return id === PLAY_PRODUCT || id === `${PLAY_PRODUCT}:${PLAY_BASE_PLAN}`;
 }

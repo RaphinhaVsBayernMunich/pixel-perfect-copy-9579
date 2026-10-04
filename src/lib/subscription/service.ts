@@ -11,7 +11,7 @@ import { getSubscription, startTrial, listSubscriptionEvents } from "./subscript
 import { createStripePortal, reconcileBilling } from "./stripe-checkout.functions";
 import { getStripeEnvironment } from "../stripe";
 import { getInstallFingerprint } from "./install-id";
-import { accessTier } from "./billing-contracts";
+import { accessTier, PLAY_PRODUCT } from "./billing-contracts";
 import type {
   Offerings,
   PlanId,
@@ -253,7 +253,9 @@ export const useSubscription = create<Store>((set, get) => ({
   async openBillingPortal() {
     const version = identityVersion;
     if (get().billingProvider === "revenuecat") {
-      await openExternal("https://play.google.com/store/account/subscriptions");
+      await openExternal(
+        `https://play.google.com/store/account/subscriptions?sku=${PLAY_PRODUCT}&package=app.questos.android`,
+      );
       return;
     }
     try {

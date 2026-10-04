@@ -27,7 +27,7 @@ export function parseRevenueCatRecords(
   const events: BillingEvent[] = [];
   for (const [product, sub] of Object.entries(subscriber.subscriptions)) {
     if (
-      !(isAnnualPlayProduct(product) || product === "premium_annual") ||
+      !isAnnualPlayProduct(product) ||
       sub.store !== "play_store" ||
       sub.is_sandbox !== (env === "sandbox") ||
       !sub.expires_date

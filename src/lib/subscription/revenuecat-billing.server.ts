@@ -1,3 +1,4 @@
+import { fetchRevenueCatSubscriber } from "./revenuecat-http.server";
 import { parseRevenueCatRecords } from "./revenuecat-contracts";
 import "@tanstack/react-start/server-only";
 import { z } from "zod";
@@ -11,20 +12,9 @@ export async function revenueCatSnapshot(
   z.string().uuid().parse(userId);
   const key = process.env.REVENUECAT_SECRET_API_KEY;
   if (!key) throw new Error("Native billing verification is not configured");
-  const response = await fetch(
-    `https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(userId)}`,
-    {
-      headers: { Authorization: `Bearer ${key}` },
-      signal: AbortSignal.timeout(15000),
-      redirect: "error",
-    },
-  );
-  if (!response.ok) throw new Error("Native subscription verification failed");
-  const text = await response.text();
-  if (text.length > 262144) throw new Error("Invalid native subscription response");
-
+  const payload = await fetchRevenueCatSubscriber(userId, key);
   const env = configuredBillingEnvironment();
-  const events = parseRevenueCatRecords(JSON.parse(text), { userId, eventId, eventAt, env });
+  const events = parseRevenueCatRecords(payload, { userId, eventId, eventAt, env });
   const { error } = await billingDb
     .from("billing_accounts")
     .upsert(

@@ -19,6 +19,7 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
 import { Route as LegalTermsRouteImport } from './routes/legal.terms'
+import { Route as ApiBillingHealthRouteImport } from './routes/api/billing/health'
 import { Route as ApiPublicRevenuecatWebhookRouteImport } from './routes/api/public/revenuecat-webhook'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
@@ -72,6 +73,11 @@ const LegalTermsRoute = LegalTermsRouteImport.update({
   path: '/legal/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiBillingHealthRoute = ApiBillingHealthRouteImport.update({
+  id: '/api/billing/health',
+  path: '/api/billing/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicRevenuecatWebhookRoute =
   ApiPublicRevenuecatWebhookRouteImport.update({
     id: '/api/public/revenuecat-webhook',
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/api/health': typeof ApiHealthRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
+  '/api/billing/health': typeof ApiBillingHealthRoute
   '/api/public/revenuecat-webhook': typeof ApiPublicRevenuecatWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/api/health': typeof ApiHealthRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
+  '/api/billing/health': typeof ApiBillingHealthRoute
   '/api/public/revenuecat-webhook': typeof ApiPublicRevenuecatWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -125,6 +133,7 @@ export interface FileRoutesById {
   '/api/health': typeof ApiHealthRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
+  '/api/billing/health': typeof ApiBillingHealthRoute
   '/api/public/revenuecat-webhook': typeof ApiPublicRevenuecatWebhookRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/api/health'
     | '/legal/privacy'
     | '/legal/terms'
+    | '/api/billing/health'
     | '/api/public/revenuecat-webhook'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
     | '/api/health'
     | '/legal/privacy'
     | '/legal/terms'
+    | '/api/billing/health'
     | '/api/public/revenuecat-webhook'
     | '/api/public/payments/webhook'
   id:
@@ -169,6 +180,7 @@ export interface FileRouteTypes {
     | '/api/health'
     | '/legal/privacy'
     | '/legal/terms'
+    | '/api/billing/health'
     | '/api/public/revenuecat-webhook'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
@@ -184,6 +196,7 @@ export interface RootRouteChildren {
   ApiHealthRoute: typeof ApiHealthRoute
   LegalPrivacyRoute: typeof LegalPrivacyRoute
   LegalTermsRoute: typeof LegalTermsRoute
+  ApiBillingHealthRoute: typeof ApiBillingHealthRoute
   ApiPublicRevenuecatWebhookRoute: typeof ApiPublicRevenuecatWebhookRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
@@ -260,6 +273,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LegalTermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/billing/health': {
+      id: '/api/billing/health'
+      path: '/api/billing/health'
+      fullPath: '/api/billing/health'
+      preLoaderRoute: typeof ApiBillingHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/revenuecat-webhook': {
       id: '/api/public/revenuecat-webhook'
       path: '/api/public/revenuecat-webhook'
@@ -288,6 +308,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiHealthRoute: ApiHealthRoute,
   LegalPrivacyRoute: LegalPrivacyRoute,
   LegalTermsRoute: LegalTermsRoute,
+  ApiBillingHealthRoute: ApiBillingHealthRoute,
   ApiPublicRevenuecatWebhookRoute: ApiPublicRevenuecatWebhookRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
