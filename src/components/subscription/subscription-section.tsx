@@ -31,13 +31,15 @@ export function SubscriptionSection() {
       <dl className="my-5 grid grid-cols-2 gap-3 text-sm">
         <dt>Current plan</dt>
         <dd>
-          {state.currentPlan === "premium_annual"
-            ? "Premium Annual"
-            : state.currentPlan === "trial"
-              ? "7-day trial"
-              : "Free"}
+          {state.currentPlan === "premium_monthly"
+            ? "Premium Monthly"
+            : state.currentPlan === "premium_annual"
+              ? "Premium Annual"
+              : state.currentPlan === "trial"
+                ? "7-day trial"
+                : "Free"}
         </dd>
-        <dt>Verified annual price</dt>
+        <dt>Verified monthly price</dt>
         <dd>{price ?? "Unavailable — retry pricing"}</dd>
         <dt>Trial started / ends</dt>
         <dd>

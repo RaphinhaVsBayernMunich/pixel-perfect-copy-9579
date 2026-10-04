@@ -1,4 +1,4 @@
-import { ANNUAL_PLAN, PLAY_PRODUCT, PLAY_BASE_PLAN } from "./billing-contracts";
+import { MONTHLY_PLAN, PLAY_PRODUCT, PLAY_BASE_PLAN } from "./billing-contracts";
 import type { OfferingPackage, PlanId } from "./types";
 
 /**
@@ -16,19 +16,19 @@ export interface PlanDef {
   id: PlanId;
   productId: string; // store SKU (Google Play / App Store / Stripe price id)
   displayName: string;
-  period: "annual" | "monthly" | "lifetime";
+  period: "monthly" | "monthly" | "lifetime";
   defaultPriceString: string;
   featured?: boolean;
 }
 
 export const PLANS: PlanDef[] = [
   {
-    id: ANNUAL_PLAN,
-    // Google Play SKU. The web price lookup key is premium_annual.
+    id: MONTHLY_PLAN,
+    // Google Play SKU. The web price lookup key is premium_monthly.
     productId: PLAY_PRODUCT,
-    displayName: "Premium — Annual",
-    period: "annual",
-    defaultPriceString: "$19.99 / year",
+    displayName: "Premium — Monthly",
+    period: "monthly",
+    defaultPriceString: "$2.99 / month",
     featured: true,
   },
 ];

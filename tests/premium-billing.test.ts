@@ -296,3 +296,25 @@ test("authenticated direct inserts obey limits and ownership rules", async () =>
   await expect(quest("side", b)).rejects.toThrow();
   await db.exec("RESET ROLE");
 });
+
+// A verified legacy annual receipt can move to monthly without losing ownership or replay guards.
+test("monthly snapshots preserve legacy annual access and update the verified receipt product", async () => {
+  await apply(event({ productId: "premium_annual" }));
+  const legacy = await db.query<{ s: { current_plan: string } }>(
+    "SELECT subscription_snapshot($1) s",
+    [a],
+  );
+  expect(legacy.rows[0].s.current_plan).toBe("premium_annual");
+  await apply(event({ productId: "premium_monthly", eventAt: date(-0.009) }));
+  const monthly = await db.query<{ s: { current_plan: string } }>(
+    "SELECT subscription_snapshot($1) s",
+    [a],
+  );
+  expect(monthly.rows[0].s.current_plan).toBe("premium_monthly");
+  expect((await snapshot()).tier).toBe("premium");
+  expect((await snapshot(b)).tier).toBe("free");
+  const receipt = await db.query<{ product_id: string }>(
+    "SELECT product_id FROM billing_subscriptions WHERE subscription_id='sub_a'",
+  );
+  expect(receipt.rows[0].product_id).toBe("premium_monthly");
+});

@@ -30,7 +30,7 @@ function TermsPage() {
         QuestOS offers a 7-day free trial to new accounts, followed by an optional Premium
         subscription. Subscriptions renew automatically until cancelled from the billing portal
         (Web) or Google Play (Android). Refunds follow the policy of the billing provider. The app
-        trial does not charge you automatically; purchasing the annual plan is a separate action.
+        trial does not charge you automatically; purchasing the monthly plan is a separate action.
         Deleting a QuestOS account does not cancel a store subscription.
       </p>
 

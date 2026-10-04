@@ -53,7 +53,7 @@ export function createWebProvider(): SubscriptionProvider {
       const returnUrl = `${window.location.origin}/?checkout=success&session_id={CHECKOUT_SESSION_ID}`;
       const res = await createStripeCheckout({
         data: {
-          priceId: "premium_annual",
+          priceId: "premium_monthly",
           returnUrl,
           environment: getStripeEnvironment(),
         },

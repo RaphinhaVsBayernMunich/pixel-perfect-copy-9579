@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { billingEvent, type BillingEvent, isAnnualPlayProduct } from "./billing-contracts";
+import { billingEvent, type BillingEvent, isSupportedPlayProduct } from "./billing-contracts";
 const rcSubscription = z.object({
   expires_date: z.string().nullable(),
   billing_issues_detected_at: z.string().nullable().optional(),
@@ -27,7 +27,7 @@ export function parseRevenueCatRecords(
   const events: BillingEvent[] = [];
   for (const [product, sub] of Object.entries(subscriber.subscriptions)) {
     if (
-      !isAnnualPlayProduct(product) ||
+      !isSupportedPlayProduct(product) ||
       sub.store !== "play_store" ||
       sub.is_sandbox !== (env === "sandbox") ||
       !sub.expires_date

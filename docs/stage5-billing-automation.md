@@ -1,3 +1,5 @@
+> Historical annual setup report. Superseded by the monthly correction in docs/stage5-monthly-completion.md.
+
 # Stage 5 billing automation — 2026-10-04
 
 Status: **partial**. Repository fixes are tested and deployed. Google Play accepted the annual product; RevenueCat and Google CLI authentication remain unavailable. No purchase, production Play release, payment-profile replacement, private-key export, or AAB rebuild was performed.
@@ -16,16 +18,16 @@ Status: **partial**. Repository fixes are tested and deployed. Google Play accep
 
 ## Canonical mapping and actual dashboard state
 
-| Item | Value |
-| --- | --- |
-| Android application | `app.questos.android` |
-| Play subscription | `questos_premium_annual` |
-| Base plan | `annual` |
-| RevenueCat product | `questos_premium_annual:annual` |
-| Entitlement | `premium` |
-| Offering | `default` |
-| Package | `$rc_annual` |
-| US annual price | `$19.99` |
+| Item                | Value                           |
+| ------------------- | ------------------------------- |
+| Android application | `app.questos.android`           |
+| Play subscription   | `questos_premium_annual`        |
+| Base plan           | `annual`                        |
+| RevenueCat product  | `questos_premium_annual:annual` |
+| Entitlement         | `premium`                       |
+| Offering            | `default`                       |
+| Package             | `$rc_annual`                    |
+| US annual price     | `$19.99`                        |
 
 Google Play account `5438030713150798651`, app `4975142940532820904`: created the missing canonical subscription and activated the yearly auto-renewing base plan. US price is USD 19.99; Google converted regional prices. Grace is three days. No store trial offer was created. Activation was verified in the authenticated Play Console, not via the unauthenticated local API. The owner-reported BillDesk connectivity issue remains unresolved; it did not prevent this activation.
 
@@ -51,20 +53,20 @@ Current result: **exit 1, six failed checks** — production billing configurati
 
 The existing Worker was updated successfully, version `48144f1f-d0b9-452a-b430-dbceeb201265`. General production health is HTTP 200. Billing configuration health is HTTP 503 and exposes no secret values. Unauthenticated RevenueCat delivery is rejected.
 
-| Check | Result |
-| --- | --- |
-| `bun install --frozen-lockfile` | Pass; lockfile unchanged |
-| `bun run typecheck` | Pass after build regenerated the new route types |
-| `bun test` | 90 passed, 0 failed; 450 assertions across 13 files |
-| `bun run build` | Pass, including final deployment build |
-| `bun run security:scan` | Pass; 420 files scanned, 0 findings including this report |
-| `bun run android:sync:prod` | Pass; approved HTTPS origin, cleartext false, 11 plugins |
-| `bun run billing:verify` | Expected failure above; no purchase attempted |
-| Changed-file ESLint | Pass |
-| Google setup PowerShell parser | Pass; no infrastructure mutation executed |
-| Android release dependency insight | Pass; Billing 8.3.0 confirmed |
-| Original AAB signature verification | Pass; 466 payload entries signed by owner certificate |
-| APK/AAB packaged assets | 14 checked, 0 private-key/stale-runtime findings |
+| Check                               | Result                                                    |
+| ----------------------------------- | --------------------------------------------------------- |
+| `bun install --frozen-lockfile`     | Pass; lockfile unchanged                                  |
+| `bun run typecheck`                 | Pass after build regenerated the new route types          |
+| `bun test`                          | 90 passed, 0 failed; 450 assertions across 13 files       |
+| `bun run build`                     | Pass, including final deployment build                    |
+| `bun run security:scan`             | Pass; 420 files scanned, 0 findings including this report |
+| `bun run android:sync:prod`         | Pass; approved HTTPS origin, cleartext false, 11 plugins  |
+| `bun run billing:verify`            | Expected failure above; no purchase attempted             |
+| Changed-file ESLint                 | Pass                                                      |
+| Google setup PowerShell parser      | Pass; no infrastructure mutation executed                 |
+| Android release dependency insight  | Pass; Billing 8.3.0 confirmed                             |
+| Original AAB signature verification | Pass; 466 payload entries signed by owner certificate     |
+| APK/AAB packaged assets             | 14 checked, 0 private-key/stale-runtime findings          |
 
 Gradle dependency resolution reports a recommendation to update 8.14.3 to 8.14.4 and Gradle 9 deprecation warnings; the command succeeds. No unnecessary toolchain/native release changes were made.
 

@@ -10,7 +10,7 @@ import type {
 const eligible = (pkg: PurchasesPackage) =>
   pkg.identifier === RC_PACKAGE &&
   !!planByProductId(pkg.product.identifier) &&
-  pkg.product.subscriptionPeriod === "P1Y" &&
+  pkg.product.subscriptionPeriod === "P1M" &&
   pkg.product.defaultOption?.id === PLAY_BASE_PLAN &&
   pkg.product.defaultOption.isBasePlan &&
   Number.isFinite(pkg.product.price) &&
@@ -66,14 +66,14 @@ export function createNativeProvider(
         current: (offerings.all[RC_OFFERING]?.availablePackages ?? []).flatMap((pkg) => {
           const plan = planByProductId(pkg.product.identifier);
           return plan && eligible(pkg)
-            ? [toOfferingPackage(plan, pkg.product.priceString + " / year")]
+            ? [toOfferingPackage(plan, pkg.product.priceString + " / month")]
             : [];
         }),
       };
     },
     async purchase(planId) {
-      if (planId !== "premium_annual" || !planById(planId))
-        return { ok: false, entitlement: "free", error: "Only the annual plan is available." };
+      if (planId !== "premium_monthly" || !planById(planId))
+        return { ok: false, entitlement: "free", error: "Only the monthly plan is available." };
       const expected = owner;
       try {
         await assertIdentity(expected);
@@ -86,7 +86,7 @@ export function createNativeProvider(
           return {
             ok: false,
             entitlement: "free",
-            error: "The annual product is unavailable in Google Play.",
+            error: "The monthly product is unavailable in Google Play.",
           };
         await assertIdentity(expected);
         const result = await purchases.purchasePackage({ aPackage: pkg });

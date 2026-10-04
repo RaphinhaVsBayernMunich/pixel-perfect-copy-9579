@@ -4,7 +4,7 @@ Stage 2 complete (2026-10-03): the owner-controlled Supabase schema, application
 
 ## What is ready and what is not
 
-The React/TanStack/Supabase/Capacitor architecture is preserved. Backend billing and quotas are authoritative. Annual purchase UI is displayed only after provider catalog validation. The code includes a native Google Play provider, a Stripe web provider, premium workspace, calendar/Health Connect bridge, account-scoped storage, and conflict-aware atomic sync.
+The React/TanStack/Supabase/Capacitor architecture is preserved. Backend billing and quotas are authoritative. Monthly purchase UI is displayed only after provider catalog validation. The code includes a native Google Play provider, a Stripe web provider, premium workspace, calendar/Health Connect bridge, account-scoped storage, and conflict-aware atomic sync.
 
 Release verdict: **BLOCKED**. Stage 2 Supabase migration is complete. Stage 3 has deployed the independent Worker at https://questos.questos-1fd92776.workers.dev and updated production auth/native configuration. Stage 3B fixed DeepSeek connectivity and verified authentication/model discovery. Stage 3 is now complete: after the owner funded DeepSeek, the minimal completion test, schema parsing and accounting passed; production health returns HTTP 200 and guarded Android sync passed. The Cloudflare DeepSeek key was unchanged. See [Stage 3B](cloudflare-stage3b.md). See [Stage 3 deployment record](cloudflare-stage3.md). Stage 4 signing/build is complete: the owner keystore signed the release AAB, cryptographic owner-certificate matching and bundletool validation passed. See [Stage 4 build record](android-stage4.md). Real device/provider acceptance and Play work remain later stages.
 
@@ -14,9 +14,9 @@ Hosted project: `c92d3ab1-8331-48a0-8bd9-a0c662b22dbe`.
 
 The existing Drizzle history had only 0000 and 0001. On 2026-10-01, the following were applied once, transactionally, and recorded in `drizzle.__drizzle_migrations`:
 
-| Migration | created_at | SHA-256 |
-|---|---:|---|
-| `0002_premium_billing.sql` | 1790643600000 | e8b415e0a31b48786f923f75f181b32b2afdfa47ccc6733697957ad6d87137b9 |
+| Migration                      |    created_at | SHA-256                                                          |
+| ------------------------------ | ------------: | ---------------------------------------------------------------- |
+| `0002_premium_billing.sql`     | 1790643600000 | e8b415e0a31b48786f923f75f181b32b2afdfa47ccc6733697957ad6d87137b9 |
 | `0003_atomic_account_sync.sql` | 1790845200000 | 1a4478d864cd896f82f79b4e608f57c62b14a782a2040d439af87f7015110f8d |
 
 Supabase-directory copies are for a separate fresh Supabase deployment, not a second migration run against Lovable. Historical migrations were not rewritten. The profile checksum before/after was identical (`0d14503564c834a8e19122c2e96b9869`); profile count 1, quests 0, legacy events 0. No current paid accounts or ambiguous paid/null-expiry accounts existed. Hosted rollback-only role tests confirmed normal profile edits, denial of billing ID/entitlement/trial edits, and privileged RPC restrictions.
@@ -42,21 +42,21 @@ Public build variables: `VITE_PAYMENTS_CLIENT_TOKEN` is the matching Stripe `pk_
 
 No dashboard product has been verified through the available tools. The following is the **repository's canonical required mapping**, not a claim that these products already exist. Reuse matching existing entries; do not create duplicates.
 
-| Layer | Value |
-|---|---|
-| Android application ID | `app.questos.android` |
-| Internal annual plan / Stripe lookup key | `premium_annual` |
-| Play subscription product | `questos_premium_annual` |
-| Play auto-renewing base plan | `annual` (one year) |
-| RevenueCat imported product | `questos_premium_annual:annual` (older SDK may report the plain product ID) |
-| RevenueCat entitlement | `premium` |
-| RevenueCat offering | `default`, mark current |
-| Offering package | Annual (`$rc_annual`), attach the annual base plan |
-| Approved US price | USD 19.99/year; other Play regions use displayed localized pricing |
+| Layer                                     | Value                                                                         |
+| ----------------------------------------- | ----------------------------------------------------------------------------- |
+| Android application ID                    | `app.questos.android`                                                         |
+| Internal monthly plan / Stripe lookup key | `premium_monthly`                                                             |
+| Play subscription product                 | `questos_premium_monthly`                                                     |
+| Play auto-renewing base plan              | `monthly` (one month)                                                         |
+| RevenueCat imported product               | `questos_premium_monthly:monthly` (older SDK may report the plain product ID) |
+| RevenueCat entitlement                    | `premium`                                                                     |
+| RevenueCat offering                       | `default`, mark current                                                       |
+| Offering package                          | Monthly (`$rc_monthly`), attach the monthly base plan                         |
+| Approved US price                         | USD 2.99/month; other Play regions use displayed localized pricing            |
 
-1. Play Console → your app → **Monetize with Play → Products → Subscriptions**. Open or create `questos_premium_annual`; add/open base plan `annual`, **Auto-renewing**, billing period **Yearly**, US price **19.99 USD**. Select intended countries, save and activate. Do not add a store free-trial offer: QuestOS already has an app trial.
+1. Play Console → your app → **Monetize with Play → Products → Subscriptions**. Open or create `questos_premium_monthly`; add/open base plan `monthly`, **Auto-renewing**, billing period **Yearly**, US price **2.99 USD**. Select intended countries, save and activate. Do not add a store free-trial offer: QuestOS already has an app trial.
 2. RevenueCat → project → **Apps & providers → Add app / existing Google Play app**. Package name `app.questos.android`. Complete Play service-account credential setup using RevenueCat's Google Play instructions; owner must grant Play access/accept terms. Test credentials in that screen.
-3. RevenueCat → **Product catalog → Products**: import the actual Play annual base plan. **Entitlements → premium**: attach it. **Offerings → default**: add the Annual package with that product; mark the offering current.
+3. RevenueCat → **Product catalog → Products**: import the actual Play monthly base plan. **Entitlements → premium**: attach it. **Offerings → default**: add the Monthly package with that product; mark the offering current.
 4. RevenueCat → app configuration → **Public SDK key**: copy the Android `goog_...` value to `VITE_REVENUECAT_ANDROID_KEY`. API keys → create/read server key in secure form, `REVENUECAT_SECRET_API_KEY`. Preserve `REVENUECAT_APP_ID` exactly.
 5. RevenueCat → **Integrations → Webhooks → Add**. URL `https://<APP_ORIGIN-host>/api/public/revenuecat-webhook`; Authorization `Bearer <REVENUECAT_WEBHOOK_AUTH>`. Select the matching app/environment. Enable purchase, renewal, cancellation, billing issue, expiration, transfer and refund-related events. A 500 means processing failed and delivery must retry.
 6. Review RevenueCat's restore/transfer policy deliberately. Code accepts a verified transfer atomically (old owner revoked before new owner receives the receipt); a receipt cannot unlock two QuestOS owners concurrently. Use two test QuestOS accounts on one Play tester to verify your chosen dashboard policy.
@@ -66,10 +66,10 @@ Cancellation retains the paid period. Full refund revokes that period; old resto
 ## Stripe web setup
 
 1. Stripe Dashboard → Developers / API keys: verify the intended account and store its private key in the corresponding server secret.
-2. Stripe Dashboard → **Product catalog → Add product / existing QuestOS Premium**. Add an active recurring annual price, USD **19.99**, interval **Year**, lookup key **premium_annual**. The backend rejects wrong currency, amount, interval, duplicates, inactive products, or environment mismatch.
+2. Stripe Dashboard → **Product catalog → Add product / existing QuestOS Premium**. Add an active recurring monthly price, USD **2.99**, interval **Month**, lookup key **premium_monthly**. The backend rejects wrong currency, amount, interval, duplicates, inactive products, or environment mismatch.
 3. Stripe → **Settings → Billing → Customer portal**: enable subscription cancellation/payment-method management and save the configuration.
 4. Stripe → **Developers / Workbench → Webhooks → Add destination**: `https://<APP_ORIGIN-host>/api/public/payments/webhook?env=live` (sandbox uses `env=sandbox`). Select `customer.subscription.created`, `.updated`, `.deleted`, `invoice.paid`, `invoice.payment_failed`, `checkout.session.completed`, `charge.refunded`. Store the endpoint signing secret securely as above.
-5. Test successful annual checkout, user cancellation, retry/double-click, payment failure, portal cancellation, full refund, restore, duplicate delivery and out-of-order delivery in staging. Backend verification uses current provider state and paid invoices, not browser success flags.
+5. Test successful monthly checkout, user cancellation, retry/double-click, payment failure, portal cancellation, full refund, restore, duplicate delivery and out-of-order delivery in staging. Backend verification uses current provider state and paid invoices, not browser success flags.
 
 ## Native authentication
 
@@ -156,7 +156,7 @@ Expect exactly one new logical row and one accepted-usage increment per action, 
 - [ ] Free cannot use premium server functions/documents/assistant confirmation even with a forged UI flag. Trial/paid can. Core quests, XP, journal, calendar, achievements and sync remain Free; 25 active quests/3 active main projects apply only to additions/reactivation.
 - [ ] Account A create/edit/delete/offline edit → logout → B sees none of A's core/premium/settings/notifications → A relogin recovers its state. Two devices edit the same save: explicit conflict, failed deletion retained, no silent overwrite.
 - [ ] Each premium panel: memory opt-in/save/clear; Future Me; Goal Simulator; assistant proposal/confirm; analytics/CSV; theme across routes; focus audio/stop; timer/widget; selected Home panels; ICS round-trip/device calendar confirm; health read preview/save/clear; 14-day experiment. No medical or guaranteed future outcome claims.
-- [ ] Stripe annual purchase/restore/portal and RevenueCat Play annual purchase/restore/manage, pending/cancel/offline/delayed verification, refund/expiry/grace/transfer. Mock ledger tests are not store certification.
+- [ ] Stripe monthly purchase/restore/portal and RevenueCat Play monthly purchase/restore/manage, pending/cancel/offline/delayed verification, refund/expiry/grace/transfer. Mock ledger tests are not store certification.
 - [ ] Device notification grant/deny, 8am local reminder, trial reminder, account switch cancellation, tap routing. There is no remote push and no automatic background AI bill.
 - [ ] Android signed release build; cold/warm auth, resume, Back, network loss/reconnect, share JSON/CSV/ICS, calendar permission, Health Connect permission and read-only scope, widget expiry/logout clearing; test Android 13+ notification permission.
 - [ ] Public privacy/terms, monitored support email, real product prices, sandbox/live separation, no secrets in assets, real published origin, Play declarations/internal testing complete.
@@ -180,20 +180,20 @@ Automatic approval review rejected an attempted deployment-helper update involvi
 
 ## Final verification record — 2026-10-02
 
-| Command/check | Actual result |
-|---|---|
-| `bun install --frozen-lockfile` | Pass; 648 installs checked, 766 packages, no lock changes |
-| `bun test` | 73 pass, 0 fail, 356 assertions, 8 files |
-| `bun run typecheck` | Pass after compatibility fix for updated Router error type |
-| ESLint on all changed existing TS/TSX/MJS files | Pass, 0 errors/warnings |
-| `bun run lint` (equivalent `eslint . --format json`) | Fails: 8,462 pre-existing errors, 8 warnings; generated Android build output excluded |
-| `bun run build` | Pass; independent Nitro Cloudflare output |
-| `bunx wrangler deploy --config .output/server/wrangler.json --dry-run` | Pass; no deployment |
-| `bun run security:scan` | 375 files, 0 findings, including web/native build assets |
-| `bunx cap sync android` | Pass; 11 plugins; no production origin configured |
-| `android/gradlew.bat -p android assembleDebug` with JDK 21/API 36 | Pass; 427 tasks, APK produced |
-| `android/gradlew.bat -p android bundleRelease --no-daemon` | Stage 4 pass; signed AAB verified against owner certificate and validated by bundletool |
-| `bun run preview --ip 127.0.0.1 --port 8787` and HTTP checks | Home/privacy/terms 200; health 503 configuration-required as expected |
+| Command/check                                                          | Actual result                                                                           |
+| ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `bun install --frozen-lockfile`                                        | Pass; 648 installs checked, 766 packages, no lock changes                               |
+| `bun test`                                                             | 73 pass, 0 fail, 356 assertions, 8 files                                                |
+| `bun run typecheck`                                                    | Pass after compatibility fix for updated Router error type                              |
+| ESLint on all changed existing TS/TSX/MJS files                        | Pass, 0 errors/warnings                                                                 |
+| `bun run lint` (equivalent `eslint . --format json`)                   | Fails: 8,462 pre-existing errors, 8 warnings; generated Android build output excluded   |
+| `bun run build`                                                        | Pass; independent Nitro Cloudflare output                                               |
+| `bunx wrangler deploy --config .output/server/wrangler.json --dry-run` | Pass; no deployment                                                                     |
+| `bun run security:scan`                                                | 375 files, 0 findings, including web/native build assets                                |
+| `bunx cap sync android`                                                | Pass; 11 plugins; no production origin configured                                       |
+| `android/gradlew.bat -p android assembleDebug` with JDK 21/API 36      | Pass; 427 tasks, APK produced                                                           |
+| `android/gradlew.bat -p android bundleRelease --no-daemon`             | Stage 4 pass; signed AAB verified against owner certificate and validated by bundletool |
+| `bun run preview --ip 127.0.0.1 --port 8787` and HTTP checks           | Home/privacy/terms 200; health 503 configuration-required as expected                   |
 
 Provider test fixtures exercise Morning Brief, Goal to Quests, Reflection Prompt and Starter Quests through real orchestration/contracts with one completion each. They are not live DeepSeek tests. SQL tests use PGlite PostgreSQL and cannot certify real provider purchases or multi-connection production races. Hosted rollback-only authenticated-role checks also passed without modifying user rows.
 
@@ -203,7 +203,7 @@ The original Nitro preview shortcut tried to spawn unavailable `npx`; `preview` 
 
 - Cloudflare: run `bunx wrangler login`, verify your account, and confirm it is the intended destination before uploading secrets. Create/select Worker `questos`, configure its owned HTTPS origin as `APP_ORIGIN`. Enter private values from `.env.example` only in the owner deployment environment/Worker secret manager. Success: deploy health is ready and legal/login routes work.
 - Supabase: Dashboard → your organization → New project (or select intended existing destination). Follow the supported export/restore checks above. Authentication → URL Configuration: Site URL is the exact independent origin; add `app.questos.android://auth/callback` and the independent web origin. Authentication → Providers → Google: enter your OAuth credentials and Google's displayed Supabase callback if enabling Google. Success: old account UUIDs/data and normal profile edits preserved; billing edits denied; existing test account signs in.
-- RevenueCat/Play/Stripe: complete the exact product/key/webhook mapping sections above in the owner dashboards. Success: provider catalog validates annual USD 19.99 and verified staging purchase/restore/cancel/refund flows match the database. Never enable sandbox receipts on the live database.
+- RevenueCat/Play/Stripe: complete the exact product/key/webhook mapping sections above in the owner dashboards. Success: provider catalog validates monthly USD 2.99 and verified staging purchase/restore/cancel/refund flows match the database. Never enable sandbox receipts on the live database.
 - Android: after deployment, set `CAPACITOR_SERVER_URL=https://<your-independent-host>` and run `bun run android:sync:prod`. Open `C:\pixel-perfect-copy-9579\android` in Android Studio, select Pixel 8, press Run. Success: signed-in core/AI and native permissions/lifecycle work; account switching exposes no prior account state. The current APK only contains the unconfigured fallback shell.
 - Signing/internal testing: provide the existing upload keystore and four `QUESTOS_*` signing variables; run `android/gradlew.bat -p android bundleRelease`. Play Console → Testing → Internal testing → Create release: upload AAB, configure authorized testers/Play App Signing. Success: internal-test install completes a real license-test purchase and restore. No public production release.
 

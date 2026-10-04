@@ -9,7 +9,7 @@
 export type SubscriptionStatus = "trial" | "free" | "premium" | "grace" | "expired";
 export type Entitlement = "free" | "premium";
 
-export type PlanId = "trial" | "premium_annual";
+export type PlanId = "trial" | "premium_monthly" | "premium_annual";
 
 export interface SubscriptionState {
   status: SubscriptionStatus;
@@ -33,7 +33,7 @@ export interface SubscriptionState {
 export interface OfferingPackage {
   identifier: PlanId;
   displayName: string;
-  priceString: string; // e.g. "$19.99" — localized where possible
+  priceString: string; // e.g. "$2.99" — localized where possible
   period: "annual" | "monthly" | "lifetime";
   featured?: boolean;
 }

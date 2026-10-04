@@ -3,7 +3,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 const request = z
   .object({
-    priceId: z.literal("premium_annual"),
+    priceId: z.literal("premium_monthly"),
     returnUrl: z.string().url(),
     environment: z.enum(["sandbox", "live"]),
   })
@@ -12,18 +12,18 @@ export const getStripeOfferings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async () => {
     try {
-      const { annualStripePrice } = await import("./stripe-billing.server");
-      const p = await annualStripePrice();
+      const { monthlyStripePrice } = await import("./stripe-billing.server");
+      const p = await monthlyStripePrice();
       return {
         current: [
           {
-            identifier: "premium_annual" as const,
-            displayName: "Premium — Annual",
+            identifier: "premium_monthly" as const,
+            displayName: "Premium — Monthly",
             priceString:
               new Intl.NumberFormat("en-US", { style: "currency", currency: p.currency }).format(
                 p.unit_amount! / 100,
-              ) + " / year",
-            period: "annual" as const,
+              ) + " / month",
+            period: "monthly" as const,
             featured: true,
           },
         ],
@@ -31,7 +31,7 @@ export const getStripeOfferings = createServerFn({ method: "GET" })
     } catch {
       return {
         current: [],
-        error: "Annual pricing could not be verified. Please retry or contact support.",
+        error: "Monthly pricing could not be verified. Please retry or contact support.",
       };
     }
   });
@@ -47,10 +47,10 @@ export const createStripeCheckout = createServerFn({ method: "POST" })
       if (data.environment !== configuredBillingEnvironment()) throw new Error("Wrong environment");
       if ((await reconcileStripeUser(context.userId)).tier === "premium")
         return { error: "Premium is already active. Use Manage subscription." };
-      const { annualStripePrice, stripeCustomer, approvedReturnUrl } =
+      const { monthlyStripePrice, stripeCustomer, approvedReturnUrl } =
         await import("./stripe-billing.server");
       const { createStripeClient } = await import("@/lib/stripe.server");
-      const price = await annualStripePrice();
+      const price = await monthlyStripePrice();
       const { data: auth, error } = await context.supabase.auth.getUser();
       if (error || !auth.user) throw new Error("Authentication required");
       const customer = await stripeCustomer(context.userId, auth.user.email, true);
@@ -61,7 +61,7 @@ export const createStripeCheckout = createServerFn({ method: "POST" })
       const reusable = existing.data.find(
         (session) =>
           session.metadata?.userId === context.userId &&
-          session.metadata?.priceId === "premium_annual" &&
+          session.metadata?.priceId === "premium_monthly" &&
           session.mode === "subscription" &&
           session.client_secret,
       );
@@ -82,10 +82,10 @@ export const createStripeCheckout = createServerFn({ method: "POST" })
           customer: customer!,
           line_items: [{ price: price.id, quantity: 1 }],
           return_url: approvedReturnUrl(data.returnUrl),
-          metadata: { userId: context.userId, priceId: "premium_annual" },
-          subscription_data: { metadata: { userId: context.userId, priceId: "premium_annual" } },
+          metadata: { userId: context.userId, priceId: "premium_monthly" },
+          subscription_data: { metadata: { userId: context.userId, priceId: "premium_monthly" } },
         },
-        { idempotencyKey: `questos-checkout-${key.key}` },
+        { idempotencyKey: `questos-checkout-monthly-${key.key}` },
       );
       if (!session.client_secret) throw new Error("Missing checkout");
       return { clientSecret: session.client_secret };

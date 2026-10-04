@@ -144,13 +144,13 @@ export const useSubscription = create<Store>((set, get) => ({
           offerings,
           error: offerings.current.length
             ? null
-            : "No verified annual plan is available. Retry or contact support.",
+            : "No verified monthly plan is available. Retry or contact support.",
         });
     } catch {
       if (version === identityVersion)
         set({
           offerings: { current: [] },
-          error: "Annual pricing could not be loaded. Retry or contact support.",
+          error: "Monthly pricing could not be loaded. Retry or contact support.",
         });
     }
   },
@@ -165,7 +165,7 @@ export const useSubscription = create<Store>((set, get) => ({
   },
   async purchase(plan) {
     const version = identityVersion;
-    if (plan !== "premium_annual" || owner !== useAuth.getState().user?.id) {
+    if (plan !== "premium_monthly" || owner !== useAuth.getState().user?.id) {
       set({ error: "Billing is not ready for this account. Sign in again." });
       return false;
     }
@@ -254,7 +254,7 @@ export const useSubscription = create<Store>((set, get) => ({
     const version = identityVersion;
     if (get().billingProvider === "revenuecat") {
       await openExternal(
-        `https://play.google.com/store/account/subscriptions?sku=${PLAY_PRODUCT}&package=app.questos.android`,
+        `https://play.google.com/store/account/subscriptions?sku=${get().currentPlan === "premium_annual" ? "questos_premium_annual" : PLAY_PRODUCT}&package=app.questos.android`,
       );
       return;
     }

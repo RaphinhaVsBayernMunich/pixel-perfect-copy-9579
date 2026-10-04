@@ -186,7 +186,7 @@ await check("Google RTDN topic and publisher permission", async () => {
   )
     throw new CheckError("Google Play RTDN publisher permission is missing.");
 });
-await check("Google Play annual product and no stacked store trial", async () => {
+await check("Google Play monthly product and no stacked store trial", async () => {
   const token = (await googleCommand(["auth", "print-access-token"])).trim();
   const root = `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${mapping.packageId}/subscriptions/${mapping.playProduct}`;
   const headers = { Authorization: `Bearer ${token}` };
@@ -217,11 +217,11 @@ await check("RevenueCat app, product, entitlement, offering and package", async 
   if (!app || !product || !entitlement || !offering)
     throw new CheckError("Canonical RevenueCat catalog resources are missing.");
   const packages = await rcList(`/offerings/${encodeURIComponent(offering.id)}/packages`);
-  const annual = packages.find((p) => p.lookup_key === mapping.package);
-  if (!annual) throw new CheckError("$rc_annual package is missing.");
+  const monthly = packages.find((p) => p.lookup_key === mapping.package);
+  if (!monthly) throw new CheckError("$rc_monthly package is missing.");
   const [entitlementProducts, packageProducts] = await Promise.all([
     rcList(`/entitlements/${encodeURIComponent(entitlement.id)}/products`),
-    rcList(`/packages/${encodeURIComponent(annual.id)}/products`),
+    rcList(`/packages/${encodeURIComponent(monthly.id)}/products`),
   ]);
   try {
     verifyRevenueCatMapping(app, product, entitlementProducts, offering, packageProducts, appId);
@@ -252,7 +252,7 @@ await check("RevenueCat app, product, entitlement, offering and package", async 
 });
 console.log(
   failures.length
-    ? `BILLING NOT READY: ${failures.length} check(s) failed. No purchase attempted.`
-    : "BILLING CONFIGURATION VERIFIED. Device purchase/restore and RTDN delivery still require store testing.",
+    ? `EXTERNAL OWNER ACTION REQUIRED: ${failures.length} check(s) failed. No purchase attempted.`
+    : "CONFIG READY. Device purchase/restore and RTDN delivery still require store testing.",
 );
 process.exitCode = failures.length ? 1 : 0;

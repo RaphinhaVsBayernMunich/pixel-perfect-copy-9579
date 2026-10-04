@@ -7,12 +7,12 @@ import {
   applyBillingEvent,
   getBillingSnapshot,
 } from "./billing-db.server";
-import { ANNUAL_PLAN, type BillingEvent } from "./billing-contracts";
+import { MONTHLY_PLAN, ANNUAL_PLAN, type BillingEvent } from "./billing-contracts";
 
-export async function annualStripePrice() {
+export async function monthlyStripePrice() {
   const stripe = createStripeClient(configuredBillingEnvironment());
   const { data } = await stripe.prices.list({
-    lookup_keys: [ANNUAL_PLAN],
+    lookup_keys: [MONTHLY_PLAN],
     active: true,
     limit: 2,
     expand: ["data.product"],
@@ -22,17 +22,17 @@ export async function annualStripePrice() {
     data.length !== 1 ||
     !price ||
     price.currency !== "usd" ||
-    price.unit_amount !== 1999 ||
+    price.unit_amount !== 299 ||
     price.type !== "recurring" ||
-    price.recurring?.interval !== "year" ||
+    price.recurring?.interval !== "month" ||
     price.recurring.interval_count !== 1 ||
     price.livemode !== (configuredBillingEnvironment() === "live")
   )
     throw new Error(
-      "Annual price is unavailable or differs from the approved $19.99/year. Contact support.",
+      "Monthly price is unavailable or differs from the approved $2.99/month. Contact support.",
     );
   if (typeof price.product !== "string" && ("deleted" in price.product || !price.product.active))
-    throw new Error("Annual product is unavailable.");
+    throw new Error("Monthly product is unavailable.");
   return price;
 }
 export async function stripeCustomer(userId: string, email?: string, create = false) {
@@ -113,10 +113,12 @@ export async function reconcileStripeSubscription(
   const userId = await owner(customerId);
   const items = sub.items.data;
   const item = items[0];
+  const plan = item?.price.lookup_key ?? sub.metadata.priceId;
+  const monthly = plan === MONTHLY_PLAN;
   if (
     items.length !== 1 ||
-    (item?.price.lookup_key !== ANNUAL_PLAN && sub.metadata.priceId !== ANNUAL_PLAN) ||
-    item.price.recurring?.interval !== "year" ||
+    (!monthly && plan !== ANNUAL_PLAN) ||
+    item.price.recurring?.interval !== (monthly ? "month" : "year") ||
     item.price.recurring.interval_count !== 1 ||
     sub.livemode !== (env === "live")
   )
@@ -164,7 +166,7 @@ export async function reconcileStripeSubscription(
     userId,
     customerId,
     subscriptionId: sub.id,
-    productId: ANNUAL_PLAN,
+    productId: monthly ? MONTHLY_PLAN : ANNUAL_PLAN,
     status,
     paidUntil: new Date(paidUntil * 1000).toISOString(),
     failureSince,

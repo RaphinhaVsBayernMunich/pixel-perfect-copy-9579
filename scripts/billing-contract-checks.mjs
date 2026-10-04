@@ -1,11 +1,11 @@
 export const mapping = Object.freeze({
   packageId: "app.questos.android",
-  playProduct: "questos_premium_annual",
-  basePlan: "annual",
-  rcProduct: "questos_premium_annual:annual",
+  playProduct: "questos_premium_monthly",
+  basePlan: "monthly",
+  rcProduct: "questos_premium_monthly:monthly",
   entitlement: "premium",
   offering: "default",
-  package: "$rc_annual",
+  package: "$rc_monthly",
 });
 export function verifyPlayProduct(product, offers) {
   const plan = product.basePlans?.find((p) => p.basePlanId === mapping.basePlan);
@@ -13,11 +13,11 @@ export function verifyPlayProduct(product, offers) {
   if (
     product.productId !== mapping.playProduct ||
     plan?.state !== "ACTIVE" ||
-    plan.autoRenewingBasePlanType?.billingPeriodDuration !== "P1Y" ||
+    plan.autoRenewingBasePlanType?.billingPeriodDuration !== "P1M" ||
     price?.currencyCode !== "USD" ||
-    Number(price.units ?? 0) * 100 + Number(price.nanos ?? 0) / 1e7 !== 1999
+    Number(price.units ?? 0) * 100 + Number(price.nanos ?? 0) / 1e7 !== 299
   )
-    throw new Error("Play annual product must be ACTIVE, P1Y and US $19.99.");
+    throw new Error("Play monthly product must be ACTIVE, P1M and US $2.99.");
   if (
     offers.some(
       (o) =>
@@ -46,13 +46,13 @@ export function verifyRevenueCatMapping(
     product.store_identifier !== mapping.rcProduct ||
     product.type !== "subscription"
   )
-    throw new Error("RevenueCat product does not match the canonical annual store product.");
+    throw new Error("RevenueCat product does not match the canonical monthly store product.");
   if (!entitlementProducts.some((p) => p.id === product.id))
-    throw new Error("Premium entitlement is not attached to the annual product.");
+    throw new Error("Premium entitlement is not attached to the monthly product.");
   if (offering.lookup_key !== mapping.offering || !offering.is_current)
     throw new Error("The default offering must be current.");
   if (
     !packageProducts.some((p) => p.product?.id === product.id && p.eligibility_criteria === "all")
   )
-    throw new Error("Annual package must contain the canonical product for all SDK versions.");
+    throw new Error("Monthly package must contain the canonical product for all SDK versions.");
 }

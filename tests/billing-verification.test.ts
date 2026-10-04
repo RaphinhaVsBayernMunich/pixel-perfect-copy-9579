@@ -1,22 +1,22 @@
 import { expect, test } from "bun:test";
 import { verifyPlayProduct, verifyRevenueCatMapping } from "../scripts/billing-contract-checks.mjs";
-test("billing readiness rejects inactive, wrong-price and store-trial annual products", () => {
+test("billing readiness rejects inactive, wrong-price and store-trial monthly products", () => {
   const plan = {
-    basePlanId: "annual",
+    basePlanId: "monthly",
     state: "ACTIVE",
-    autoRenewingBasePlanType: { billingPeriodDuration: "P1Y" },
+    autoRenewingBasePlanType: { billingPeriodDuration: "P1M" },
     regionalConfigs: [
-      { regionCode: "US", price: { currencyCode: "USD", units: "19", nanos: 990000000 } },
+      { regionCode: "US", price: { currencyCode: "USD", units: "2", nanos: 990000000 } },
     ],
   };
-  const product = { productId: "questos_premium_annual", basePlans: [plan] };
+  const product = { productId: "questos_premium_monthly", basePlans: [plan] };
   expect(() => verifyPlayProduct(product, [])).not.toThrow();
   plan.state = "DRAFT";
   expect(() => verifyPlayProduct(product, [])).toThrow("ACTIVE");
   plan.state = "ACTIVE";
   plan.regionalConfigs[0].price.units = "9";
-  expect(() => verifyPlayProduct(product, [])).toThrow("19.99");
-  plan.regionalConfigs[0].price.units = "19";
+  expect(() => verifyPlayProduct(product, [])).toThrow("2.99");
+  plan.regionalConfigs[0].price.units = "2";
   expect(() =>
     verifyPlayProduct(product, [
       { state: "ACTIVE", phases: [{ regionalConfigs: [{ free: {} }] }] },
@@ -32,7 +32,7 @@ test("RevenueCat readiness rejects the wrong app, unattached entitlement and wro
   const product = {
     id: "prod1",
     app_id: "app1",
-    store_identifier: "questos_premium_annual:annual",
+    store_identifier: "questos_premium_monthly:monthly",
     type: "subscription",
   };
   const offering = { lookup_key: "default", is_current: true };

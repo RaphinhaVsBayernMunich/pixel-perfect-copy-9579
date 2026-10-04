@@ -4,7 +4,7 @@ export const subscriptionSnapshot = z.object({
   tier: z.enum(["free", "trial", "premium"]),
   subscription_status: z.enum(["free", "trial", "premium", "grace", "expired"]),
   entitlement: z.enum(["free", "premium"]),
-  current_plan: z.enum(["trial", "premium_annual"]).nullable(),
+  current_plan: z.enum(["trial", "premium_monthly", "premium_annual"]).nullable(),
   trial_start: z.string().nullable(),
   trial_end: z.string().nullable(),
   premium_expiration: z.string().nullable(),
@@ -24,7 +24,14 @@ export const billingEvent = z.object({
   userId: z.string().uuid(),
   customerId: z.string().min(1).max(250),
   subscriptionId: z.string().min(1).max(250),
-  productId: z.enum(["premium_annual", "questos_premium_annual", "questos_premium_annual:annual"]),
+  productId: z.enum([
+    "premium_monthly",
+    "questos_premium_monthly",
+    "questos_premium_monthly:monthly",
+    "premium_annual",
+    "questos_premium_annual",
+    "questos_premium_annual:annual",
+  ]),
   status: z.enum(["active", "grace", "expired", "revoked"]),
   paidUntil: z.string().datetime({ offset: true }),
   failureSince: z.string().datetime({ offset: true }).nullable(),
@@ -32,13 +39,20 @@ export const billingEvent = z.object({
 });
 export type BillingEvent = z.infer<typeof billingEvent>;
 export const ANNUAL_PLAN = "premium_annual" as const;
-export const PLAY_PRODUCT = "questos_premium_annual";
-export const PLAY_BASE_PLAN = "annual";
+export const MONTHLY_PLAN = "premium_monthly" as const;
+export const PLAY_PRODUCT = "questos_premium_monthly";
+export const PLAY_BASE_PLAN = "monthly";
 export const RC_ENTITLEMENT = "premium";
 export const RC_OFFERING = "default";
-export const RC_PACKAGE = "$rc_annual";
-export function isAnnualPlayProduct(id: string) {
-  return id === PLAY_PRODUCT || id === `${PLAY_PRODUCT}:${PLAY_BASE_PLAN}`;
+export const RC_PACKAGE = "$rc_monthly";
+export function isSupportedPlayProduct(id: string) {
+  // Annual receipts remain recognized for existing customers; new offerings are monthly only.
+  return (
+    id === PLAY_PRODUCT ||
+    id === `${PLAY_PRODUCT}:${PLAY_BASE_PLAN}` ||
+    id === "questos_premium_annual" ||
+    id === "questos_premium_annual:annual"
+  );
 }
 export function accessTier(
   s: {

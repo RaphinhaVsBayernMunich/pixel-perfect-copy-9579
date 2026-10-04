@@ -15,14 +15,14 @@ function fixture() {
   let duringPurchase: (() => Promise<void>) | undefined;
   const info = { entitlements: { active: { premium: {} } } } as CustomerInfo;
   const pkg = {
-    identifier: "$rc_annual",
+    identifier: "$rc_monthly",
     product: {
-      identifier: "questos_premium_annual:annual",
-      subscriptionPeriod: "P1Y",
-      defaultOption: { id: "annual", isBasePlan: true },
+      identifier: "questos_premium_monthly:monthly",
+      subscriptionPeriod: "P1M",
+      defaultOption: { id: "monthly", isBasePlan: true },
       currencyCode: "USD",
-      price: 19.99,
-      priceString: "$19.99",
+      price: 2.99,
+      priceString: "$2.99",
     },
   } as PurchasesPackage;
   const catalog = { all: { default: { availablePackages: [pkg] } }, current: null };
@@ -70,7 +70,7 @@ test("native billing rejects anonymous, missing and non-UUID identities", async 
   const f = fixture();
   await expect(f.provider.init(null)).rejects.toThrow();
   await expect(f.provider.identify("another-user")).rejects.toThrow();
-  expect((await f.provider.purchase("premium_annual")).ok).toBe(false);
+  expect((await f.provider.purchase("premium_monthly")).ok).toBe(false);
   expect((await f.provider.restore()).ok).toBe(false);
   expect(f.counts()).toEqual({ purchases: 0, restores: 0 });
 });
@@ -91,20 +91,20 @@ test("account switching discards an in-flight purchase result", async () => {
     await f.provider.reset!();
     await f.provider.identify(accountB);
   });
-  expect((await f.provider.purchase("premium_annual")).ok).toBe(false);
+  expect((await f.provider.purchase("premium_monthly")).ok).toBe(false);
   expect(f.identity()).toBe(accountB);
 });
-test("catalog requires default offering, annual package, annual base plan and valid localized price", async () => {
+test("catalog requires default offering, monthly package, monthly base plan and valid localized price", async () => {
   const f = fixture();
   await f.provider.init(accountA);
   expect((await f.provider.getOfferings()).current).toHaveLength(1);
-  f.pkg.identifier = "$rc_monthly";
-  expect((await f.provider.purchase("premium_annual")).ok).toBe(false);
   f.pkg.identifier = "$rc_annual";
+  expect((await f.provider.purchase("premium_monthly")).ok).toBe(false);
+  f.pkg.identifier = "$rc_monthly";
   f.pkg.product.price = 0;
   expect((await f.provider.getOfferings()).current).toHaveLength(0);
-  f.pkg.product.price = 19.99;
+  f.pkg.product.price = 2.99;
   delete (f.catalog.all as Partial<typeof f.catalog.all>).default;
-  expect((await f.provider.purchase("premium_annual")).ok).toBe(false);
+  expect((await f.provider.purchase("premium_monthly")).ok).toBe(false);
   expect(f.counts().purchases).toBe(0);
 });

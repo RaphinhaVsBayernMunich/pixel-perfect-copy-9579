@@ -39,7 +39,7 @@ export function Paywall() {
         <DialogTitle>QuestOS Premium</DialogTitle>
         <DialogDescription>
           {paid
-            ? "Manage your annual subscription."
+            ? "Manage your monthly subscription."
             : days !== null
               ? `${days} days remain in your 7-day trial.`
               : "More ways to plan, reflect and build momentum."}
@@ -82,7 +82,7 @@ export function Paywall() {
                 <strong>{plan.displayName}</strong>
                 <p>{plan.priceString}</p>
                 <p className="text-xs">
-                  Auto-renews annually until cancelled. Your current paid period remains available
+                  Auto-renews monthly until cancelled. Your current paid period remains available
                   after cancellation.
                 </p>
                 <Button
@@ -90,7 +90,7 @@ export function Paywall() {
                   disabled={state.pending || paid}
                   onClick={() => void state.purchase(plan.identifier)}
                 >
-                  Subscribe annually
+                  Subscribe monthly
                 </Button>
               </div>
             ))}

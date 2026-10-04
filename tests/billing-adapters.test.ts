@@ -13,9 +13,9 @@ const context = {
 function receipt(changes: Record<string, unknown> = {}) {
   return {
     subscriber: {
-      entitlements: { premium: { product_identifier: "questos_premium_annual:annual" } },
+      entitlements: { premium: { product_identifier: "questos_premium_monthly:monthly" } },
       subscriptions: {
-        "questos_premium_annual:annual": {
+        "questos_premium_monthly:monthly": {
           expires_date: stamp(30),
           is_sandbox: true,
           store: "play_store",
@@ -56,7 +56,7 @@ test("Stripe verifies the signed raw body and rejects changed payloads or wrong 
     else process.env.PAYMENTS_SANDBOX_WEBHOOK_SECRET = previous;
   }
 });
-test("native annual receipt uses stable Play order identity across renewal suffixes", () => {
+test("native monthly receipt uses stable Play order identity across renewal suffixes", () => {
   const first = parseRevenueCatRecords(receipt(), context, now)[0];
   const next = parseRevenueCatRecords(
     receipt({ store_transaction_id: "GPA.6801-7988-0152-76034..6" }),
@@ -107,7 +107,19 @@ test("internal Stripe plan ID cannot be accepted as a Google Play receipt", () =
   const data = receipt();
   data.subscriber.entitlements.premium.product_identifier = "premium_annual";
   const subscriptions = data.subscriber.subscriptions as Record<string, unknown>;
-  subscriptions.premium_annual = subscriptions["questos_premium_annual:annual"];
-  delete subscriptions["questos_premium_annual:annual"];
+  subscriptions.premium_annual = subscriptions["questos_premium_monthly:monthly"];
+  delete subscriptions["questos_premium_monthly:monthly"];
   expect(parseRevenueCatRecords(data, context, now)).toHaveLength(0);
+});
+
+test("historical annual receipts remain verified without appearing in new monthly offerings", () => {
+  const historical = JSON.parse(
+    JSON.stringify(receipt()).replaceAll(
+      "questos_premium_monthly:monthly",
+      "questos_premium_annual:annual",
+    ),
+  );
+  expect(parseRevenueCatRecords(historical, context, now)[0].productId).toBe(
+    "questos_premium_annual:annual",
+  );
 });
