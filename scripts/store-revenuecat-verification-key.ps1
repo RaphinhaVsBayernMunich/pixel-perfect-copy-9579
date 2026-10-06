@@ -15,7 +15,25 @@ try {
         [regex]::Replace($existing, '(?m)^REVENUECAT_CONFIGURATION_API_KEY=.*$', $line)
     } else { $existing.TrimEnd() + "`n" + $line + "`n" }
     [System.IO.File]::WriteAllText($privateEnvironment, $updated, [System.Text.UTF8Encoding]::new($false))
-    Write-Host 'Verification credential saved privately. Its scope must be checked in RevenueCat before use.'
+    $start = [System.Diagnostics.ProcessStartInfo]::new()
+    $start.FileName = (Get-Command bun -ErrorAction Stop).Source
+    $start.WorkingDirectory = (Get-Location).Path
+    foreach ($argument in @('x','wrangler','secret','put','REVENUECAT_CONFIGURATION_API_KEY','--config','wrangler.json')) { $start.ArgumentList.Add($argument) }
+    $start.UseShellExecute = $false
+    $start.CreateNoWindow = $true
+    $start.RedirectStandardInput = $true
+    $start.RedirectStandardOutput = $true
+    $start.RedirectStandardError = $true
+    $storage = [System.Diagnostics.Process]::Start($start)
+    $outputTask = $storage.StandardOutput.ReadToEndAsync()
+    $errorTask = $storage.StandardError.ReadToEndAsync()
+    $storage.StandardInput.WriteLine($value)
+    $storage.StandardInput.Close()
+    $storage.WaitForExit()
+    $null = $outputTask.GetAwaiter().GetResult()
+    $null = $errorTask.GetAwaiter().GetResult()
+    if ($storage.ExitCode -ne 0) { throw 'Cloudflare storage failed; local key remains private. No provider output displayed.' }
+    Write-Host 'Verification credential saved privately locally and in Cloudflare. No value displayed.'
 } finally {
     $value = $null
     $existing = $null
