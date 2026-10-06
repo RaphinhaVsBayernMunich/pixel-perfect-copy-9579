@@ -151,7 +151,12 @@ await check("Cloudflare billing secrets", async () => {
       "wrangler.json",
     ]),
   );
-  for (const name of ["REVENUECAT_SECRET_API_KEY", "REVENUECAT_APP_ID", "REVENUECAT_WEBHOOK_AUTH"])
+  for (const name of [
+    "REVENUECAT_SECRET_API_KEY",
+    "REVENUECAT_APP_ID",
+    "REVENUECAT_WEBHOOK_AUTH",
+    "REVENUECAT_CONFIGURATION_API_KEY",
+  ])
     if (!secrets.some((s) => s.name === name))
       throw new CheckError(`${name} is missing from the Worker secret manager.`);
 });

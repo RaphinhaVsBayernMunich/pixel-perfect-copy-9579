@@ -19,13 +19,14 @@ $status | ConvertTo-Json | Set-Content -LiteralPath $statusPath
 Write-Host 'QuestOS release signing. Enter passwords here only, never in chat.'
 Write-Host "Keystore: $StoreFile; alias: $KeyAlias"
 $storeSecret = Read-Host 'Keystore password' -AsSecureString
-$keySecret = Read-Host 'Key password (Enter to use keystore password)' -AsSecureString
+$keySecret = Read-Host 'Key password (separate fresh entry required, even if identical)' -AsSecureString
 $previous = @{}
 foreach ($name in @('JAVA_HOME','QUESTOS_KEYSTORE_PATH','QUESTOS_KEYSTORE_PASSWORD','QUESTOS_KEY_ALIAS','QUESTOS_KEY_PASSWORD')) {
     $previous[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
 }
 try {
-    if ($storeSecret.Length -eq 0) { throw 'Keystore password is required.' }
+    if ($storeSecret.Length -eq 0) { $status.reason = 'store-password-missing'; throw 'Keystore password is required.' }
+    if ($keySecret.Length -eq 0) { $status.reason = 'key-password-missing'; throw 'Key password is required.' }
     $status.status = 'waiting-for-checks'
     $status | ConvertTo-Json | Set-Content -LiteralPath $statusPath
     if ($WaitForChecks) {
@@ -39,11 +40,26 @@ try {
     $env:QUESTOS_KEYSTORE_PATH = $StoreFile
     $env:QUESTOS_KEY_ALIAS = $KeyAlias
     $env:QUESTOS_KEYSTORE_PASSWORD = [System.Net.NetworkCredential]::new('', $storeSecret).Password
-    $env:QUESTOS_KEY_PASSWORD = if ($keySecret.Length -gt 0) { [System.Net.NetworkCredential]::new('', $keySecret).Password } else { $env:QUESTOS_KEYSTORE_PASSWORD }
+    $env:QUESTOS_KEY_PASSWORD = [System.Net.NetworkCredential]::new('', $keySecret).Password
+    $env:QUESTOS_VERSION_CODE = '2'
+    $env:QUESTOS_VERSION_NAME = '1.0.0'
     $status.status = 'building'
     $status | ConvertTo-Json | Set-Content -LiteralPath $statusPath
     $status.phase = 'verify-keystore'
     $status | ConvertTo-Json | Set-Content -LiteralPath $statusPath
+    $ErrorActionPreference = 'Continue'
+    $null = & (Join-Path $JavaHome 'bin\java.exe') (Join-Path $PSScriptRoot 'VerifySigningCredentials.java') 2>&1
+    $privateVerification = $LASTEXITCODE
+    $ErrorActionPreference = 'Stop'
+    if ($privateVerification -ne 0) {
+        $status.reason = switch ($privateVerification) {
+            10 { 'store-password-or-keystore-rejected' }
+            11 { 'key-password-rejected' }
+            12 { 'alias-not-found' }
+            default { 'private-signing-verification-failed' }
+        }
+        throw 'Keystore or alias verification failed.'
+    }
     $ErrorActionPreference = 'Continue'
     $keytoolOutput = (& (Join-Path $JavaHome 'bin\keytool.exe') -exportcert -rfc -keystore $StoreFile -storepass:env QUESTOS_KEYSTORE_PASSWORD -alias $KeyAlias -file $certificatePath 2>&1 | Out-String)
     $certificateResult = $LASTEXITCODE
@@ -65,7 +81,7 @@ try {
     $allowedFailures = @('Keystore password is required.','Preparation checks did not complete in time.','Keystore or alias verification failed.','Release build failed; inspect the local build log.','Release bundle was not produced.')
     $status.failure = if ($allowedFailures -contains $_.Exception.Message) { $_.Exception.Message } else { 'Signing helper runtime failed.' }
     $status | ConvertTo-Json | Set-Content -LiteralPath $statusPath
-    Write-Host 'Release signing/build failed. No password values were recorded.'
+    Write-Host ('Release signing/build failed: ' + $status.reason + '. No password values were recorded.')
 } finally {
     foreach ($name in $previous.Keys) { [Environment]::SetEnvironmentVariable($name, $previous[$name], 'Process') }
     $keytoolOutput = $null
