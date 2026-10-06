@@ -13,7 +13,9 @@ for ($attempt = 1; $attempt -le 2; $attempt++) {
     try {
         $status.attempt = $attempt
         $value = [System.Net.NetworkCredential]::new('', $secret).Password.Trim()
-        if ($value -notmatch '^sk_[A-Za-z0-9_-]+$') { $status.reason = 'revenuecat-key-format-rejected'; throw 'Private verification failed' }
+        # Documented examples use sk_, but provider authentication is authoritative.
+        # Reject empty/unsafe headers locally; never store anything before the project API accepts it.
+        if ($value.Length -lt 8 -or $value.Length -gt 512 -or $value -match '[^\x21-\x7E]') { $status.reason = 'revenuecat-key-format-rejected'; throw 'Private verification failed' }
         $handler = [System.Net.Http.HttpClientHandler]::new()
         $handler.AllowAutoRedirect = $false
         $client = [System.Net.Http.HttpClient]::new($handler)

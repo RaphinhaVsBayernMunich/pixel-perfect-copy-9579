@@ -14,6 +14,7 @@
     "test": "bun test",
     "security:scan": "bun scripts/security-scan.mjs",
     "billing:verify": "bun scripts/billing-verify.mjs",
+    "billing:postpurchase": "bun scripts/billing-postpurchase.mjs",
     "android:sync": "cap sync android",
     "deploy": "bun scripts/deploy.mjs",
     "deploy:dry-run": "bun run build && wrangler deploy --config .output/server/wrangler.json --dry-run",
