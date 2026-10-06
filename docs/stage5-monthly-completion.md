@@ -1,5 +1,17 @@
 # Stage 5 monthly completion — 2026-10-04
 
+## Final technical recheck — 2026-10-07
+
+The existing subscriber key again returned HTTP 200 on the required subscriber endpoint and HTTP 403 on the documented V2 catalog endpoint. The sanitized response did not identify version incompatibility or missing permissions. Browser initialization failed before dashboard access (`apply deny-read ACLs`); owner metadata confirmation is pending. No new key, permission change, credential replacement or deployment was performed without that evidence.
+
+Frozen Bun install passed without changes. Typecheck, all 93 tests/460 assertions, production build, security scan (431 files, zero findings), Android production sync and relevant script ESLint passed. Billing verification remains 9/10: catalog authorization is the sole failing check; live database billing authority, Google monthly configuration, RTDN topic/publisher permissions and production health pass.
+
+Production app and billing health returned HTTP 200. Unauthenticated webhook input returned 401; authenticated invalid JSON returned 400. Provider registration and a genuine RevenueCat test delivery remain unverified. Google Pub/Sub currently lists zero subscriptions. RevenueCat's documented flow is Google Play App Settings → select the existing topic → Connect to Google, followed by a Play test notification and confirmation of RevenueCat's Last received timestamp. Do not fabricate a subscriber or treat topic IAM/synthetic webhook tests as delivery evidence. Reference: https://www.revenuecat.com/docs/platform-resources/server-notifications/google-server-notifications
+
+The unchanged signed AAB passes owner-certificate verification (466 payload entries) and bundletool validation. Package `app.questos.android`, versionCode `2`, versionName `1.0.0`, HTTPS production runtime and disabled cleartext were rechecked. Its public Google SDK key matches the synced native configuration; authenticated catalog association remains unverified. AAB SHA-256 remains `9D6228D51D39818F9BE06569B639AF219DE801B7AA3C19CDF73CE51FC7314033`. **SIGNED AAB READY — REUPLOAD REQUIRED** for Internal Testing. No rebuild, Play production release or purchase occurred.
+
+Stage 5 cannot receive either success verdict until catalog authorization and actual provider webhook/RTDN delivery are verified. The existing post-purchase verification tool remains ready; a successful paid/restore/device-isolation test has not been fabricated. BillDesk remains an unresolved owner-side issue; no dashboard recheck was possible.
+
 ## Corrected existing-key status — 2026-10-06
 
 This correction supersedes the earlier extra-key assumptions. The owner never created an additional RevenueCat V2 configuration key. The only existing secret key is “QuestOS backend subscriber verification”; its version is unknown and must not be inferred from its name or endpoint behavior.
