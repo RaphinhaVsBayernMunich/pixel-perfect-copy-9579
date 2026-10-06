@@ -60,7 +60,8 @@ async function json(url, headers = {}, allowEmpty = false) {
 }
 async function rcList(route) {
   const root = `https://api.revenuecat.com/v2/projects/${encodeURIComponent(requireValue("REVENUECAT_PROJECT_ID"))}`;
-  const headers = { Authorization: `Bearer ${requireValue("REVENUECAT_CONFIGURATION_API_KEY")}` };
+  // Probe suitability of the one existing backend key; do not presume a second key exists.
+  const headers = { Authorization: `Bearer ${requireValue("REVENUECAT_SECRET_API_KEY")}` };
   let url = root + route;
   const items = [];
   for (let pages = 0; pages < 20; pages++) {
@@ -151,12 +152,7 @@ await check("Cloudflare billing secrets", async () => {
       "wrangler.json",
     ]),
   );
-  for (const name of [
-    "REVENUECAT_SECRET_API_KEY",
-    "REVENUECAT_APP_ID",
-    "REVENUECAT_WEBHOOK_AUTH",
-    "REVENUECAT_CONFIGURATION_API_KEY",
-  ])
+  for (const name of ["REVENUECAT_SECRET_API_KEY", "REVENUECAT_APP_ID", "REVENUECAT_WEBHOOK_AUTH"])
     if (!secrets.some((s) => s.name === name))
       throw new CheckError(`${name} is missing from the Worker secret manager.`);
 });
