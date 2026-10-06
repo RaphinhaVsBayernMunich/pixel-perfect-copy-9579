@@ -14,6 +14,11 @@ import java.util.*;
 
 @CapacitorPlugin(name="QuestOSNative", permissions={@Permission(alias="calendar",strings={Manifest.permission.READ_CALENDAR,Manifest.permission.WRITE_CALENDAR})})
 public class QuestOSNativePlugin extends Plugin {
+ @PluginMethod public void billingConfig(PluginCall call){
+  String key=getConfig().getString("revenueCatAndroidKey", "");
+  if(!key.matches("goog_[A-Za-z0-9]+")){call.reject("Update QuestOS from Google Play before using billing.");return;}
+  JSObject result=new JSObject();result.put("androidPublicSdkKey",key);call.resolve(result);
+ }
  @PluginMethod public void shareText(PluginCall call){
   try {
    String name=call.getString("name"),value=call.getString("value"),type=call.getString("type");

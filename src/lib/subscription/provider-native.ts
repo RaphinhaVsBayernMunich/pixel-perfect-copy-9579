@@ -16,7 +16,7 @@ const eligible = (pkg: PurchasesPackage) =>
   Number.isFinite(pkg.product.price) &&
   pkg.product.price > 0;
 export function createNativeProvider(
-  getApiKey: () => string | undefined,
+  getApiKey: () => string | undefined | Promise<string | undefined>,
   sdk: () => Promise<PurchasesPlugin> = async () =>
     (await import("@revenuecat/purchases-capacitor")).Purchases,
 ): SubscriptionProvider {
@@ -39,7 +39,7 @@ export function createNativeProvider(
     async init(userId) {
       z.string().uuid().parse(userId);
       if (initialized) return;
-      const apiKey = getApiKey();
+      const apiKey = await getApiKey();
       if (!apiKey?.startsWith("goog_")) throw new Error("Google Play billing is not configured.");
       const purchases = await sdk();
       await purchases.configure({ apiKey, appUserID: userId! });

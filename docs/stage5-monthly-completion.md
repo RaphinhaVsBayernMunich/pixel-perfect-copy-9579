@@ -1,5 +1,21 @@
 # Stage 5 monthly completion — 2026-10-04
 
+## Latest owner-auth completion status — 2026-10-06
+
+This update supersedes the external configuration and Android status below. Stage 5 is **not complete**.
+
+- Cloudflare deployment `3a424417-20f8-434f-8688-585114a4804c` succeeded; app and billing health passed. Existing core secrets were preserved. RevenueCat V1 subscriber verification, app ID, and webhook authentication are stored privately in the existing Worker.
+- The existing Play app has app-level Admin access for the dedicated service account, including financial data and subscription management. Cloud IAM remains Monitoring Viewer and Pub/Sub Editor. RevenueCat purchase validation still reported insufficient permissions after recheck; with the Play grants confirmed, this remains propagation pending.
+- The monthly Play product is ACTIVE, P1M, US $2.99; no offers/store trial exist. The historical annual base plan is INACTIVE. The verifier now uses the dedicated service-account JWT and accepts Google's HTTP 204 empty offer list.
+- RevenueCat monthly product `prod1c81f60819` is attached to `premium` (`entl367c51d2af`). The existing default offering's monthly package mapping was saved. Its API verification is pending the approved V2 configuration read-only key.
+- The actual public Android SDK key is configured privately and packaged through the existing QuestOSNative plugin. Native initialization checks it against the published client key and fails closed for stale shells. VersionCode is now 2; versionName remains 1.0.0. The debug build passed. A signed replacement AAB is still required; the private signing attempt rejected the keystore password.
+- Type checking and all 93 tests / 460 assertions passed. Production build, security scan, production sync, and changed-file lint passed in the preceding checks. Billing verification passed nine checks; catalog verification requires the V2 key. No live purchase or Play production release occurred.
+- Browser automation currently fails during Windows sandbox initialization, before dashboard access. Webhook registration, Play-to-topic linkage, RevenueCat RTDN connection and delivery checks are not confirmed; topic existence and Google Play publisher IAM alone do not prove delivery.
+
+The owner approved a V2 key named “QuestOS billing configuration verification” with **Project configuration → Read only**, and all other permission groups disabled. It has not been created. If browser recovery remains unavailable, use RevenueCat → QuestOS → API keys → New secret API key, verify that no key with that name already exists, select V2 and those scopes, and generate it once. Run `scripts/store-revenuecat-verification-key.ps1` in a private local terminal to store it without sharing it in chat. No dashboard write or customer scopes are needed for the verifier, and the key is never bundled into the client.
+
+The historical details below describe the earlier pass and must not be used as current readiness evidence.
+
 This is the current monthly configuration. The earlier annual setup report is historical.
 
 ## Canonical mapping and documented price

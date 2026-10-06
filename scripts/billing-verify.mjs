@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { googlePlayAccessToken } from "./google-play-auth.mjs";
 import path from "node:path";
 import { mapping, verifyPlayProduct, verifyRevenueCatMapping } from "./billing-contract-checks.mjs";
 import {
@@ -42,7 +43,7 @@ async function command(args) {
     throw new CheckError("CLI authentication, access or verification is unavailable.");
   return output;
 }
-async function json(url, headers = {}) {
+async function json(url, headers = {}, allowEmpty = false) {
   const response = await fetch(url, {
     headers,
     redirect: "manual",
@@ -50,6 +51,8 @@ async function json(url, headers = {}) {
   });
   if (!response.ok)
     throw new CheckError(`Read-only provider check returned HTTP ${response.status}.`);
+  // Google returns 204 when the subscription has no offers (and therefore no store trial).
+  if (allowEmpty && response.status === 204) return {};
   const body = await response.text();
   if (body.length > 1048576)
     throw new CheckError("Provider response exceeded the safe size limit.");
@@ -102,6 +105,14 @@ await check("canonical IDs and Android runtime", async () => {
     native.server.cleartext !== false
   )
     throw new CheckError("Native application ID or production runtime is incorrect.");
+  if (
+    !/^goog_[A-Za-z0-9]+$/.test(native.plugins?.QuestOSNative?.revenueCatAndroidKey ?? "") ||
+    native.plugins.QuestOSNative.revenueCatAndroidKey !==
+      requireValue("VITE_REVENUECAT_ANDROID_KEY")
+  )
+    throw new CheckError(
+      "Packaged Android public billing key does not match the production client.",
+    );
 });
 await check("source and generated secret scan", () =>
   command([process.execPath, "run", "security:scan"]),
@@ -187,11 +198,17 @@ await check("Google RTDN topic and publisher permission", async () => {
     throw new CheckError("Google Play RTDN publisher permission is missing.");
 });
 await check("Google Play monthly product and no stacked store trial", async () => {
-  const token = (await googleCommand(["auth", "print-access-token"])).trim();
+  const token = await googlePlayAccessToken();
   const root = `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${mapping.packageId}/subscriptions/${mapping.playProduct}`;
   const headers = { Authorization: `Bearer ${token}` };
   const product = await json(root, headers);
-  const offers = await json(root + `/basePlans/${mapping.basePlan}/offers`, headers);
+  const offers = await json(root + `/basePlans/${mapping.basePlan}/offers`, headers, true);
+  const annual = await json(
+    `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${mapping.packageId}/subscriptions/questos_premium_annual`,
+    headers,
+  );
+  if (!annual.basePlans?.some((plan) => plan.basePlanId === "annual" && plan.state === "INACTIVE"))
+    throw new CheckError("Historical annual base plan must remain inactive for new purchases.");
   if (offers.nextPageToken)
     throw new CheckError("Multiple offer pages require review; readiness cannot be assumed.");
   try {

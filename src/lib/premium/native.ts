@@ -7,6 +7,7 @@ export type DeviceEvent = {
   questId?: string;
 };
 export const QuestOSNative = registerPlugin<{
+  billingConfig(): Promise<{ androidPublicSdkKey: string }>;
   shareText(input: { name: string; value: string; type: string }): Promise<void>;
   calendars(): Promise<{ calendars: { id: string; name: string }[] }>;
   readCalendar(input: {

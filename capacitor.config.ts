@@ -12,6 +12,9 @@ const config: CapacitorConfig = {
   server: origin ? { url: new URL(origin).origin, cleartext: false } : undefined,
   android: { allowMixedContent: false, webContentsDebuggingEnabled: false },
   plugins: {
+    QuestOSNative: {
+      revenueCatAndroidKey: process.env.VITE_REVENUECAT_ANDROID_KEY ?? "",
+    },
     SplashScreen: {
       launchShowDuration: 1200,
       backgroundColor: "#161821",

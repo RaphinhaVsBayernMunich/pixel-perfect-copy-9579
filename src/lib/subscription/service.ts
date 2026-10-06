@@ -42,7 +42,15 @@ let interval: ReturnType<typeof setInterval> | undefined;
 const getProvider = () =>
   provider ??
   (provider = isNative()
-    ? createNativeProvider(() => import.meta.env.VITE_REVENUECAT_ANDROID_KEY)
+    ? createNativeProvider(async () => {
+        const { QuestOSNative } = await import("@/lib/premium/native");
+        const { verifiedNativeBillingKey } = await import("./native-billing-config");
+        const { androidPublicSdkKey } = await QuestOSNative.billingConfig();
+        return verifiedNativeBillingKey(
+          androidPublicSdkKey,
+          import.meta.env.VITE_REVENUECAT_ANDROID_KEY,
+        );
+      })
     : createWebProvider());
 const initial: SubscriptionState = {
   status: "free",
