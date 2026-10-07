@@ -1,5 +1,17 @@
 # Stage 5 monthly completion — 2026-10-04
 
+## Private integration update completed — 2026-10-07
+
+The owner created “QuestOS temporary integration setup” with only V2 `project_configuration:integrations:read_write`. Fresh private input succeeded on attempt 1: validation 200, authorization update 200, integration readback 200. The ONE existing webhook `whintgr2a29343fbd` was updated with exactly `Bearer ` plus the unchanged existing production secret. App ID, URL, all-environment configuration (`environment: null`) and event selection were verified preserved. No duplicate or permanent-key change occurred. The temporary key was memory-only and was not persisted locally, in Git, or in Cloudflare.
+
+Temporary-key revocation is **pending**, not completed. The published API has no secret-key revocation operation, no RevenueCat connector was found, and the currently available tools contain no browser-control execution tool. Owner-only revocation of that exact temporary key was requested; both permanent keys must remain intact. No second temporary key or replacement secret was requested.
+
+All requested checks passed again: frozen install, typecheck, 93 tests/463 assertions, production build, 432-file security scan with zero findings, production sync, relevant ESLint, and billing readiness 10/10 CONFIG READY. Production app/billing health returned 200; unauthenticated webhook 401, malformed authenticated JSON 400, complete authenticated TEST 200, duplicate TEST 200. These direct requests are not provider-originated evidence.
+
+Fresh Play API verification confirms Internal Testing versionCode 2 is completed, with no Production release. The unchanged AAB matches the owner certificate on all 466 entries and passes bundletool validation. No deployment, rebuild, tester change or purchase occurred. Monthly catalog and historical annual receipt support remain intact.
+
+Actual RevenueCat webhook test delivery, Play saved RTDN configuration, Connect to Google and RevenueCat Last received remain unverified. No supported public API for those dashboard test/receipt actions is available. Empty topic subscriptions are only an observation; no random receiver was invented. Technical success does not prove an external provider path. Neither a full-completion nor dashboard-confirmation-only verdict is warranted while temporary access revocation and RTDN connection evidence remain outstanding.
+
 ## API-first RTDN and Internal Testing completion — 2026-10-07
 
 The exact existing signed AAB was uploaded through Android Publisher `edits.bundles.upload`. Google returned versionCode 2 and SHA-256 `9d6228d51d39818f9be06569b639af219de801b7aa3c19cdf73ce51fc7314033`. Only the internal track was updated, validated and committed. A fresh edit read confirms `internal` versionCodes `[2]`, status `completed`; Production has no release and was untouched. Tester configuration was not modified. **INTERNAL TESTING V2 UPLOAD COMPLETE**; no further AAB upload is currently required.
