@@ -50,7 +50,11 @@ function PrivacyPage() {
         Google sign-in uses Google OAuth and Supabase to authenticate your account; email and
         profile information are used for sign-in. Cloudflare hosts the QuestOS backend. Network
         requests reveal connection information such as IP address and browser or device headers to
-        the receiving provider. The interface also requests fonts from Google Fonts.
+        the receiving provider. Interface fonts are hosted by QuestOS; the app does not make Google
+        Fonts requests. Hosting infrastructure can derive an approximate region from an IP address
+        for network delivery and security. QuestOS does not request GPS access or use precise device
+        location. Providers record authentication, request and service diagnostics; these are
+        distinct from QuestOS's account-linked product analytics.
       </p>
       <h2>Notifications</h2>
       <p>
@@ -72,8 +76,10 @@ function PrivacyPage() {
         model completion. QuestOS records feature usage and token counts, without storing prompts or
         generated text in its AI usage logs. Generated quests and saved assistant proposals can be
         stored with your account. Avoid entering sensitive information in prompts. DeepSeek
-        processes the submitted content under its own applicable terms and privacy policy; QuestOS
-        does not promise that the provider retains nothing or never uses content for training.
+        processes the submitted content under its own applicable terms and privacy policy, which
+        allow service and model improvement. We disclose this transfer as sharing with an AI
+        provider and do not promise zero retention or exclusion from training. Contact us for help
+        with provider deletion requests.
       </p>
 
       <h2>Optional memory, calendar and health features</h2>
@@ -112,13 +118,20 @@ function PrivacyPage() {
         for fraud prevention and duplicate-event protection. Google Play, Stripe and other providers
         may retain payment, backup and access records under their policies. QuestOS does not set a
         verified deletion period for these provider records. Deleting on one device cannot erase
-        offline copies on other devices; clear their app or site data separately.
+        offline copies on other devices; clear their app or site data separately. Provider
+        authentication audit and security logs may remain after account deletion, according to
+        provider service, security and legal requirements. DeepSeek does not publish a fixed API
+        prompt retention period in the terms reviewed. Contact us or privacy@deepseek.com about
+        provider-held data. Its policy describes processing in China and rights to request deletion
+        and opt out of model training.
       </p>
       <h2>Children and account safety</h2>
       <p>
-        QuestOS currently requires an account and does not implement verified parental consent or a
-        child-specific mode. Parents or guardians should contact us about a child's information or
-        deletion requests. Do not submit a child's sensitive information to AI features.
+        QuestOS is intended for teenagers aged 13 and above and adults, not children under 13. It is
+        not a child-directed service. Minors should review these terms and provider notices with a
+        parent or guardian and obtain permission where required. Parents or guardians can contact us
+        about a child's information or deletion requests. Do not submit sensitive personal
+        information about children to AI features.
       </p>
       <h2>Security and updates</h2>
       <p>

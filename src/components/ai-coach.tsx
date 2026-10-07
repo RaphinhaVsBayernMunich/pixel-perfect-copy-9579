@@ -42,7 +42,9 @@ export function AICoach() {
             AI Coach
           </DialogTitle>
           <DialogDescription>
-            Your operating system's brain — briefs, breakdowns, and reflection.
+            Planning and journaling suggestions. Selected details are sent to DeepSeek, whose policy
+            allows service and model improvement. Avoid sensitive information and review suggestions
+            before using them. Minors should review provider notices with a guardian.
           </DialogDescription>
         </DialogHeader>
 

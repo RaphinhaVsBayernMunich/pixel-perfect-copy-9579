@@ -61,7 +61,17 @@ export const runPremiumCoach = createServerFn({ method: "POST" })
         );
       evidence = { date: data.date, actions };
     }
-    const response = await runAi(data.feature, { evidence: JSON.stringify(evidence) });
+    // The model explains time slots; database IDs and edit versions stay in the server proposal.
+    const explanation =
+      data.feature === "executive_assistant"
+        ? {
+            date: data.date,
+            actions: (evidence as { actions: ReturnType<typeof planDay> }).actions.map(
+              ({ title, date, startTime, minutes }) => ({ title, date, startTime, minutes }),
+            ),
+          }
+        : evidence;
+    const response = await runAi(data.feature, { evidence: JSON.stringify(explanation) });
     if (!response.ok)
       throw new Error(
         "AI Coach could not complete this request. Please retry within your daily limit.",

@@ -17,12 +17,20 @@ function TermsPage() {
   return (
     <article className="prose prose-invert mx-auto max-w-2xl px-5 pt-10 pb-16 md:px-10 md:pt-16">
       <h1 className="font-display text-3xl font-semibold">Terms of Service</h1>
-      <p className="text-sm text-muted-foreground">Last updated: {new Date().getFullYear()}</p>
+      <p className="text-sm text-muted-foreground">Last updated: 7 October 2026</p>
 
       <h2>The service</h2>
       <p>
         {APP_CONFIG.legal.companyName} provides a gamified life-planning app. You may use it for
         personal, non-commercial purposes.
+      </p>
+
+      <h2>Age and eligibility</h2>
+      <p>
+        QuestOS is intended for users aged 13 and above and is not designed for children under 13.
+        Minors must review these terms and AI provider notices with a parent or guardian and obtain
+        permission where required by applicable law or provider terms. Do not provide sensitive
+        information about children to AI features.
       </p>
 
       <h2>Subscriptions</h2>

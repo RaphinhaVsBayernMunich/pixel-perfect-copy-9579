@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight, Check, Loader2, Sparkles, Swords, X } from "lucide-react";
@@ -30,8 +30,18 @@ import {
 } from "@/lib/onboarding-types";
 
 const STEPS = [
-  "welcome", "basics", "profession", "goals", "interests", "skills",
-  "schedule", "productivity", "personalization", "celebration", "ai", "build",
+  "welcome",
+  "basics",
+  "profession",
+  "goals",
+  "interests",
+  "skills",
+  "schedule",
+  "productivity",
+  "personalization",
+  "celebration",
+  "ai",
+  "build",
 ] as const;
 
 const TOTAL = STEPS.length;
@@ -192,10 +202,20 @@ function WelcomeStep({ name }: { name?: string }) {
   );
 }
 
-function BasicsStep({ data, update }: { data: OnboardingProfile; update: (p: Partial<OnboardingProfile>) => void }) {
+function BasicsStep({
+  data,
+  update,
+}: {
+  data: OnboardingProfile;
+  update: (p: Partial<OnboardingProfile>) => void;
+}) {
   return (
     <div>
-      <StepHeader eyebrow="Step 1 · Basics" title="Who's the hero?" sub="A little grounding. You can change any of this later." />
+      <StepHeader
+        eyebrow="Step 1 · Basics"
+        title="Who's the hero?"
+        sub="A little grounding. You can change any of this later."
+      />
       <div className="space-y-4">
         <Field label="What should we call you?">
           <Input
@@ -215,11 +235,18 @@ function BasicsStep({ data, update }: { data: OnboardingProfile; update: (p: Par
             />
           </Field>
           <Field label="Country (optional)">
-            <Input value={data.country ?? ""} onChange={(e) => update({ country: e.target.value })} placeholder="e.g. Germany" />
+            <Input
+              value={data.country ?? ""}
+              onChange={(e) => update({ country: e.target.value })}
+              placeholder="e.g. Germany"
+            />
           </Field>
         </div>
         <Field label="Timezone">
-          <Input value={data.timezone ?? ""} onChange={(e) => update({ timezone: e.target.value })} />
+          <Input
+            value={data.timezone ?? ""}
+            onChange={(e) => update({ timezone: e.target.value })}
+          />
         </Field>
         <Field label="Units">
           <ChipGroup
@@ -236,10 +263,20 @@ function BasicsStep({ data, update }: { data: OnboardingProfile; update: (p: Par
   );
 }
 
-function ProfessionStep({ data, update }: { data: OnboardingProfile; update: (p: Partial<OnboardingProfile>) => void }) {
+function ProfessionStep({
+  data,
+  update,
+}: {
+  data: OnboardingProfile;
+  update: (p: Partial<OnboardingProfile>) => void;
+}) {
   return (
     <div>
-      <StepHeader eyebrow="Step 2 · Profession" title="What's your day job?" sub="This unlocks specialized quests and follow-up questions." />
+      <StepHeader
+        eyebrow="Step 2 · Profession"
+        title="What's your day job?"
+        sub="This unlocks specialized quests and follow-up questions."
+      />
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
         {PROFESSIONS.map((p) => {
           const active = data.profession === p.id;
@@ -264,10 +301,20 @@ function ProfessionStep({ data, update }: { data: OnboardingProfile; update: (p:
   );
 }
 
-function GoalsStep({ data, update }: { data: OnboardingProfile; update: (p: Partial<OnboardingProfile>) => void }) {
+function GoalsStep({
+  data,
+  update,
+}: {
+  data: OnboardingProfile;
+  update: (p: Partial<OnboardingProfile>) => void;
+}) {
   return (
     <div>
-      <StepHeader eyebrow="Step 3 · Ambition" title="What are you playing for?" sub="Your goals become the AI's north star." />
+      <StepHeader
+        eyebrow="Step 3 · Ambition"
+        title="What are you playing for?"
+        sub="Your goals become the AI's north star."
+      />
       <div className="space-y-4">
         <Field label="Your biggest goal this year">
           <Textarea
@@ -298,10 +345,17 @@ function GoalsStep({ data, update }: { data: OnboardingProfile; update: (p: Part
   );
 }
 
-function InterestsStep({ data, update }: { data: OnboardingProfile; update: (p: Partial<OnboardingProfile>) => void }) {
+function InterestsStep({
+  data,
+  update,
+}: {
+  data: OnboardingProfile;
+  update: (p: Partial<OnboardingProfile>) => void;
+}) {
   const toggle = (label: string) => {
     const set = new Set(data.interests);
-    set.has(label) ? set.delete(label) : set.add(label);
+    if (set.has(label)) set.delete(label);
+    else set.add(label);
     update({ interests: [...set] });
   };
   return (
@@ -334,10 +388,17 @@ function InterestsStep({ data, update }: { data: OnboardingProfile; update: (p: 
   );
 }
 
-function SkillsStep({ data, update }: { data: OnboardingProfile; update: (p: Partial<OnboardingProfile>) => void }) {
+function SkillsStep({
+  data,
+  update,
+}: {
+  data: OnboardingProfile;
+  update: (p: Partial<OnboardingProfile>) => void;
+}) {
   const toggle = (label: string) => {
     const set = new Set(data.skills);
-    set.has(label) ? set.delete(label) : set.add(label);
+    if (set.has(label)) set.delete(label);
+    else set.add(label);
     update({ skills: [...set] });
   };
   return (
@@ -370,29 +431,61 @@ function SkillsStep({ data, update }: { data: OnboardingProfile; update: (p: Par
   );
 }
 
-function ScheduleStep({ data, update }: { data: OnboardingProfile; update: (p: Partial<OnboardingProfile>) => void }) {
+function ScheduleStep({
+  data,
+  update,
+}: {
+  data: OnboardingProfile;
+  update: (p: Partial<OnboardingProfile>) => void;
+}) {
   return (
     <div>
-      <StepHeader eyebrow="Step 6 · Rhythm" title="How does your day flow?" sub="AI uses this to draft your calendar." />
+      <StepHeader
+        eyebrow="Step 6 · Rhythm"
+        title="How does your day flow?"
+        sub="AI uses this to draft your calendar."
+      />
       <div className="grid grid-cols-2 gap-3">
         <Field label="Wake time">
-          <Input type="time" value={data.wakeTime ?? ""} onChange={(e) => update({ wakeTime: e.target.value })} />
+          <Input
+            type="time"
+            value={data.wakeTime ?? ""}
+            onChange={(e) => update({ wakeTime: e.target.value })}
+          />
         </Field>
         <Field label="Sleep time">
-          <Input type="time" value={data.sleepTime ?? ""} onChange={(e) => update({ sleepTime: e.target.value })} />
+          <Input
+            type="time"
+            value={data.sleepTime ?? ""}
+            onChange={(e) => update({ sleepTime: e.target.value })}
+          />
         </Field>
         <Field label="Work / school hours">
-          <Input value={data.workHours ?? ""} onChange={(e) => update({ workHours: e.target.value })} placeholder="e.g. 9-17" />
+          <Input
+            value={data.workHours ?? ""}
+            onChange={(e) => update({ workHours: e.target.value })}
+            placeholder="e.g. 9-17"
+          />
         </Field>
         <Field label="Preferred focus hours">
-          <Input value={data.focusHours ?? ""} onChange={(e) => update({ focusHours: e.target.value })} placeholder="e.g. 6-9, 20-22" />
+          <Input
+            value={data.focusHours ?? ""}
+            onChange={(e) => update({ focusHours: e.target.value })}
+            placeholder="e.g. 6-9, 20-22"
+          />
         </Field>
       </div>
     </div>
   );
 }
 
-function ProductivityStep({ data, update }: { data: OnboardingProfile; update: (p: Partial<OnboardingProfile>) => void }) {
+function ProductivityStep({
+  data,
+  update,
+}: {
+  data: OnboardingProfile;
+  update: (p: Partial<OnboardingProfile>) => void;
+}) {
   return (
     <div>
       <StepHeader eyebrow="Step 7 · Style" title="How do you operate?" />
@@ -449,7 +542,13 @@ function ProductivityStep({ data, update }: { data: OnboardingProfile; update: (
   );
 }
 
-function PersonalizationStep({ data, update }: { data: OnboardingProfile; update: (p: Partial<OnboardingProfile>) => void }) {
+function PersonalizationStep({
+  data,
+  update,
+}: {
+  data: OnboardingProfile;
+  update: (p: Partial<OnboardingProfile>) => void;
+}) {
   return (
     <div>
       <StepHeader eyebrow="Step 8 · Theme" title="Choose your world." />
@@ -468,7 +567,9 @@ function PersonalizationStep({ data, update }: { data: OnboardingProfile; update
             >
               <div className="absolute inset-0 bg-black/20" />
               <div className="absolute inset-0 flex items-end p-3">
-                <span className="font-display text-sm font-semibold text-white drop-shadow-lg">{t.label}</span>
+                <span className="font-display text-sm font-semibold text-white drop-shadow-lg">
+                  {t.label}
+                </span>
               </div>
               {active && (
                 <div className="absolute top-2 right-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
@@ -483,10 +584,20 @@ function PersonalizationStep({ data, update }: { data: OnboardingProfile; update
   );
 }
 
-function CelebrationStep({ data, update }: { data: OnboardingProfile; update: (p: Partial<OnboardingProfile>) => void }) {
+function CelebrationStep({
+  data,
+  update,
+}: {
+  data: OnboardingProfile;
+  update: (p: Partial<OnboardingProfile>) => void;
+}) {
   return (
     <div>
-      <StepHeader eyebrow="Step 9 · Celebration" title="How should wins feel?" sub="You can switch this anytime." />
+      <StepHeader
+        eyebrow="Step 9 · Celebration"
+        title="How should wins feel?"
+        sub="You can switch this anytime."
+      />
       <div className="space-y-2">
         {CELEBRATIONS.map((c) => {
           const active = data.celebration === c.id;
@@ -514,13 +625,23 @@ function CelebrationStep({ data, update }: { data: OnboardingProfile; update: (p
   );
 }
 
-function AIStep({ data, update }: { data: OnboardingProfile; update: (p: Partial<OnboardingProfile>) => void }) {
+function AIStep({
+  data,
+  update,
+}: {
+  data: OnboardingProfile;
+  update: (p: Partial<OnboardingProfile>) => void;
+}) {
   const toggle = (id: string) => {
     update({ aiFeatures: { ...data.aiFeatures, [id]: !(data.aiFeatures?.[id] ?? true) } });
   };
   return (
     <div>
-      <StepHeader eyebrow="Step 10 · AI" title="What can the AI do for you?" sub="You keep control. Toggle anything off." />
+      <StepHeader
+        eyebrow="Step 10 · AI"
+        title="What can the AI do for you?"
+        sub="You keep control. Toggle anything off."
+      />
       <div className="space-y-2">
         {AI_FEATURES.map((f) => {
           const enabled = data.aiFeatures?.[f.id] ?? true;
@@ -572,7 +693,7 @@ function BuildStep({
   const start = async () => {
     setStatus("loading");
     try {
-      const result: any = await generate({
+      const result = await generate({
         data: {
           preferredName: data.preferredName,
           profession: data.profession,
@@ -609,14 +730,28 @@ function BuildStep({
     }
   };
 
-  // auto-start on mount
-  useMemo(() => {
-    if (status === "idle") void start();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   return (
     <div className="pt-6 text-center">
+      {status === "idle" && (
+        <div className="space-y-4">
+          <h1 className="font-display text-3xl">Choose your starting quests</h1>
+          <p className="mx-auto max-w-md text-sm text-muted-foreground">
+            AI can draft starter quests using your name, profession, goals, interests, skills and
+            planning preferences. These details are sent to DeepSeek, whose policy allows service
+            and model improvement. Avoid sensitive information. Minors should review provider
+            notices with a parent or guardian.
+          </p>
+          <a href="/legal/privacy" className="text-sm text-primary underline">
+            Read the privacy policy
+          </a>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Button onClick={() => void start()}>Generate starter quests with AI</Button>
+            <Button variant="outline" onClick={onDone}>
+              Skip AI and enter QuestOS
+            </Button>
+          </div>
+        </div>
+      )}
       {status === "loading" && (
         <>
           <div className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
@@ -656,7 +791,9 @@ function BuildStep({
             <p className="mt-4 text-muted-foreground italic max-w-md mx-auto">"{welcome}"</p>
           )}
           <p className="mt-6 text-sm text-muted-foreground">
-            {count > 0 ? `${count} starter quests added to your board.` : "Add your first quest from the dashboard."}
+            {count > 0
+              ? `${count} starter quests added to your board.`
+              : "Add your first quest from the dashboard."}
           </p>
           <Button size="lg" onClick={onDone} className="mt-8 gap-1.5">
             Enter QuestOS <ArrowRight className="h-4 w-4" />
@@ -674,7 +811,9 @@ function BuildStep({
             We couldn't reach the AI. You can enter anyway and generate quests from the coach later.
           </p>
           <div className="mt-6 flex items-center justify-center gap-2">
-            <Button variant="outline" onClick={() => start()}>Try again</Button>
+            <Button variant="outline" onClick={() => start()}>
+              Try again
+            </Button>
             <Button onClick={onDone}>Enter QuestOS</Button>
           </div>
         </>
@@ -690,7 +829,9 @@ function BuildStep({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</Label>
+      <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+        {label}
+      </Label>
       {children}
     </div>
   );

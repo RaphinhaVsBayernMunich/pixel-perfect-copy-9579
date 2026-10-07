@@ -54,3 +54,7 @@ android/app/google-services.json
 !*.service-account.example.json
 !*-service-account.example.json
 questos-510417-*.json
+
+# Owner-only reviewer/login credential exports.
+*.private.json
+*reviewer-credentials*.json

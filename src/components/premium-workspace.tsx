@@ -204,6 +204,11 @@ export function PremiumWorkspace() {
           </Button>
         </Panel>
         <Panel title="Future Me & Goal Simulator">
+          <p className="text-sm text-muted-foreground">
+            AI explanations send your goal and calculated progress scenarios to DeepSeek. Its policy
+            allows service and model improvement. Avoid sensitive information; minors should review
+            provider notices with a guardian. Projections are not guarantees.
+          </p>
           <label>
             Goal
             <input className={field} value={goal} onChange={(e) => setGoal(e.target.value)} />
@@ -254,6 +259,11 @@ export function PremiumWorkspace() {
           </p>
         </Panel>
         <Panel title="AI Executive Assistant">
+          <p className="text-sm text-muted-foreground">
+            AI explains a proposed schedule by sending selected quest details and time slots to
+            DeepSeek. Its policy allows service and model improvement. Review before confirming; no
+            calendar changes are made by generating the explanation.
+          </p>
           <p className="text-sm">
             Propose a day from your actual unscheduled active quests. Existing time blocks are
             respected. Nothing changes until you confirm.
