@@ -60,8 +60,8 @@ async function json(url, headers = {}, allowEmpty = false) {
 }
 async function rcList(route) {
   const root = `https://api.revenuecat.com/v2/projects/${encodeURIComponent(requireValue("REVENUECAT_PROJECT_ID"))}`;
-  // Probe suitability of the one existing backend key; do not presume a second key exists.
-  const headers = { Authorization: `Bearer ${requireValue("REVENUECAT_SECRET_API_KEY")}` };
+  // The owner confirmed V1 subscriber and separate read-only V2 catalog credentials.
+  const headers = { Authorization: `Bearer ${requireValue("REVENUECAT_CONFIGURATION_API_KEY")}` };
   let url = root + route;
   const items = [];
   for (let pages = 0; pages < 20; pages++) {
@@ -152,7 +152,12 @@ await check("Cloudflare billing secrets", async () => {
       "wrangler.json",
     ]),
   );
-  for (const name of ["REVENUECAT_SECRET_API_KEY", "REVENUECAT_APP_ID", "REVENUECAT_WEBHOOK_AUTH"])
+  for (const name of [
+    "REVENUECAT_SECRET_API_KEY",
+    "REVENUECAT_CONFIGURATION_API_KEY",
+    "REVENUECAT_APP_ID",
+    "REVENUECAT_WEBHOOK_AUTH",
+  ])
     if (!secrets.some((s) => s.name === name))
       throw new CheckError(`${name} is missing from the Worker secret manager.`);
 });
@@ -242,7 +247,23 @@ await check("RevenueCat app, product, entitlement, offering and package", async 
     rcList(`/packages/${encodeURIComponent(monthly.id)}/products`),
   ]);
   try {
-    verifyRevenueCatMapping(app, product, entitlementProducts, offering, packageProducts, appId);
+    // Locked Capacitor plugin uses hybrid-common 18.21.0, whose Maven POM resolves
+    // Android purchases 10.13.0. Fail closed if that verified dependency changes.
+    const nativeGradle = fs.readFileSync(
+      "node_modules/@revenuecat/purchases-capacitor/android/build.gradle",
+      "utf8",
+    );
+    if (!nativeGradle.includes("purchases-hybrid-common:18.21.0"))
+      throw new CheckError("Reverify the installed native RevenueCat SDK eligibility.");
+    verifyRevenueCatMapping(
+      app,
+      product,
+      entitlementProducts,
+      offering,
+      packageProducts,
+      appId,
+      10,
+    );
   } catch (e) {
     throw new CheckError(e.message);
   }

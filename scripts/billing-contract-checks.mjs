@@ -34,6 +34,7 @@ export function verifyRevenueCatMapping(
   offering,
   packageProducts,
   appId,
+  googleSdkMajor = 0,
 ) {
   if (
     app.id !== appId ||
@@ -52,7 +53,12 @@ export function verifyRevenueCatMapping(
   if (offering.lookup_key !== mapping.offering || !offering.is_current)
     throw new Error("The default offering must be current.");
   if (
-    !packageProducts.some((p) => p.product?.id === product.id && p.eligibility_criteria === "all")
+    !packageProducts.some(
+      (p) =>
+        p.product?.id === product.id &&
+        (p.eligibility_criteria === "all" ||
+          (p.eligibility_criteria === "google_sdk_ge_6" && googleSdkMajor >= 6)),
+    )
   )
-    throw new Error("Monthly package must contain the canonical product for all SDK versions.");
+    throw new Error("Monthly package must contain the canonical product for the installed SDK.");
 }

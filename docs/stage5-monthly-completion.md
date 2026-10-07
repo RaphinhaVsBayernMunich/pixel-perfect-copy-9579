@@ -1,5 +1,17 @@
 # Stage 5 monthly completion — 2026-10-04
 
+## Owner-confirmed separate catalog key — 2026-10-07
+
+The owner confirmed “QuestOS backend subscriber verification” is V1 and created “QuestOS catalog verification” as a separate V2 read-only project/catalog key. Fresh private V2 input passed on attempt 1 (apps HTTP 200), then was stored through Cloudflare secret storage as `REVENUECAT_CONFIGURATION_API_KEY` and in the ignored local verification environment. The V1 key remains unchanged. No key was created or rotated by automation.
+
+Authenticated catalog verification now passes **10/10 — CONFIG READY**. The V2 projects response identifies QuestOS as `projf6813f52` (dashboard project `f6813f52`), and its Google Play app is `app2a0b484e6e` / `app.questos.android`. Verified: `questos_premium_monthly:monthly` → `premium`; `default` → `$rc_monthly` (`pkge8a21b0468f`) → the same monthly product. Annual/lifetime packages have no attached products, and historical annual receipt support remains preserved. The production public Google SDK key is verified against the app catalog.
+
+The verifier previously required package eligibility `all`; the actual base-plan mapping correctly uses `google_sdk_ge_6`. The locked native dependency is purchases-hybrid-common 18.21.0 → Android purchases 10.13.0 (verified Maven POM). The corrected verifier checks eligibility for that installed SDK and fails closed if the verified native dependency changes. Regression assertions accept SDK 10 and reject incompatible eligibility/SDK 5. Documentation: https://www.revenuecat.com/docs/api-v2/package
+
+Provider webhook registration API returned HTTP 200 with zero registrations. Google Pub/Sub lists zero subscriptions. Dashboard automation still fails during Windows sandbox initialization; provider webhook registration/test delivery and RevenueCat RTDN connection/receipt remain pending owner interaction. Read-only key permissions were not expanded. No duplicate webhook/topic was created, and no fabricated test delivery is claimed.
+
+Frozen install, typecheck, all 93 tests/463 assertions, production build, relevant ESLint, security scan and Android production sync passed. App/billing health returned 200, unauthenticated webhook 401 and authenticated invalid JSON 400. The owner-signed v2 AAB remains unchanged, verifies all 466 payload entries and passes bundletool validation. No Android rebuild is necessary. Cloudflare secret storage applied the server-only catalog secret; no backend source change requiring another deployment was made. Stage 5 remains incomplete until provider webhook and RTDN delivery are verified; no Play production release or purchase occurred.
+
 ## Final technical recheck — 2026-10-07
 
 The existing subscriber key again returned HTTP 200 on the required subscriber endpoint and HTTP 403 on the documented V2 catalog endpoint. The sanitized response did not identify version incompatibility or missing permissions. Browser initialization failed before dashboard access (`apply deny-read ACLs`); owner metadata confirmation is pending. No new key, permission change, credential replacement or deployment was performed without that evidence.

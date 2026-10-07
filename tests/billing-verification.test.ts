@@ -40,6 +40,18 @@ test("RevenueCat readiness rejects the wrong app, unattached entitlement and wro
   expect(() =>
     verifyRevenueCatMapping(app, product, [product], offering, products, "app1"),
   ).not.toThrow();
+  products[0].eligibility_criteria = "google_sdk_ge_6";
+  expect(() =>
+    verifyRevenueCatMapping(app, product, [product], offering, products, "app1", 10),
+  ).not.toThrow();
+  expect(() =>
+    verifyRevenueCatMapping(app, product, [product], offering, products, "app1", 5),
+  ).toThrow("installed SDK");
+  products[0].eligibility_criteria = "google_sdk_lt_6";
+  expect(() =>
+    verifyRevenueCatMapping(app, product, [product], offering, products, "app1", 10),
+  ).toThrow("installed SDK");
+  products[0].eligibility_criteria = "all";
   expect(() => verifyRevenueCatMapping(app, product, [], offering, products, "app1")).toThrow(
     "entitlement",
   );
