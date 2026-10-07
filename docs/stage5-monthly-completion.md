@@ -1,5 +1,15 @@
 # Stage 5 monthly completion — 2026-10-04
 
+## Automated webhook completion attempt — 2026-10-07
+
+One existing RevenueCat webhook is registered at the correct production URL. The backend explicitly expects `Bearer ` followed by the unchanged existing secret; a raw-secret Authorization header returned 401. An automated update of that same registration using the V2 catalog key returned 403, consistent with its intentionally read-only permissions. No duplicate registration, secret rotation or permission expansion occurred. Browser control still fails before opening the dashboard with Windows sandbox `apply deny-read ACLs`. Real provider test delivery therefore remains blocked by dashboard access / API write authorization; direct endpoint tests are not provider delivery evidence.
+
+Direct automated checks using the privately retrieved existing secret returned: missing auth 401, authenticated invalid JSON 400, complete authenticated RevenueCat TEST schema 200, and duplicate TEST 200. The initial synthetic probe omitted app ID and event timestamp, returned 500, and was corrected to the actual schema before retry; no billing state was granted or modified.
+
+The existing RTDN topic and Google Play publisher IAM were reverified. Google lists zero subscriptions; this observation does not alone establish whether RevenueCat's managed integration is configured. Play configuration, RevenueCat connection and actual receipt still need provider-side evidence. No invented subscriber or duplicate topic was created.
+
+Frozen install, typecheck, all 93 tests/463 assertions, build, secret scan (432 files, zero findings), production sync, relevant ESLint and billing verification 10/10 passed. Production health and live Supabase billing authority checks passed. The unchanged signed v2 AAB again verifies all 466 entries against the owner's certificate and passes bundletool validation. No backend/client change requiring deployment or rebuilding was made. Stage 5 is blocked on actual provider webhook and RTDN verification; no manual webhook test was requested, production release performed or purchase made.
+
 ## Owner-confirmed separate catalog key — 2026-10-07
 
 The owner confirmed “QuestOS backend subscriber verification” is V1 and created “QuestOS catalog verification” as a separate V2 read-only project/catalog key. Fresh private V2 input passed on attempt 1 (apps HTTP 200), then was stored through Cloudflare secret storage as `REVENUECAT_CONFIGURATION_API_KEY` and in the ignored local verification environment. The V1 key remains unchanged. No key was created or rotated by automation.
