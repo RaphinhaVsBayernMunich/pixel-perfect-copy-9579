@@ -38,12 +38,18 @@ export const deleteAccount = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ confirm: z.literal("DELETE") }).parse(input))
   .handler(async ({ context }) => {
     const { userId } = context;
-    // ON DELETE CASCADE on auth.users FK removes rows in public tables that
-    // reference user_id. Deleting the auth user is authoritative.
+    // Request processor deletion first. On failure keep the account available for retry.
+    const { deleteRevenueCatCustomer } = await import("./subscription/revenuecat-http.server");
+    const key = process.env.REVENUECAT_SECRET_API_KEY;
+    if (!key) throw new Error("Account deletion is temporarily unavailable. Contact support.");
+    await deleteRevenueCatCustomer(userId, key);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    // All user-owned tables use ON DELETE CASCADE. Do not partially erase data before auth deletion succeeds.
+    // User-owned rows cascade. Trial anti-abuse hashes and billing deduplication IDs remain.
     const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
-    if (error) throw error;
+    if (error)
+      throw new Error(
+        "Billing deletion was requested, but account removal failed. Retry deletion or contact support.",
+      );
     return { ok: true };
   });
 

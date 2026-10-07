@@ -17,7 +17,11 @@ function PrivacyPage() {
   return (
     <article className="prose prose-invert mx-auto max-w-2xl px-5 pt-10 pb-16 md:px-10 md:pt-16">
       <h1 className="font-display text-3xl font-semibold">Privacy Policy</h1>
-      <p className="text-sm text-muted-foreground">Last updated: {new Date().getFullYear()}</p>
+      <p className="text-sm text-muted-foreground">Last updated: 7 October 2026</p>
+      <p>
+        QuestOS privacy and support contact:{" "}
+        <a href="mailto:founder@questos.net">founder@questos.net</a>.
+      </p>
 
       <h2>What we collect</h2>
       <p>
@@ -42,6 +46,12 @@ function PrivacyPage() {
         backups stay on that device until you clear site or app data. Conflicts retain a local
         backup instead of silently overwriting a newer cloud save.
       </p>
+      <p>
+        Google sign-in uses Google OAuth and Supabase to authenticate your account; email and
+        profile information are used for sign-in. Cloudflare hosts the QuestOS backend. Network
+        requests reveal connection information such as IP address and browser or device headers to
+        the receiving provider. The interface also requests fonts from Google Fonts.
+      </p>
       <h2>Notifications</h2>
       <p>
         Android reminders are scheduled locally after permission is granted. They use general text,
@@ -51,14 +61,19 @@ function PrivacyPage() {
       <h2>Payments</h2>
       <p>
         Payments on the web are processed by Stripe. On Android they are processed by Google Play
-        Billing (via RevenueCat). QuestOS never sees your full card number.
+        Billing (via RevenueCat). QuestOS never sees your full card number. RevenueCat receives your
+        QuestOS account identifier and purchase/subscription records to verify access. Payment
+        providers process payment information under their own policies.
       </p>
 
       <h2>AI</h2>
       <p>
         Prompts you send to the AI Coach are transmitted through the QuestOS backend to DeepSeek for
         model completion. QuestOS records feature usage and token counts, without storing prompts or
-        generated text in its AI usage logs.
+        generated text in its AI usage logs. Generated quests and saved assistant proposals can be
+        stored with your account. Avoid entering sensitive information in prompts. DeepSeek
+        processes the submitted content under its own applicable terms and privacy policy; QuestOS
+        does not promise that the provider retains nothing or never uses content for training.
       </p>
 
       <h2>Optional memory, calendar and health features</h2>
@@ -84,7 +99,33 @@ function PrivacyPage() {
         You can export your editable profile, quests, journal, achievements and saved Premium
         documents as JSON from
         <em> Settings → Data</em>. You can delete your account permanently from the same screen.
-        Deletion is irreversible.
+        Deletion is irreversible. See{" "}
+        <a href="/legal/delete-account">account deletion instructions</a> for requests without the
+        app. Deletion requests RevenueCat customer removal asynchronously. It does not cancel
+        subscriptions: cancel Google Play or Stripe subscriptions separately before deleting.
+      </p>
+
+      <h2>Retention and deletion limits</h2>
+      <p>
+        Account data is kept while your account exists and removed from the active QuestOS database
+        through account deletion. Trial-abuse hashes and billing deduplication identifiers remain
+        for fraud prevention and duplicate-event protection. Google Play, Stripe and other providers
+        may retain payment, backup and access records under their policies. QuestOS does not set a
+        verified deletion period for these provider records. Deleting on one device cannot erase
+        offline copies on other devices; clear their app or site data separately.
+      </p>
+      <h2>Children and account safety</h2>
+      <p>
+        QuestOS currently requires an account and does not implement verified parental consent or a
+        child-specific mode. Parents or guardians should contact us about a child's information or
+        deletion requests. Do not submit a child's sensitive information to AI features.
+      </p>
+      <h2>Security and updates</h2>
+      <p>
+        Production connections use HTTPS. Account access rules restrict database records and the
+        backend verifies paid access; private provider credentials stay on the server. No service
+        can guarantee absolute security. Changes to this policy will be posted here with an updated
+        date. Contact us to request access, correction or deletion assistance.
       </p>
 
       <h2>Contact</h2>

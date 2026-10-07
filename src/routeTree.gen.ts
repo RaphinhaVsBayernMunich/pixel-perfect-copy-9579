@@ -17,6 +17,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as QuestsRouteImport } from './routes/quests'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
+import { Route as LegalDeleteAccountRouteImport } from './routes/legal.delete-account'
 import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
 import { Route as LegalTermsRouteImport } from './routes/legal.terms'
 import { Route as ApiBillingHealthRouteImport } from './routes/api/billing/health'
@@ -63,6 +64,11 @@ const ApiHealthRoute = ApiHealthRouteImport.update({
   path: '/api/health',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LegalDeleteAccountRoute = LegalDeleteAccountRouteImport.update({
+  id: '/legal/delete-account',
+  path: '/legal/delete-account',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LegalPrivacyRoute = LegalPrivacyRouteImport.update({
   id: '/legal/privacy',
   path: '/legal/privacy',
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/quests': typeof QuestsRoute
   '/settings': typeof SettingsRoute
   '/api/health': typeof ApiHealthRoute
+  '/legal/delete-account': typeof LegalDeleteAccountRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
   '/api/billing/health': typeof ApiBillingHealthRoute
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/quests': typeof QuestsRoute
   '/settings': typeof SettingsRoute
   '/api/health': typeof ApiHealthRoute
+  '/legal/delete-account': typeof LegalDeleteAccountRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
   '/api/billing/health': typeof ApiBillingHealthRoute
@@ -131,6 +139,7 @@ export interface FileRoutesById {
   '/quests': typeof QuestsRoute
   '/settings': typeof SettingsRoute
   '/api/health': typeof ApiHealthRoute
+  '/legal/delete-account': typeof LegalDeleteAccountRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
   '/api/billing/health': typeof ApiBillingHealthRoute
@@ -148,6 +157,7 @@ export interface FileRouteTypes {
     | '/quests'
     | '/settings'
     | '/api/health'
+    | '/legal/delete-account'
     | '/legal/privacy'
     | '/legal/terms'
     | '/api/billing/health'
@@ -163,6 +173,7 @@ export interface FileRouteTypes {
     | '/quests'
     | '/settings'
     | '/api/health'
+    | '/legal/delete-account'
     | '/legal/privacy'
     | '/legal/terms'
     | '/api/billing/health'
@@ -178,6 +189,7 @@ export interface FileRouteTypes {
     | '/quests'
     | '/settings'
     | '/api/health'
+    | '/legal/delete-account'
     | '/legal/privacy'
     | '/legal/terms'
     | '/api/billing/health'
@@ -194,6 +206,7 @@ export interface RootRouteChildren {
   QuestsRoute: typeof QuestsRoute
   SettingsRoute: typeof SettingsRoute
   ApiHealthRoute: typeof ApiHealthRoute
+  LegalDeleteAccountRoute: typeof LegalDeleteAccountRoute
   LegalPrivacyRoute: typeof LegalPrivacyRoute
   LegalTermsRoute: typeof LegalTermsRoute
   ApiBillingHealthRoute: typeof ApiBillingHealthRoute
@@ -259,6 +272,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/legal/delete-account': {
+      id: '/legal/delete-account'
+      path: '/legal/delete-account'
+      fullPath: '/legal/delete-account'
+      preLoaderRoute: typeof LegalDeleteAccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/legal/privacy': {
       id: '/legal/privacy'
       path: '/legal/privacy'
@@ -306,6 +326,7 @@ const rootRouteChildren: RootRouteChildren = {
   QuestsRoute: QuestsRoute,
   SettingsRoute: SettingsRoute,
   ApiHealthRoute: ApiHealthRoute,
+  LegalDeleteAccountRoute: LegalDeleteAccountRoute,
   LegalPrivacyRoute: LegalPrivacyRoute,
   LegalTermsRoute: LegalTermsRoute,
   ApiBillingHealthRoute: ApiBillingHealthRoute,

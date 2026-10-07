@@ -2,6 +2,8 @@ import { requestReminderPermission } from "@/lib/notifications";
 import { isNative } from "@/lib/native/platform";
 import { downloadText } from "@/lib/premium/import-export";
 import { useAuth } from "@/lib/auth-store";
+import { detachSync } from "@/lib/cloud-sync";
+import { removeAccountState } from "@/lib/account-storage";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import {
@@ -411,8 +413,17 @@ function DangerZone() {
     if (confirm !== "DELETE") return;
     setDeleting(true);
     try {
+      const userId = useAuth.getState().user?.id;
+      if (!userId) throw new Error("Sign in before deleting your account.");
       await deleteAccount({ data: { confirm: "DELETE" } });
-      track("account_deleted");
+      detachSync();
+      try {
+        removeAccountState(window.localStorage, userId);
+      } catch {
+        toast.error(
+          "Account deleted. Clear this device's app or site data to remove inaccessible local copies.",
+        );
+      }
       toast.success("Account deleted. Signing out…");
       await supabase.auth.signOut();
       window.location.href = "/";
@@ -432,7 +443,9 @@ function DangerZone() {
           <h2 className="font-display text-base font-semibold text-destructive">Delete account</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
             Permanently removes your account, quests, legacy, achievements and settings. This cannot
-            be undone.
+            be undone. Deletion does not cancel Google Play or Stripe subscriptions. Cancel them
+            through your billing provider first to avoid future charges. Payment-provider records,
+            trial-abuse hashes and billing deduplication identifiers may remain.
           </p>
         </div>
       </div>

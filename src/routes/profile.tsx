@@ -13,8 +13,7 @@ export const Route = createFileRoute("/profile")({
       { title: "Profile — QuestOS" },
       {
         name: "description",
-        content:
-          "Your character sheet: level, attributes, skills, projects, and settings.",
+        content: "Your character sheet: level, attributes, skills, projects, and settings.",
       },
       { property: "og:title", content: "Profile — QuestOS" },
       {
@@ -64,9 +63,7 @@ function ProfilePage() {
               <p className="text-[10px] tracking-[0.2em] text-muted-foreground uppercase">
                 {character.season}
               </p>
-              <h1 className="mt-1 font-display text-3xl font-semibold">
-                {character.name}
-              </h1>
+              <h1 className="mt-1 font-display text-3xl font-semibold">{character.name}</h1>
               <p className="text-sm text-muted-foreground">
                 {character.title} · Day {character.streakDays}
               </p>
@@ -83,7 +80,11 @@ function ProfilePage() {
 
       {/* Attributes */}
       <section className="mb-8">
-        <SectionHeader icon={<Zap className="h-4 w-4" />} title="Attributes" hint="Derived from category XP" />
+        <SectionHeader
+          icon={<Zap className="h-4 w-4" />}
+          title="Attributes"
+          hint="Derived from category XP"
+        />
         <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {attributes.map((a) => (
             <div
@@ -124,7 +125,8 @@ function ProfilePage() {
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {topCategories.map((cat, i) => {
             const xp = character.categoryXp[cat];
-            const tier = xp >= 2000 ? "Master" : xp >= 1000 ? "Adept" : xp >= 400 ? "Journeyman" : "Novice";
+            const tier =
+              xp >= 2000 ? "Master" : xp >= 1000 ? "Adept" : xp >= 400 ? "Journeyman" : "Novice";
             return (
               <div
                 key={cat}
@@ -151,7 +153,11 @@ function ProfilePage() {
 
       {/* Recent trophies */}
       <section className="mb-8">
-        <SectionHeader icon={<Award className="h-4 w-4" />} title="Trophies" hint={`${unlocked.length} unlocked`} />
+        <SectionHeader
+          icon={<Award className="h-4 w-4" />}
+          title="Trophies"
+          hint={`${unlocked.length} unlocked`}
+        />
         {recent.length === 0 ? (
           <div className="mt-4 rounded-xl border border-dashed border-hairline bg-card/40 p-6 text-center text-sm text-muted-foreground">
             Complete quests to unlock your first trophy.
@@ -174,9 +180,7 @@ function ProfilePage() {
                 >
                   <Award className="h-5 w-5" />
                 </div>
-                <p className="font-display text-xs font-semibold leading-tight">
-                  {a.name}
-                </p>
+                <p className="font-display text-xs font-semibold leading-tight">{a.name}</p>
               </div>
             ))}
           </div>
@@ -189,7 +193,8 @@ function ProfilePage() {
       </section>
 
       <p className="text-xs text-muted-foreground">
-        Cloud sync is always on. Premium unlocks unlimited AI, advanced analytics, themes, sounds, integrations, and more.
+        Cloud sync is always on. Premium unlocks higher AI limits, advanced analytics, themes,
+        sounds, integrations, and more.
       </p>
     </div>
   );
@@ -198,17 +203,8 @@ function ProfilePage() {
 function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
     <div className="rounded-xl border border-hairline bg-background/40 px-3 py-2">
-      <p className="text-[10px] tracking-widest text-muted-foreground uppercase">
-        {label}
-      </p>
-      <p
-        className={cn(
-          "mt-1 font-display text-lg font-semibold",
-          accent && "text-xp",
-        )}
-      >
-        {value}
-      </p>
+      <p className="text-[10px] tracking-widest text-muted-foreground uppercase">{label}</p>
+      <p className={cn("mt-1 font-display text-lg font-semibold", accent && "text-xp")}>{value}</p>
     </div>
   );
 }
@@ -231,9 +227,7 @@ function SectionHeader({
         </h2>
       </div>
       {hint && (
-        <span className="text-[10px] tracking-widest text-muted-foreground uppercase">
-          {hint}
-        </span>
+        <span className="text-[10px] tracking-widest text-muted-foreground uppercase">{hint}</span>
       )}
     </div>
   );

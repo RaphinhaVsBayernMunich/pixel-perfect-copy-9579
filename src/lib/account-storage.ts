@@ -3,6 +3,17 @@ export function accountStorageKey(userId: string, kind: string): string {
   return `questos:v2:${userId}:${kind}`;
 }
 
+/** Call after confirmed backend deletion, with sync detached. Preserve other accounts. */
+export function removeAccountState(storage: Storage, userId: string) {
+  const prefix = accountStorageKey(userId, "");
+  const keys: string[] = [];
+  for (let index = 0; index < storage.length; index++) {
+    const key = storage.key(index);
+    if (key?.startsWith(prefix)) keys.push(key);
+  }
+  keys.forEach((key) => storage.removeItem(key));
+}
+
 export function readAccountState<T>(storage: Storage, userId: string, kind: string): T | null {
   const raw = storage.getItem(accountStorageKey(userId, kind));
   if (!raw) return null;
