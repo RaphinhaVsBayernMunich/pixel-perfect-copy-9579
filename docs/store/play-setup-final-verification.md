@@ -7,11 +7,11 @@
   reviewer data, real quest completion/XP and successful native AI Coach response. All visually
   inspected. No UI reconstruction, artificial history, pixel alteration or credential exposure.
 - Image hashes/dimensions/modes: `store-assets-manifest.json`.
-- English listing field limits: title 7/30, short 68/80, full 1484/4000. Exact JSON preserved;
+- English listing field limits: title 7/30, short 68/80, full 1503/4000. Exact JSON preserved;
   additional copy-ready text in `play-listing-copy-ready.md`.
 - Exact Console fields/owner attestations: `play-console-final-checklist.md`; full Data Safety
   provider evidence remains in `play-compliance-13plus.md`.
-- Legal operator still unknown. One input process in `legal-operator.md` updates all three legal
+- Legal operator confirmed as **Oryxion** on 8 October 2026. The process in `legal-operator.md` updates all three legal
   pages through their shared JSON/notice, canonical compliance identity and both prepared listing
   formats. Public product branding and private verified developer identity remain separate.
 
@@ -62,7 +62,7 @@ No Play review submission, policy attestation or Production release. Google's pr
 `changesNotSentForReview=true` commit safeguard is retained; no unsafe commit fallback is used.
 Metadata/graphics are durable local prepared files, not falsely claimed committed dashboard edits.
 
-Only setup actions remaining: supply legal identity and run/deploy its prepared update; privately
+Only setup actions remaining: privately
 enter reviewer login/instructions; confirm/upload prepared graphics/text; attest policy/health
 declarations; inspect actual Dashboard identity/payment/setup status, which the audited Publisher
 API does not expose. Conditional tablet/other surface requirements must follow actual distribution.
@@ -71,3 +71,22 @@ Monthly Google Play/RevenueCat mapping remains `questos_premium_monthly:monthly`
 `default` → `$rc_monthly` → monthly product, US $2.99/P1M. Historical annual receipt support remains.
 No real purchase, restore/refund lifecycle or end-to-end RTDN delivery is claimed by catalog checks.
 These store-test activities are distinct from preparing the listing and policy forms.
+
+## Oryxion operator completion — 8 October 2026
+
+The owner confirmed Oryxion as the organization operating QuestOS. The prepared legal operator
+process was run with that exact name. QuestOS branding, Android package and all billing IDs remain
+unchanged. The final checklist records the operator as resolved; no operator placeholder remains
+in prepared legal/compliance materials or live legal pages. The environment variable name in the
+reusable source script is an input identifier, not an unresolved public placeholder.
+
+Deployed Worker version: `db57ded1-4440-4bd0-b624-7fe24049855e` (supersedes the version above).
+Privacy, terms and deletion pages each returned HTTP 200 and contained
+“QuestOS is operated by Oryxion.” Public app health passed deployment verification.
+Type checking, all 98 tests (492 assertions), production build and security scan passed;
+467 files scanned with zero findings. No source-code ESLint files changed in this identity update.
+
+Remaining owner Console work: enter private reviewer access, upload/confirm listing and assets,
+attest policy/health forms, and inspect/complete developer identity and payment verification using
+accurate owner facts. No Console review submission or Production publication occurred.
+No AAB rebuild/reupload is required for this remote legal identity update.

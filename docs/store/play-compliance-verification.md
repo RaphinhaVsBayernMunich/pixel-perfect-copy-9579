@@ -46,4 +46,5 @@ not fabricated. The AI exception assessment is not a Google approval or a model 
 
 Reviewer credentials remain outside the repository in the owner-only private file described in
 `reviewer-access.md`. They must be supplied privately in Play Console before review. The legal
-operator name remains the one missing owner identity fact.
+operator was subsequently confirmed as Oryxion on 8 October 2026; see legal-operator.md.
+This earlier verification record is superseded by play-setup-final-verification.md.

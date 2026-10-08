@@ -35,6 +35,8 @@ An account is required. Android Premium subscriptions use Google Play Billing an
 Privacy: https://questos.questos-1fd92776.workers.dev/legal/privacy
 Account deletion: https://questos.questos-1fd92776.workers.dev/legal/delete-account
 Support: founder@questos.net
+
+Operator: Oryxion
 ```
 
 Source: play-listing.en-US.json. Use the legal-operator.md process to insert the owner-supplied name consistently. Prepared locally; no review submission or Production publication.

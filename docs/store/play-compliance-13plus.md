@@ -169,10 +169,10 @@ References: [Google Data Safety](https://support.google.com/googleplay/android-d
 ## E. Privacy and legal operator placement
 
 Public privacy URL is preserved. Updated 13+ positioning, AI-sharing/provider retention, IP-derived
-region/diagnostics, guardian review and self-hosted fonts. Operator name remains deliberately
-unfilled until supplied. Insert the actual legal name (not an invented company) in:
+region/diagnostics, guardian review and self-hosted fonts. The owner confirmed **Oryxion** as
+the legal operator. **QuestOS is operated by Oryxion.** The identity applies to:
 
-1. Privacy policy opening: “QuestOS is operated by [exact legal name]. Privacy contact: founder@questos.net.”
+1. Privacy policy opening: “QuestOS is operated by Oryxion.” Privacy contact: founder@questos.net.
 2. Terms service/operator paragraph, separate from QuestOS product branding.
 3. Deletion page introductory operator/contact statement.
 4. Play Console developer account/legal identity and organization details, matching verified identity
@@ -304,7 +304,8 @@ No service-account JSON, key, signing password or reviewer credential is committ
 
 ## Q. Only owner facts/actions remaining
 
-1. Supply the exact legal operator name so it can be inserted and deployed; do not invent an entity.
+1. Confirm Console developer/payment identity matches Oryxion where legal operator identity is requested;
+   address, banking and identity verification remain separate owner facts.
 2. Privately copy dedicated reviewer credentials into App content → App access; paste instructions
    from `reviewer-access.md`. No real purchase needed for premium-feature review.
 3. Upload the finished feature graphic, genuine Android captures (see `screenshots/README.md`) and
@@ -324,7 +325,7 @@ maintain reviewer access. Those are not accomplished by a one-time form submissi
 
 13+ audience and limited-scope AI applicability are resolved at the preparation level; the earlier
 under-13/reporting blockers are removed. Technical runtime/billing checks do not certify Google
-approval. Legal identity, asset upload confirmations, privately supplied review login, owner attestations and
+approval. Legal operator is resolved as Oryxion. Asset upload confirmations, privately supplied review login, owner attestations and
 unobserved Console verification tasks remain before public-release setup is complete. Final assets
 and exact dashboard fields are recorded in `play-console-final-checklist.md`.
 Do not publish Production automatically.

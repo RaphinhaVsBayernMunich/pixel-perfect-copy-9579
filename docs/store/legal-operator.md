@@ -1,23 +1,18 @@
 # QuestOS legal operator
 
-Legal operator: **not supplied**. Do not substitute the QuestOS product brand as legal identity.
+Legal operator: Oryxion
 
-Run this once the owner supplies the exact public legal person/business name, from PowerShell:
+This owner-supplied public identity is shared by the privacy, terms and deletion pages, compliance identity record and prepared JSON/copy-ready Play description.
+Support/privacy: founder@questos.net. Product brand: QuestOS.
 
-```powershell
-$env:LEGAL_OPERATOR_NAME = Read-Host 'Exact legal operator name'
-bun scripts/legal-operator.mjs
-Remove-Item Env:LEGAL_OPERATOR_NAME
-```
+## Confirmation and future corrections
 
-The command validates a nonempty single-line name, updates the shared public identity JSON
-consumed by Privacy Policy, Terms and account deletion, this compliance identity record,
-`play-console-values.json`, a separate operator line in the English listing description,
-and its copy-ready Markdown version.
-It never changes the QuestOS title or privately verified Play developer/payment identity.
-All compliance packs refer to this canonical record instead of independently maintained names.
+QuestOS is operated by Oryxion. The owner confirmed this organization on 8 October 2026.
+There are no outstanding operator-name placeholders. The reusable owner update script remains
+available for a future confirmed correction; the current identity has already been applied.
 
-Review the diff, run required checks, deploy the existing Worker, then commit/push the public changes.
-The legal pages use the existing Android HTTPS runtime; no AAB rebuild is required.
-Enter the same exact legal identity in Console's developer verification/payment fields where required.
-Jurisdiction, address, tax/bank details and public developer display name are separate facts.
+Play developer/payment identity must be entered and verified privately in Console. This update
+does not modify a developer account or attest address, jurisdiction, banking or registration details.
+QuestOS remains the product/app name; billing identifiers are unchanged.
+
+No AAB rebuild is needed for these remote legal pages.
