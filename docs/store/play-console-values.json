@@ -1,0 +1,14 @@
+{
+  "legalOperatorName": null,
+  "category": "Productivity",
+  "appType": "App",
+  "contactEmail": "founder@questos.net",
+  "contactWebsite": "https://questos.questos-1fd92776.workers.dev",
+  "privacyPolicy": "https://questos.questos-1fd92776.workers.dev/legal/privacy",
+  "accountDeletion": "https://questos.questos-1fd92776.workers.dev/legal/delete-account",
+  "containsAds": false,
+  "targetAudience": ["13–15", "16–17", "18 and over"],
+  "listingSource": "play-listing.en-US.json",
+  "reviewerInstructionsSource": "reviewer-access.md",
+  "dataSafetySource": "play-compliance-13plus.md#d-final-data-safety-answers"
+}

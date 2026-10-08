@@ -4,6 +4,10 @@ Use **Policy and programs → App content → App access → All or some functio
 Add instructions named **QuestOS email/password and premium-feature review**.
 The app requires a QuestOS account; Google sign-in is optional.
 
+Owner recheck: `bun scripts/play-reviewer-verify.mjs`. It verifies the private password,
+server user, active Premium trial, original review expiry and absence of credential leaks.
+It ends only its own verification session, preserving other reviewer app/browser sessions.
+
 ## One private owner action
 
 Open `C:\QuestOS-Secrets\questos-play-reviewer.private.json` locally and copy only its `email`

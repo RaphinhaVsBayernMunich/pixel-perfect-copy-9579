@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { APP_CONFIG } from "@/lib/config/admin-config";
+import { LegalOperatorNotice } from "@/components/legal-operator-notice";
 
 export const Route = createFileRoute("/legal/delete-account")({
   head: () => ({ meta: [{ title: "Delete your QuestOS account" }] }),
@@ -11,6 +12,7 @@ function DeleteAccountPage() {
   return (
     <article className="prose prose-invert mx-auto max-w-2xl px-5 py-10">
       <h1>Delete your QuestOS account and data</h1>
+      <LegalOperatorNotice />
       <p>You can request deletion without installing the app.</p>
       <p>
         <a href={`mailto:${email}?subject=QuestOS%20account%20deletion`}>Email {email}</a> from the

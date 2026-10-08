@@ -16,4 +16,6 @@ This is promotional branding, not a fabricated screenshot.
 - Export opaque RGB; visually check text, icon edges and contrast at full size and thumbnail size.
 
 Screenshots must be captured separately from the real QuestOS app using clean review/test data.
-This specification is ready for design/export; no finished feature-graphic PNG is claimed.
+Finished output: `questos-feature-graphic.png` (1024×500, opaque RGB). Editable vector source:
+`questos-feature-graphic.pdf`. `scripts/store-feature-graphic.py` renders the exact geometric mark
+and existing licensed fonts. Visually checked at full size and thumbnail size; no app UI fabricated.

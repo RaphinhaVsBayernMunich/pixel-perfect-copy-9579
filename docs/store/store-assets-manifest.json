@@ -1,0 +1,44 @@
+[
+  {
+    "file": "docs/store/questos-feature-graphic.png",
+    "width": 1024,
+    "height": 500,
+    "mode": "RGB",
+    "sha256": "d4719d86af48e244b51150b0894539b5fae9bacbb389e584fe170fe395441936"
+  },
+  {
+    "file": "docs/store/screenshots/01-dashboard.png",
+    "width": 1080,
+    "height": 1920,
+    "mode": "RGB",
+    "sha256": "1386b349559033fb3c3a92185b095882d459213335781da1a7ebb8f641f5b6d5"
+  },
+  {
+    "file": "docs/store/screenshots/02-quest-board.png",
+    "width": 1080,
+    "height": 1920,
+    "mode": "RGB",
+    "sha256": "9195a34432bac8f07b23e796736462c75706ea8703c7c4fc6f36187fe0edf68f"
+  },
+  {
+    "file": "docs/store/screenshots/03-advanced-analytics.png",
+    "width": 1080,
+    "height": 1920,
+    "mode": "RGB",
+    "sha256": "c52a83b695f9a11ae841930bc580c13883f0bfbbe649ed50268ed18dfd527b94"
+  },
+  {
+    "file": "docs/store/screenshots/04-premium-memory.png",
+    "width": 1080,
+    "height": 1920,
+    "mode": "RGB",
+    "sha256": "9c260ab688c699984b21335e7ad79b9d19602a2b3f906c2abb62b3502efaf2af"
+  },
+  {
+    "file": "docs/store/screenshots/05-ai-coach.png",
+    "width": 1080,
+    "height": 1920,
+    "mode": "RGB",
+    "sha256": "9b53999b37a1884be468caea65df4a3b1f07e5a9280a53e967c84cc95bc7f60d"
+  }
+]

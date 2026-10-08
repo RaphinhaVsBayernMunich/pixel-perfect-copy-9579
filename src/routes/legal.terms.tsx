@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { APP_CONFIG } from "@/lib/config/admin-config";
+import { LegalOperatorNotice } from "@/components/legal-operator-notice";
 
 export const Route = createFileRoute("/legal/terms")({
   head: () => ({
@@ -18,6 +19,7 @@ function TermsPage() {
     <article className="prose prose-invert mx-auto max-w-2xl px-5 pt-10 pb-16 md:px-10 md:pt-16">
       <h1 className="font-display text-3xl font-semibold">Terms of Service</h1>
       <p className="text-sm text-muted-foreground">Last updated: 7 October 2026</p>
+      <LegalOperatorNotice />
 
       <h2>The service</h2>
       <p>

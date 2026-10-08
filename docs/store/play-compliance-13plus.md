@@ -3,7 +3,8 @@
 Reviewed 7 October 2026. This supersedes the earlier all-ages audit.
 Package `app.questos.android`; Internal Testing versionCode 2 / versionName 1.0.0.
 Runtime https://questos.questos-1fd92776.workers.dev.
-Support/privacy: founder@questos.net. Legal operator: **pending the owner's exact name**.
+Support/privacy: founder@questos.net. Legal operator: see the canonical owner-supplied
+[legal identity record and update process](legal-operator.md); no identity is inferred from branding.
 
 ## A. Final target audience
 
@@ -179,8 +180,10 @@ unfilled until supplied. Insert the actual legal name (not an invented company) 
 5. Store listing support contact remains founder@questos.net; use legal identity where Console
    asks for operator information, not by replacing the QuestOS app title.
 
-Source `APP_CONFIG.legal.companyName` currently identifies the QuestOS brand. No legal identity
-or jurisdiction is inferred from it. Exact name has been requested once in this task.
+Source `APP_CONFIG.legal.companyName` identifies the QuestOS brand. The separate
+`src/lib/config/legal-operator.json` is consumed by a shared notice on all three legal pages.
+The single update process in `legal-operator.md` updates public identity, this canonical
+compliance record and prepared Play metadata. No jurisdiction or verified developer identity is inferred.
 
 ## F. Account deletion
 
@@ -248,13 +251,13 @@ price to marketing copy; checkout displays localized Google Play price and renew
 
 ## K. Required assets
 
-| Asset                      | Dimensions / format / quantity                                                                                     | Existing status / real capture                                                                 |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
-| Store icon                 | 512×512; 32-bit PNG; one, ≤1 MB                                                                                    | Existing `questos-icon-512.png` verified 512×512; not uploaded                                 |
-| Feature graphic            | 1024×500; opaque 24-bit PNG/JPEG; one                                                                              | Exact branding/export specification in `feature-graphic-spec.md`; finished PNG not yet created |
-| Phone screenshots          | At least 2, up to 8; JPEG/24-bit PNG; sides 320…3840 px, longest ≤2× shortest                                      | None. Recommend real 1080×1920 Home quests, Calendar, Legacy and Profile/Premium captures      |
-| 7-inch tablet screenshots  | Up to 8 matching actual layout, JPEG/24-bit PNG; large-screen guidance: 4–8 captures at 1080…7680 px, 16:9 or 9:16 | None; capture genuine supported layout if tablets distributed                                  |
-| 10-inch tablet screenshots | Up to 8 matching actual layout, JPEG/24-bit PNG; large-screen guidance: 4–8 captures at 1080…7680 px, 16:9 or 9:16 | None; capture genuine supported layout if tablets distributed                                  |
+| Asset                      | Dimensions / format / quantity                                                                                     | Existing status / real capture                                                                                            |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| Store icon                 | 512×512; 32-bit PNG; one, ≤1 MB                                                                                    | Existing `questos-icon-512.png` verified 512×512; not uploaded                                                            |
+| Feature graphic            | 1024×500; opaque 24-bit PNG/JPEG; one                                                                              | Exact branding/export specification in `feature-graphic-spec.md`; finished opaque RGB PNG and vector source now available |
+| Phone screenshots          | At least 2, up to 8; JPEG/24-bit PNG; sides 320…3840 px, longest ≤2× shortest                                      | Five genuine 1080×1920 captures; provenance and order in screenshots/README.md                                            |
+| 7-inch tablet screenshots  | Up to 8 matching actual layout, JPEG/24-bit PNG; large-screen guidance: 4–8 captures at 1080…7680 px, 16:9 or 9:16 | None; capture genuine supported layout if tablets distributed                                                             |
+| 10-inch tablet screenshots | Up to 8 matching actual layout, JPEG/24-bit PNG; large-screen guidance: 4–8 captures at 1080…7680 px, 16:9 or 9:16 | None; capture genuine supported layout if tablets distributed                                                             |
 
 For expanded promotional eligibility use at least four genuine high-resolution screenshots;
 this is distinct from the basic two-screenshot requirement. Show clean test data, not owner data
@@ -304,7 +307,7 @@ No service-account JSON, key, signing password or reviewer credential is committ
 1. Supply the exact legal operator name so it can be inserted and deployed; do not invent an entity.
 2. Privately copy dedicated reviewer credentials into App content → App access; paste instructions
    from `reviewer-access.md`. No real purchase needed for premium-feature review.
-3. Export the feature graphic from its exact spec and capture genuine screenshots; upload those and
+3. Upload the finished feature graphic, genuine Android captures (see `screenshots/README.md`) and
    the existing icon through Store presence → Default store listing. Paste prepared listing text
    and contact details because Google's no-review commit option is rejected.
 4. Attest/submission only: App content → Privacy policy; Ads No; Target audience 13–15/16–17/18+;
@@ -321,6 +324,7 @@ maintain reviewer access. Those are not accomplished by a one-time form submissi
 
 13+ audience and limited-scope AI applicability are resolved at the preparation level; the earlier
 under-13/reporting blockers are removed. Technical runtime/billing checks do not certify Google
-approval. Legal identity, actual assets, privately supplied review login, owner attestations and
-unobserved Console verification tasks remain before public-release setup is complete.
+approval. Legal identity, asset upload confirmations, privately supplied review login, owner attestations and
+unobserved Console verification tasks remain before public-release setup is complete. Final assets
+and exact dashboard fields are recorded in `play-console-final-checklist.md`.
 Do not publish Production automatically.
