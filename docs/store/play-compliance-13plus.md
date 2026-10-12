@@ -71,8 +71,13 @@ unobserved provider configuration change or the use of another advertising/attri
 - Account creation: **Username and password** (email/password) and **OAuth** (Google).
 - Can users request account deletion? **Yes**.
 - Account deletion URL: https://questos.questos-1fd92776.workers.dev/legal/delete-account.
-- Can users request deletion of some data without deleting the account? **Yes**: saved Health
-  Connect summaries can be cleared in Settings; account/provider requests go to the public contact.
+- Can users request deletion of some data without deleting the account? **YES**: existing health
+  summary clearing, individual journal/quest deletion and AI Memory fact clearing are audited.
+- Delete data URL: https://questos.questos-1fd92776.workers.dev/legal/delete-data.
+  The public page provides self-service steps and a scoped email request to founder@questos.net,
+  with ownership verification and retention limits. Memory self-service requires Premium/trial;
+  support requests are available without paying. Account deletion is not required.
+- Audit evidence: [partial-data-deletion-verification.md](partial-data-deletion-verification.md).
 - Independent security review/certification badge: **do not claim one**. Provider certifications
   are not an independent review of this app. Do not claim end-to-end encryption.
 

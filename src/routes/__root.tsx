@@ -128,7 +128,10 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const publicPage =
-    path === "/legal/privacy" || path === "/legal/terms" || path === "/legal/delete-account";
+    path === "/legal/privacy" ||
+    path === "/legal/terms" ||
+    path === "/legal/delete-account" ||
+    path === "/legal/delete-data";
 
   return (
     <QueryClientProvider client={queryClient}>

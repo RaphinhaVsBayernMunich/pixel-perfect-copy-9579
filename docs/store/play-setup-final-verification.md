@@ -90,3 +90,11 @@ Remaining owner Console work: enter private reviewer access, upload/confirm list
 attest policy/health forms, and inspect/complete developer identity and payment verification using
 accurate owner facts. No Console review submission or Production publication occurred.
 No AAB rebuild/reupload is required for this remote legal identity update.
+
+## Selected-data deletion update — 12 October 2026
+
+Optional partial-data answer: **YES**. Dedicated public URL:
+https://questos.questos-1fd92776.workers.dev/legal/delete-data.
+Mandatory account deletion remains https://questos.questos-1fd92776.workers.dev/legal/delete-account.
+See [the category audit and deployment verification](partial-data-deletion-verification.md).
+The existing account-deletion page's purpose and implementation are unchanged.

@@ -115,6 +115,11 @@ function PrivacyPage() {
 
       <h2>Retention and deletion limits</h2>
       <p>
+        You can keep your account while deleting selected data. See the{" "}
+        <a href="/legal/delete-data">selected data deletion instructions and support request</a> for
+        the available controls and their limits.
+      </p>
+      <p>
         Account data is kept while your account exists and removed from the active QuestOS database
         through account deletion. Trial-abuse hashes and billing deduplication identifiers remain
         for fraud prevention and duplicate-event protection. Google Play, Stripe and other providers

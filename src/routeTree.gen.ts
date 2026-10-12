@@ -18,6 +18,7 @@ import { Route as QuestsRouteImport } from './routes/quests'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as LegalDeleteAccountRouteImport } from './routes/legal.delete-account'
+import { Route as LegalDeleteDataRouteImport } from './routes/legal.delete-data'
 import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
 import { Route as LegalTermsRouteImport } from './routes/legal.terms'
 import { Route as ApiBillingHealthRouteImport } from './routes/api/billing/health'
@@ -69,6 +70,11 @@ const LegalDeleteAccountRoute = LegalDeleteAccountRouteImport.update({
   path: '/legal/delete-account',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LegalDeleteDataRoute = LegalDeleteDataRouteImport.update({
+  id: '/legal/delete-data',
+  path: '/legal/delete-data',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LegalPrivacyRoute = LegalPrivacyRouteImport.update({
   id: '/legal/privacy',
   path: '/legal/privacy',
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/api/health': typeof ApiHealthRoute
   '/legal/delete-account': typeof LegalDeleteAccountRoute
+  '/legal/delete-data': typeof LegalDeleteDataRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
   '/api/billing/health': typeof ApiBillingHealthRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/api/health': typeof ApiHealthRoute
   '/legal/delete-account': typeof LegalDeleteAccountRoute
+  '/legal/delete-data': typeof LegalDeleteDataRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
   '/api/billing/health': typeof ApiBillingHealthRoute
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/api/health': typeof ApiHealthRoute
   '/legal/delete-account': typeof LegalDeleteAccountRoute
+  '/legal/delete-data': typeof LegalDeleteDataRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
   '/api/billing/health': typeof ApiBillingHealthRoute
@@ -158,6 +167,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/api/health'
     | '/legal/delete-account'
+    | '/legal/delete-data'
     | '/legal/privacy'
     | '/legal/terms'
     | '/api/billing/health'
@@ -174,6 +184,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/api/health'
     | '/legal/delete-account'
+    | '/legal/delete-data'
     | '/legal/privacy'
     | '/legal/terms'
     | '/api/billing/health'
@@ -190,6 +201,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/api/health'
     | '/legal/delete-account'
+    | '/legal/delete-data'
     | '/legal/privacy'
     | '/legal/terms'
     | '/api/billing/health'
@@ -207,6 +219,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   ApiHealthRoute: typeof ApiHealthRoute
   LegalDeleteAccountRoute: typeof LegalDeleteAccountRoute
+  LegalDeleteDataRoute: typeof LegalDeleteDataRoute
   LegalPrivacyRoute: typeof LegalPrivacyRoute
   LegalTermsRoute: typeof LegalTermsRoute
   ApiBillingHealthRoute: typeof ApiBillingHealthRoute
@@ -279,6 +292,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LegalDeleteAccountRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/legal/delete-data': {
+      id: '/legal/delete-data'
+      path: '/legal/delete-data'
+      fullPath: '/legal/delete-data'
+      preLoaderRoute: typeof LegalDeleteDataRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/legal/privacy': {
       id: '/legal/privacy'
       path: '/legal/privacy'
@@ -327,6 +347,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   ApiHealthRoute: ApiHealthRoute,
   LegalDeleteAccountRoute: LegalDeleteAccountRoute,
+  LegalDeleteDataRoute: LegalDeleteDataRoute,
   LegalPrivacyRoute: LegalPrivacyRoute,
   LegalTermsRoute: LegalTermsRoute,
   ApiBillingHealthRoute: ApiBillingHealthRoute,
