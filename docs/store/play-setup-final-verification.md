@@ -98,3 +98,12 @@ https://questos.questos-1fd92776.workers.dev/legal/delete-data.
 Mandatory account deletion remains https://questos.questos-1fd92776.workers.dev/legal/delete-account.
 See [the category audit and deployment verification](partial-data-deletion-verification.md).
 The existing account-deletion page's purpose and implementation are unchanged.
+
+## Final Console automation audit — 12 October 2026
+
+[Current authenticated audit, API limits and exact remaining owner actions](play-console-automation-final.md)
+supersede earlier Console/integration status. Data Safety is owner-reported completed. Supported
+listing/icon/feature/ordered screenshot staging succeeded; guarded no-review commit returned HTTP 400.
+The edit was discarded and durable state read back unchanged. No review submission occurred.
+Current RTDN topic now has the existing RevenueCat push subscription attached; delivery/Last received
+remain unverified. Billing 10/10 and the unchanged signed v2 AAB revalidated.
