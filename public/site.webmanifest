@@ -1,0 +1,17 @@
+{
+  "name": "QuestOS",
+  "short_name": "QuestOS",
+  "description": "Turn goals into quests and track your progress.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#161821",
+  "theme_color": "#161821",
+  "icons": [
+    {
+      "src": "/questos-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

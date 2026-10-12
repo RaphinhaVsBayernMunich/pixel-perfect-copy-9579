@@ -1,4 +1,4 @@
-// Local seed data for Phase 1. Replaced by Lovable Cloud in Phase 5.
+// Local seed data; authenticated account records are persisted through Supabase.
 
 export type QuestType = "main" | "daily" | "weekly" | "side" | "boss";
 export type Category =

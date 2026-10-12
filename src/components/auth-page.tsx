@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { authErrorMessage, signupFeedback } from "@/lib/auth-feedback";
 
 export function AuthPage() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -39,7 +40,7 @@ export function AuthPage() {
     setLoading(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -48,14 +49,15 @@ export function AuthPage() {
           },
         });
         if (error) throw error;
-        toast.success("Check your email to confirm your account.");
+        const feedback = signupFeedback(Boolean(data.session));
+        toast.message(feedback.title, { description: feedback.description });
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       }
     } catch (err) {
       toast.error(mode === "signup" ? "Sign up failed" : "Sign in failed", {
-        description: err instanceof Error ? err.message : String(err),
+        description: authErrorMessage(err, mode),
       });
     } finally {
       setLoading(false);
