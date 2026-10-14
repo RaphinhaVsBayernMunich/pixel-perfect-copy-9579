@@ -48,13 +48,13 @@ and verify the existing domain. Do not create duplicate domains.
 
 After verification, create **QuestOS Supabase SMTP**, **Sending access**, restricted to
 **oryxion.net**, at https://resend.com/api-keys. No broad management key is required.
-The owner approved this exact restricted key creation. After the domain became Verified, the key was created with Sending access restricted to oryxion.net. The private Copy control was used without reading/displaying the key. A separate hidden-input terminal is waiting for the owner to paste it for server-only Supabase SMTP configuration. No secret is logged or committed.
+The owner approved this exact restricted key creation. After the domain became Verified, the key was created with Sending access restricted to oryxion.net. The private Copy control was used without reading/displaying the key. The owner entered it through the separate hidden-input terminal. Supabase SMTP configuration completed with exit code 0 and non-secret readback matched. No secret is logged or committed.
 
 https://supabase.com/dashboard/project/kqsoccbtookvwelctyhm/auth/smtp
 
 | Field              | Exact value                                                  |
 | ------------------ | ------------------------------------------------------------ |
-| Enable custom SMTP | On after domain/key verification                             |
+| Enable custom SMTP | On; domain/key verified                                      |
 | Sender email       | noreply@oryxion.net                                          |
 | Sender name        | QuestOS                                                      |
 | Host               | smtp.resend.com                                              |
@@ -71,17 +71,16 @@ Prepared confirmation template: `supabase/templates/confirmation.html`, subject
 **Confirm your QuestOS account**, support address founder@oryxion.net, one
 `{{ .ConfirmationURL }}` link, no foreign mail domain or hardcoded token.
 Earlier template customization returned HTTP 400 while default SMTP was active; the helper now
-blocks template application until custom SMTP exists. Template is prepared locally, not applied.
+blocks template application until custom SMTP exists. The QuestOS confirmation template is now applied and read back successfully.
 The actual Management API field is `mailer_templates_confirmation_content`; the shorter key used
-in the first audit was incorrect. Live default content has a valid confirmation URL and no Lovable
+in the first audit was incorrect. Live QuestOS content has a valid confirmation URL and no Lovable
 branding. Supported helper: `scripts/supabase-email-config.py`.
 
 ## Delivery and checks
 
-Real delivery remains unverified until the domain, sending key and SMTP are configured. Use one
-owner-authorized test mailbox and verify provider acceptance, inbox receipt, confirmation and return
-to QuestOS. Do not invent a mailbox or share confirmation links/passwords/keys in chat.
-The owner authorized one confirmation test to founder@oryxion.net and will check receipt privately. No real signup has been sent yet.
+The owner authorized one confirmation test to founder@oryxion.net. A read-only check confirmed no existing account for that address. One normal Supabase signup returned HTTP 200, created an unconfirmed account, recorded confirmation_sent_at and granted no session. Its temporary random password was neither printed nor persisted; the owner can choose their own password later through the existing recovery flow.
+
+Resend records **Delivered** for "Confirm your QuestOS account" to the authorized mailbox (event 01a13b0a-9f44-727c-bbe9-0143316b5aa8). Provider delivery is proven. Owner inbox receipt and clicking the confirmation link back to QuestOS remain pending; no end-to-end confirmation claim is made yet. Do not share links/tokens or secrets in chat.
 
 Verification on 14 October 2026:
 
@@ -93,10 +92,12 @@ Verification on 14 October 2026:
 - App /api/health HTTP 200, ready.
 - Secret scan: 476 files, no findings. Only two explicit historical domain-correction paragraphs still mention the unowned domain.
 - Existing AAB SHA256 unchanged: 9D6228D51D39818F9BE06569B639AF219DE801B7AA3C19CDF73CE51FC7314033.
-- Resend is Verified and the restricted sending key exists. SMTP application is awaiting private terminal input; real delivery remains unproven.
+- Resend is Verified, the domain-restricted key is configured privately in Supabase, and the test email is Delivered. Owner inbox/link confirmation remains pending.
   No billing, RevenueCat, Play configuration, Google OAuth, Android source or AAB changes are authorized.
   Prepared Play contact files are corrected locally only; no Play form was submitted.
 
 Sources: [GoDaddy DNS](https://www.godaddy.com/en-uk/help/manage-dns-records-680),
 [Resend SMTP](https://resend.com/docs/send-with-smtp),
 [Supabase email templates](https://supabase.com/docs/guides/auth/auth-email-templates).
+
+SMTP readback: smtp.resend.com:465, username resend, sender QuestOS <noreply@oryxion.net>, credentials present. Confirm email remains required; web Site URL and Android callback are unchanged; Google OAuth remains enabled. Existing 2 emails/hour project limit and 60-second minimum interval remain unchanged and should be reviewed against expected signup volume before a larger rollout.

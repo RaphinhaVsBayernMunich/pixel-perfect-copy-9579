@@ -138,3 +138,7 @@ setup instructions for that domain are withdrawn. Use only **oryxion.net**, send
 **QuestOS <noreply@oryxion.net>**, and the separately approved support/privacy address
 **founder@oryxion.net**. Production Worker URL and Android callbacks stay unchanged.
 See [the corrected SMTP setup](resend-smtp-setup.md) for the actual domain's new records.
+
+## Corrected-domain SMTP applied — 14 October 2026
+
+Oryxion sending domain verified in Resend. Supabase now uses smtp.resend.com:465 with the domain-restricted Sending key entered privately, sender QuestOS <noreply@oryxion.net>, and the branded confirmation template. Confirmation and existing redirects remain enabled/unchanged. One owner-authorized signup to founder@oryxion.net returned HTTP 200 without a session, and Resend reports Delivered. Owner inbox and confirmation-link verification are pending; earlier SMTP-unconfigured statements above describe the historical audit. See the SMTP setup report for current status.
