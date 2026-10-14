@@ -58,3 +58,6 @@ questos-510417-*.json
 # Owner-only reviewer/login credential exports.
 *.private.json
 *reviewer-credentials*.json
+
+# Python owner-tool cache
+__pycache__/

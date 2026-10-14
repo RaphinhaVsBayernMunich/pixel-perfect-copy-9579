@@ -4,7 +4,7 @@ App name: **QuestOS**
 
 Category: **Productivity**; app type: **App**.
 
-Contact email: founder@questos.net
+Contact email: founder@oryxion.net
 Website: https://questos.questos-1fd92776.workers.dev
 Privacy: https://questos.questos-1fd92776.workers.dev/legal/privacy
 Deletion: https://questos.questos-1fd92776.workers.dev/legal/delete-account
@@ -34,7 +34,7 @@ An account is required. Android Premium subscriptions use Google Play Billing an
 
 Privacy: https://questos.questos-1fd92776.workers.dev/legal/privacy
 Account deletion: https://questos.questos-1fd92776.workers.dev/legal/delete-account
-Support: founder@questos.net
+Support: founder@oryxion.net
 
 Operator: Oryxion
 ```

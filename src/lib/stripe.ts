@@ -18,7 +18,7 @@ export function paymentsConfigured(): boolean {
 export function getStripeEnvironment(): StripeEnv {
   if (clientToken?.startsWith("pk_test_")) return "sandbox";
   if (clientToken?.startsWith("pk_live_")) return "live";
-  throw new Error("Web payments are currently unavailable. Contact founder@questos.net for help.");
+  throw new Error("Web payments are currently unavailable. Contact founder@oryxion.net for help.");
 }
 
 let stripePromise: Promise<Stripe | null> | null = null;

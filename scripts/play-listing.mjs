@@ -121,7 +121,7 @@ try {
     await call(`${base}/listings/en-US`, "PUT", { ...current, ...listing });
     await call(`${base}/details`, "PUT", {
       ...details,
-      contactEmail: "founder@questos.net",
+      contactEmail: "founder@oryxion.net",
       contactWebsite: "https://questos.questos-1fd92776.workers.dev",
     });
     for (const [kind, files] of Object.entries(assetGroups)) {

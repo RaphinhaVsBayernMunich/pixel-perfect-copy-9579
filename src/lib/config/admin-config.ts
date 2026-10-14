@@ -73,7 +73,7 @@ export const APP_CONFIG = {
   legal: {
     privacyUrl: "/legal/privacy",
     termsUrl: "/legal/terms",
-    supportEmail: "founder@questos.net",
+    supportEmail: "founder@oryxion.net",
     companyName: "QuestOS",
   },
 } as const;

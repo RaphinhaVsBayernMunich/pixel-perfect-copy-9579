@@ -25,7 +25,7 @@ as supported self-service categories. No new privileged/public deletion endpoint
 ## Public support route and security
 
 The dedicated page is accessible without authentication, installation or payment. A mailto link
-to the existing founder@questos.net contact prepopulates only generic request instructions.
+to the existing founder@oryxion.net contact prepopulates only generic request instructions.
 It specifies selected categories/records, keeping the account, ownership verification and scope
 confirmation. Sending is manual; no instant automated deletion or turnaround deadline is promised.
 Oryxion must monitor this inbox and handle verified requests, including expired-Premium Memory

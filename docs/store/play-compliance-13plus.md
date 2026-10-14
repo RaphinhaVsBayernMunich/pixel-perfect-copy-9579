@@ -3,7 +3,7 @@
 Reviewed 7 October 2026. This supersedes the earlier all-ages audit.
 Package `app.questos.android`; Internal Testing versionCode 2 / versionName 1.0.0.
 Runtime https://questos.questos-1fd92776.workers.dev.
-Support/privacy: founder@questos.net. Legal operator: see the canonical owner-supplied
+Support/privacy: founder@oryxion.net. Legal operator: see the canonical owner-supplied
 [legal identity record and update process](legal-operator.md); no identity is inferred from branding.
 
 ## A. Final target audience
@@ -74,7 +74,7 @@ unobserved provider configuration change or the use of another advertising/attri
 - Can users request deletion of some data without deleting the account? **YES**: existing health
   summary clearing, individual journal/quest deletion and AI Memory fact clearing are audited.
 - Delete data URL: https://questos.questos-1fd92776.workers.dev/legal/delete-data.
-  The public page provides self-service steps and a scoped email request to founder@questos.net,
+  The public page provides self-service steps and a scoped email request to founder@oryxion.net,
   with ownership verification and retention limits. Memory self-service requires Premium/trial;
   support requests are available without paying. Account deletion is not required.
 - Audit evidence: [partial-data-deletion-verification.md](partial-data-deletion-verification.md).
@@ -177,12 +177,12 @@ Public privacy URL is preserved. Updated 13+ positioning, AI-sharing/provider re
 region/diagnostics, guardian review and self-hosted fonts. The owner confirmed **Oryxion** as
 the legal operator. **QuestOS is operated by Oryxion.** The identity applies to:
 
-1. Privacy policy opening: “QuestOS is operated by Oryxion.” Privacy contact: founder@questos.net.
+1. Privacy policy opening: “QuestOS is operated by Oryxion.” Privacy contact: founder@oryxion.net.
 2. Terms service/operator paragraph, separate from QuestOS product branding.
 3. Deletion page introductory operator/contact statement.
 4. Play Console developer account/legal identity and organization details, matching verified identity
    and payment profile. Use a permitted separate public developer brand only where Console allows it.
-5. Store listing support contact remains founder@questos.net; use legal identity where Console
+5. Store listing support contact remains founder@oryxion.net; use legal identity where Console
    asks for operator information, not by replacing the QuestOS app title.
 
 Source `APP_CONFIG.legal.companyName` identifies the QuestOS brand. The separate
@@ -193,7 +193,7 @@ compliance record and prepared Play metadata. No jurisdiction or verified develo
 ## F. Account deletion
 
 https://questos.questos-1fd92776.workers.dev/legal/delete-account is public without login/app install.
-Email request from the account address to founder@questos.net with subject “QuestOS account deletion”;
+Email request from the account address to founder@oryxion.net with subject “QuestOS account deletion”;
 owner verifies ownership, monitors requests and fulfills applicable processor requests. Never ask
 for passwords/payment secrets. Settings → Delete account → type DELETE is the self-service path.
 
@@ -248,7 +248,7 @@ rating itself. Owner must review and attest the current questionnaire.
 ## J. Store listing
 
 Ready-to-paste exact text: `play-listing.en-US.json`.
-Name **QuestOS**; category **Productivity**; contact **founder@questos.net**.
+Name **QuestOS**; category **Productivity**; contact **founder@oryxion.net**.
 Short description: **Turn goals into quests, track your progress and reflect on your day.**
 Website: runtime URL above; privacy URL `/legal/privacy`; deletion URL `/legal/delete-account`.
 No all-ages-safe, medical, unlimited-AI or false live-purchase claims. No requirement to add a

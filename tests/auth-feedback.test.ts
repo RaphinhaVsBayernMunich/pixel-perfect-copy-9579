@@ -17,7 +17,7 @@ test("authentication errors are useful without exposing raw provider data", () =
   expect(authErrorMessage({ status: 429 }, "signup")).toContain("wait");
   expect(authErrorMessage({ code: "over_email_send_rate_limit" }, "signup")).toContain("wait");
   expect(authErrorMessage({ code: "email_address_not_authorized" }, "signup")).toContain(
-    "founder@questos.net",
+    "founder@oryxion.net",
   );
   expect(authErrorMessage({ status: 500 }, "signup")).toContain("temporarily unavailable");
   expect(authErrorMessage({ code: "email_not_confirmed" }, "signin")).toContain(

@@ -3,7 +3,7 @@
 Legal operator: Oryxion
 
 This owner-supplied public identity is shared by the privacy, terms and deletion pages, compliance identity record and prepared JSON/copy-ready Play description.
-Support/privacy: founder@questos.net. Product brand: QuestOS.
+Support/privacy: founder@oryxion.net. Product brand: QuestOS.
 
 ## Confirmation and future corrections
 

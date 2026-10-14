@@ -22,7 +22,7 @@ function PrivacyPage() {
       <LegalOperatorNotice />
       <p>
         QuestOS privacy and support contact:{" "}
-        <a href="mailto:founder@questos.net">founder@questos.net</a>.
+        <a href="mailto:founder@oryxion.net">founder@oryxion.net</a>.
       </p>
 
       <h2>What we collect</h2>

@@ -71,7 +71,7 @@ Use a transactional SMTP provider with a verified sending domain. One concrete s
 Resend; another provider is acceptable if its actual SMTP settings are used. No provider account,
 credentials, DNS records or paid plan was invented or configured in this pass.
 
-1. In the provider, verify `questos.net` using its supplied DNS records, authorize the sending address,
+1. In the provider, verify `oryxion.net` using its supplied DNS records, authorize the sending address,
    and create the required sending credential privately. Confirm its daily/hourly sending allowance.
 2. Open **Supabase → kqsoccbtookvwelctyhm → Authentication → Email → SMTP settings**, or
    https://supabase.com/dashboard/project/kqsoccbtookvwelctyhm/auth/smtp. Enable custom SMTP.
@@ -79,7 +79,7 @@ credentials, DNS records or paid plan was invented or configured in this pass.
 
 | Dashboard field           | Value                                                                                                                               |
 | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Sender email address      | `founder@questos.net`, only after authorized by the provider; or another owner-verified address under questos.net                   |
+| Sender email address      | `noreply@oryxion.net`, after domain verification; support/privacy uses founder@oryxion.net                                          |
 | Sender name               | QuestOS                                                                                                                             |
 | Host                      | Provider's SMTP host; for Resend, `smtp.resend.com`                                                                                 |
 | Port                      | Provider's supported TLS port; for Resend, `465` (implicit TLS)                                                                     |
@@ -121,3 +121,20 @@ Sources: [Supabase SMTP restrictions/setup](https://supabase.com/docs/guides/aut
 [Management Auth config](https://supabase.com/docs/reference/api/v1-get-auth-service-config),
 [Auth logs query](https://supabase.com/docs/guides/observability/advanced-log-filtering),
 [Resend SMTP settings](https://resend.com/docs/send-with-smtp).
+
+## Follow-up — 13 October 2026
+
+See [the Resend setup and exact generated DNS records](resend-smtp-setup.md). The authenticated
+Resend domain now exists but is not verified. DNS delegation currently fails; no SMTP key/config
+or real delivery is ready. The fresh audit also corrects the earlier template-field interpretation:
+`mailer_templates_confirmation_content` contains Supabase's default confirmation HTML, including
+its valid confirmation-link variable. A custom QuestOS template is prepared locally; the built-in
+SMTP customization restriction prevented applying it. Authentication security remains unchanged.
+
+## Owner domain correction — 14 October 2026
+
+The owner confirmed that questos.net is not owned by Oryxion. All previous ownership, DNS and SMTP
+setup instructions for that domain are withdrawn. Use only **oryxion.net**, sender
+**QuestOS <noreply@oryxion.net>**, and the separately approved support/privacy address
+**founder@oryxion.net**. Production Worker URL and Android callbacks stay unchanged.
+See [the corrected SMTP setup](resend-smtp-setup.md) for the actual domain's new records.
