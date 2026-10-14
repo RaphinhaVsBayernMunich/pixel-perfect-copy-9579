@@ -80,7 +80,7 @@ branding. Supported helper: `scripts/supabase-email-config.py`.
 
 The owner authorized one confirmation test to founder@oryxion.net. A read-only check confirmed no existing account for that address. One normal Supabase signup returned HTTP 200, created an unconfirmed account, recorded confirmation_sent_at and granted no session. Its temporary random password was neither printed nor persisted; the owner can choose their own password later through the existing recovery flow.
 
-Resend records **Delivered** for "Confirm your QuestOS account" to the authorized mailbox (event 01a13b0a-9f44-727c-bbe9-0143316b5aa8). Provider delivery is proven. Owner inbox receipt and clicking the confirmation link back to QuestOS remain pending; no end-to-end confirmation claim is made yet. Do not share links/tokens or secrets in chat.
+Resend records **Delivered** for "Confirm your QuestOS account" to the authorized mailbox (event 01a13b0a-9f44-727c-bbe9-0143316b5aa8). Provider delivery is proven. The owner confirmed inbox receipt and that the confirmation link returned to QuestOS. A subsequent read-only Supabase check confirms email_confirmed_at is set for the authorized test account. End-to-end confirmation email delivery is verified. Do not share links/tokens or secrets in chat.
 
 Verification on 14 October 2026:
 
@@ -92,7 +92,7 @@ Verification on 14 October 2026:
 - App /api/health HTTP 200, ready.
 - Secret scan: 476 files, no findings. Only two explicit historical domain-correction paragraphs still mention the unowned domain.
 - Existing AAB SHA256 unchanged: 9D6228D51D39818F9BE06569B639AF219DE801B7AA3C19CDF73CE51FC7314033.
-- Resend is Verified, the domain-restricted key is configured privately in Supabase, and the test email is Delivered. Owner inbox/link confirmation remains pending.
+- Resend is Verified, the domain-restricted key is configured privately in Supabase, and the test email is Delivered. Owner inbox/link confirmation succeeded and Supabase confirms the email is verified.
   No billing, RevenueCat, Play configuration, Google OAuth, Android source or AAB changes are authorized.
   Prepared Play contact files are corrected locally only; no Play form was submitted.
 
@@ -101,3 +101,5 @@ Sources: [GoDaddy DNS](https://www.godaddy.com/en-uk/help/manage-dns-records-680
 [Supabase email templates](https://supabase.com/docs/guides/auth/auth-email-templates).
 
 SMTP readback: smtp.resend.com:465, username resend, sender QuestOS <noreply@oryxion.net>, credentials present. Confirm email remains required; web Site URL and Android callback are unchanged; Google OAuth remains enabled. Existing 2 emails/hour project limit and 60-second minimum interval remain unchanged and should be reviewed against expected signup volume before a larger rollout.
+
+Final result: production SMTP confirmation flow passed end-to-end. Supabase Auth health HTTP 200. No further DNS or SMTP credentials are required for this setup. Existing email rate of 2/hour remains a documented rollout capacity constraint.
