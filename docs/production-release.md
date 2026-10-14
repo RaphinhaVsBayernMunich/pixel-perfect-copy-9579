@@ -75,12 +75,12 @@ Cancellation retains the paid period. Full refund revokes that period; old resto
 
 Email/password and email verification remain supported. Email verification opens the secure web origin; return to the app and sign in after confirming.
 
-Google on web uses direct Supabase OAuth, hidden until `VITE_GOOGLE_AUTH_ENABLED=true`. Native Google uses external browser + Supabase PKCE and is hidden until configured:
+Google on web uses direct Supabase OAuth, hidden until `VITE_GOOGLE_AUTH_ENABLED=true`. Native Google is available on both sign-in and sign-up screens and uses the existing external browser + Supabase PKCE flow:
 
 1. Supabase project's **Authentication → Sign In / Providers → Google**: enable the provider with the owner's Google OAuth credentials. In Google Cloud Console, authorize the exact Supabase callback URL displayed in that provider screen.
 2. **Authentication → URL Configuration → Redirect URLs → Add URL**: `app.questos.android://auth/callback`. Keep the approved HTTPS web origin too.
-3. Set public build flag `VITE_NATIVE_GOOGLE_AUTH_ENABLED=true`, rebuild, and test on a device. The manifest accepts only that scheme/host/path; client accepts a code only during a ten-minute locally initiated sign-in and exchanges its PKCE verifier. URL tokens are rejected.
-4. Test cancel, failed sign-in, warm/cold callback, session refresh, logout, account B login, and Android Back/resume. Do not enable the flag on production until this passes.
+3. Native visibility no longer depends on the obsolete `VITE_NATIVE_GOOGLE_AUTH_ENABLED` flag. Deploy the web runtime to expose the option in the existing Android shell. The manifest accepts only that scheme/host/path; client accepts a code only during a ten-minute locally initiated sign-in and exchanges its PKCE verifier. URL tokens are rejected.
+4. Test cancel, failed sign-in, warm/cold callback, session refresh, logout, account B login, and Android Back/resume. Device verification is still required; automated callback tests do not substitute for a real Google login.
 
 ## Android SDK, build and signing
 

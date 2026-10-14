@@ -84,9 +84,7 @@ export function AuthPage() {
               : "Turn your goals into quests. Level up your real life."}
           </p>
 
-          {(isNative()
-            ? import.meta.env.VITE_NATIVE_GOOGLE_AUTH_ENABLED === "true"
-            : import.meta.env.VITE_GOOGLE_AUTH_ENABLED === "true") && (
+          {(isNative() || import.meta.env.VITE_GOOGLE_AUTH_ENABLED === "true") && (
             <Button
               type="button"
               onClick={handleGoogle}
