@@ -22,7 +22,7 @@ Any mention of the unowned domain now serves only this correction/audit record.
 ## Correct Resend domain and exact DNS records
 
 Created **oryxion.net**, ID **a3154dcc-2d80-4e43-a5d7-a5f7f4889c3e**, in the authenticated
-oryxion Resend account. It is awaiting DNS verification; no verified status is claimed.
+oryxion Resend account. Resend now confirms Verified and ready to send, after DNS provisioning completed.
 Resend selected Tokyo; receiving remains disabled.
 
 | Type  | Host/name under oryxion.net | Exact value                                                                                                                                                                                                                | TTL                       |
@@ -48,7 +48,7 @@ and verify the existing domain. Do not create duplicate domains.
 
 After verification, create **QuestOS Supabase SMTP**, **Sending access**, restricted to
 **oryxion.net**, at https://resend.com/api-keys. No broad management key is required.
-The owner approved this exact restricted key creation after domain verification. No sending key has yet been created, retrieved, logged or committed.
+The owner approved this exact restricted key creation. After the domain became Verified, the key was created with Sending access restricted to oryxion.net. The private Copy control was used without reading/displaying the key. A separate hidden-input terminal is waiting for the owner to paste it for server-only Supabase SMTP configuration. No secret is logged or committed.
 
 https://supabase.com/dashboard/project/kqsoccbtookvwelctyhm/auth/smtp
 
@@ -93,7 +93,7 @@ Verification on 14 October 2026:
 - App /api/health HTTP 200, ready.
 - Secret scan: 476 files, no findings. Only two explicit historical domain-correction paragraphs still mention the unowned domain.
 - Existing AAB SHA256 unchanged: 9D6228D51D39818F9BE06569B639AF219DE801B7AA3C19CDF73CE51FC7314033.
-- SMTP remains unconfigured and real delivery remains unproven pending Resend domain provisioning and private key setup. Resend domain events show DNS verified, while overall domain/DKIM and regional sending status remain pending; send CNAME is verified.
+- Resend is Verified and the restricted sending key exists. SMTP application is awaiting private terminal input; real delivery remains unproven.
   No billing, RevenueCat, Play configuration, Google OAuth, Android source or AAB changes are authorized.
   Prepared Play contact files are corrected locally only; no Play form was submitted.
 
