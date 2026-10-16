@@ -54,38 +54,41 @@ export function PremiumDashboard() {
       </p>
     );
   return (
-    <div className="mb-5 grid gap-3 sm:grid-cols-2">
-      {data.preferences.widgets.map((widget) => (
-        <section key={widget} className="rounded-xl border border-hairline bg-card p-4">
-          <h2 className="font-display capitalize">{widget}</h2>
-          {widget === "focus" ? (
-            <>
+    <details className="disclosure mb-8">
+      <summary>Your dashboard insights</summary>
+      <div className="mt-3 grid gap-6 sm:grid-cols-2">
+        {data.preferences.widgets.map((widget) => (
+          <section key={widget} className="space-y-2 text-sm text-muted-foreground">
+            <h2 className="type-h3 capitalize text-foreground">{widget}</h2>
+            {widget === "focus" ? (
+              <>
+                <p>
+                  {data.metrics.active} active quests ·{" "}
+                  {Math.round(data.metrics.plannedMinutes / 60)} hours estimated backlog
+                </p>
+                <Link to="/premium">Open focus timer</Link>
+              </>
+            ) : widget === "week" ? (
               <p>
-                {data.metrics.active} active quests · {Math.round(data.metrics.plannedMinutes / 60)}{" "}
-                hours estimated backlog
+                {data.metrics.last7} completions in the last 7 days ({data.metrics.previous7} in the
+                previous 7).
               </p>
-              <Link to="/premium">Open focus timer</Link>
-            </>
-          ) : widget === "week" ? (
-            <p>
-              {data.metrics.last7} completions in the last 7 days ({data.metrics.previous7} in the
-              previous 7).
-            </p>
-          ) : widget === "category" ? (
-            data.metrics.categories.map((c) => (
-              <p key={c.category}>
-                {c.category}: {c.active} active · {c.completed} completed
+            ) : widget === "category" ? (
+              data.metrics.categories.map((c) => (
+                <p key={c.category}>
+                  {c.category}: {c.active} active · {c.completed} completed
+                </p>
+              ))
+            ) : (
+              <p>
+                At your chosen {data.preferences.dailyMinutes} minutes/day, the current backlog
+                needs about {Math.ceil(data.metrics.plannedMinutes / data.preferences.dailyMinutes)}{" "}
+                days. This is an estimate.
               </p>
-            ))
-          ) : (
-            <p>
-              At your chosen {data.preferences.dailyMinutes} minutes/day, the current backlog needs
-              about {Math.ceil(data.metrics.plannedMinutes / data.preferences.dailyMinutes)} days.
-              This is an estimate.
-            </p>
-          )}
-        </section>
-      ))}
-    </div>
+            )}
+          </section>
+        ))}
+      </div>
+    </details>
   );
 }

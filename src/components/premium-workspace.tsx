@@ -25,10 +25,10 @@ import type { ReactNode } from "react";
 
 function Panel({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="space-y-3 rounded-2xl border border-hairline bg-card/70 p-5">
-      <h2 className="font-display text-xl">{title}</h2>
-      {children}
-    </section>
+    <details className="workspace-panel" open={title === "Coach result" || undefined}>
+      <summary>{title}</summary>
+      <div className="workspace-content space-y-4">{children}</div>
+    </details>
   );
 }
 const field = "rounded-lg border border-input bg-background px-3 py-2 w-full";
@@ -119,7 +119,18 @@ export function PremiumWorkspace() {
         {Object.keys(PREMIUM_FEATURES)
           .filter((k) => k !== "ai.unlimited")
           .map((key) => (
-            <PremiumGate key={key} feature={key as PremiumFeature}>
+            <PremiumGate
+              key={key}
+              feature={key as PremiumFeature}
+              fallback={
+                <section className="space-y-2 py-4">
+                  <h2 className="type-h3">{PREMIUM_FEATURES[key as PremiumFeature].label}</h2>
+                  <p className="text-sm text-muted-foreground">
+                    {PREMIUM_FEATURES[key as PremiumFeature].description}
+                  </p>
+                </section>
+              }
+            >
               <span />
             </PremiumGate>
           ))}
@@ -149,7 +160,7 @@ export function PremiumWorkspace() {
     : null;
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <p className="text-sm text-muted-foreground">
           Uses your synced quests and history. Refresh after syncing edits.
         </p>
@@ -157,7 +168,7 @@ export function PremiumWorkspace() {
           Refresh
         </Button>
       </div>
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="space-y-1">
         <Panel title="AI Memory">
           <p className="text-sm">
             With your permission, Coach uses these facts and your latest 20 completions in future

@@ -53,6 +53,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Link
                   key={item.to}
                   to={item.to}
+                  aria-current={active ? "page" : undefined}
                   className={cn(
                     "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                     active
@@ -72,15 +73,29 @@ export function AppShell({ children }: { children: ReactNode }) {
             })}
           </nav>
 
-          <div className="mt-6 rounded-xl border border-hairline bg-sidebar-accent/40 p-3 text-xs text-muted-foreground">
-            <p className="font-display text-sm text-foreground">Season of Momentum</p>
-            <p className="mt-1">Day 17 · keep the fire lit.</p>
-          </div>
+          <TrialBadge />
           <SignOutButton />
         </aside>
 
-        <main className="relative flex min-h-screen w-full flex-col pb-24 md:pb-8">
+        <main className="app-content relative flex min-h-screen w-full flex-col md:pb-8">
           <PremiumRuntime />
+          <header className="flex items-center justify-between gap-2 px-5 pt-[max(0.5rem,env(safe-area-inset-top))] md:hidden">
+            <Link to="/" className="font-display text-sm">
+              QuestOS
+            </Link>
+            <div className="flex items-center gap-2">
+              <Link to="/premium" className="flex min-h-11 items-center px-2 text-sm text-primary">
+                Premium
+              </Link>
+              <Link
+                to="/settings"
+                aria-label="Settings"
+                className="flex size-11 items-center justify-center rounded-lg text-muted-foreground"
+              >
+                <Settings className="size-5" />
+              </Link>
+            </div>
+          </header>
           {children}
         </main>
       </div>
@@ -90,23 +105,24 @@ export function AppShell({ children }: { children: ReactNode }) {
         type="button"
         aria-label="Add quest"
         onClick={openQuickAdd}
-        className="fixed right-5 bottom-24 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-glow-xp transition hover:scale-105 active:scale-95 md:right-8 md:bottom-8"
+        className="fixed right-5 bottom-24 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md transition active:scale-95 md:right-8 md:bottom-8"
       >
         <Plus className="h-6 w-6" strokeWidth={2.5} />
       </button>
 
       {/* Mobile bottom nav */}
-      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-hairline bg-background/85 backdrop-blur-xl md:hidden">
-        <ul className="mx-auto grid max-w-md grid-cols-7">
-          {NAV.map((item) => {
+      <nav className="mobile-nav fixed inset-x-0 bottom-0 z-30 border-t border-hairline bg-background/85 backdrop-blur-xl md:hidden">
+        <ul className="mx-auto grid max-w-md grid-cols-5">
+          {NAV.slice(0, 5).map((item) => {
             const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
             const Icon = item.icon;
             return (
               <li key={item.to}>
                 <Link
                   to={item.to}
+                  aria-current={active ? "page" : undefined}
                   className={cn(
-                    "flex flex-col items-center gap-1 px-2 py-3 text-[10px] font-medium tracking-wide uppercase transition-colors",
+                    "flex min-h-16 flex-col items-center justify-center gap-1 px-1 py-2 type-nav transition-colors",
                     active ? "text-primary" : "text-muted-foreground",
                   )}
                 >
@@ -126,7 +142,6 @@ export function AppShell({ children }: { children: ReactNode }) {
       <AICoach />
       <Paywall />
       <TrialEndedGate />
-      <TrialBadge />
     </div>
   );
 }

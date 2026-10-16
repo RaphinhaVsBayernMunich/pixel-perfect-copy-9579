@@ -132,27 +132,30 @@ export function QuestQuickAdd() {
             ))}
           </ChipGroup>
 
-          <div className="grid grid-cols-2 gap-4">
-            <ChipGroup label="Difficulty" wrap>
-              {DIFFICULTIES.map((d) => (
-                <Chip
-                  key={d.value}
-                  active={difficulty === d.value}
-                  onClick={() => setDifficulty(d.value)}
-                >
-                  {d.label}
-                </Chip>
-              ))}
-            </ChipGroup>
+          <details className="disclosure">
+            <summary>Difficulty and priority</summary>
+            <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <ChipGroup label="Difficulty" wrap>
+                {DIFFICULTIES.map((d) => (
+                  <Chip
+                    key={d.value}
+                    active={difficulty === d.value}
+                    onClick={() => setDifficulty(d.value)}
+                  >
+                    {d.label}
+                  </Chip>
+                ))}
+              </ChipGroup>
 
-            <ChipGroup label="Priority" wrap>
-              {PRIORITIES.map((p) => (
-                <Chip key={p} active={priority === p} onClick={() => setPriority(p)}>
-                  {p}
-                </Chip>
-              ))}
-            </ChipGroup>
-          </div>
+              <ChipGroup label="Priority" wrap>
+                {PRIORITIES.map((p) => (
+                  <Chip key={p} active={priority === p} onClick={() => setPriority(p)}>
+                    {p}
+                  </Chip>
+                ))}
+              </ChipGroup>
+            </div>
+          </details>
 
           <div className="flex items-center justify-between rounded-xl border border-hairline bg-background/40 px-4 py-3">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -192,9 +195,7 @@ function ChipGroup({
 }) {
   return (
     <div>
-      <p className="mb-2 text-[10px] font-medium tracking-[0.15em] text-muted-foreground uppercase">
-        {label}
-      </p>
+      <p className="mb-2 type-eyebrow text-muted-foreground uppercase">{label}</p>
       <div className={cn("flex gap-1.5", wrap ? "flex-wrap" : "flex-wrap")}>{children}</div>
     </div>
   );
@@ -216,7 +217,7 @@ function Chip({
       type="button"
       onClick={onClick}
       className={cn(
-        "rounded-full border px-3 py-1 text-xs font-medium capitalize transition",
+        "min-h-11 rounded-lg border px-3 py-2 text-sm font-medium capitalize transition",
         active
           ? "border-primary/60 bg-primary/15 text-primary"
           : "border-hairline bg-background/40 text-muted-foreground hover:text-foreground",

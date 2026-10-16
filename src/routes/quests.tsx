@@ -2,12 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Search, Filter, Sparkles, Plus } from "lucide-react";
 import { useQuests, QUEST_TEMPLATES, type QuestTemplate } from "@/lib/quests-store";
-import {
-  CATEGORY_LABEL,
-  CATEGORY_TOKEN,
-  type Category,
-  type QuestType,
-} from "@/lib/demo-data";
+import { CATEGORY_LABEL, CATEGORY_TOKEN, type Category, type QuestType } from "@/lib/demo-data";
 import { QuestRow } from "@/components/quest-row";
 import { useUI } from "@/lib/ui-store";
 import { cn } from "@/lib/utils";
@@ -71,7 +66,13 @@ function QuestsPage() {
 
   const counts = useMemo(() => {
     const c: Record<Tab, number> = {
-      all: 0, main: 0, daily: 0, weekly: 0, side: 0, boss: 0, completed: 0,
+      all: 0,
+      main: 0,
+      daily: 0,
+      weekly: 0,
+      side: 0,
+      boss: 0,
+      completed: 0,
     };
     for (const quest of quests) {
       if (quest.completed) c.completed++;
@@ -83,7 +84,7 @@ function QuestsPage() {
     return c;
   }, [quests]);
 
-  function useTemplate(tpl: QuestTemplate) {
+  function applyTemplate(tpl: QuestTemplate) {
     add({ ...tpl.quest });
   }
 
@@ -91,16 +92,11 @@ function QuestsPage() {
     <div className="mx-auto w-full max-w-6xl px-5 pt-8 pb-8 md:px-10 md:pt-12">
       <header className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
-            Chapter 3
-          </p>
-          <h1 className="mt-2 font-display text-3xl font-semibold md:text-4xl">
-            Quest board
-          </h1>
+          <p className="type-eyebrow text-muted-foreground">Your missions</p>
+          <h1 className="mt-2 type-h1">Quest board</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-            {quests.filter((x) => !x.completed).length} active ·{" "}
-            {counts.completed} completed. Tap a quest to edit, or complete it
-            with the checkbox.
+            {quests.filter((x) => !x.completed).length} active · {counts.completed} completed. Tap a
+            quest to edit, or complete it with the checkbox.
           </p>
         </div>
         <button
@@ -118,17 +114,19 @@ function QuestsPage() {
             key={t.value}
             onClick={() => setTab(t.value)}
             className={cn(
-              "flex shrink-0 items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-medium transition",
+              "flex shrink-0 items-center gap-2 min-h-11 rounded-lg border border-transparent px-3.5 py-2 text-sm font-medium transition",
               tab === t.value
                 ? "border-primary/50 bg-primary/15 text-primary"
                 : "border-hairline bg-card/40 text-muted-foreground hover:text-foreground",
             )}
           >
             {t.label}
-            <span className={cn(
-              "rounded-full px-1.5 text-[10px] tabular-nums",
-              tab === t.value ? "bg-primary/20" : "bg-background/60",
-            )}>
+            <span
+              className={cn(
+                "rounded-full px-1.5 text-[10px] tabular-nums",
+                tab === t.value ? "bg-primary/20" : "bg-background/60",
+              )}
+            >
               {counts[t.value]}
             </span>
           </button>
@@ -143,7 +141,7 @@ function QuestsPage() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search quests…"
-            className="h-10 border-hairline bg-card/40 pl-9"
+            className="h-11 border-hairline bg-card/40 pl-9"
           />
         </div>
         <div className="flex items-center gap-1.5 overflow-x-auto">
@@ -190,16 +188,14 @@ function QuestsPage() {
             <p className="text-[10px] tracking-[0.2em] text-muted-foreground uppercase">
               Templates
             </p>
-            <h2 className="mt-1 font-display text-xl font-semibold">
-              Start from a proven routine
-            </h2>
+            <h2 className="mt-1 font-display text-xl font-semibold">Start from a proven routine</h2>
           </div>
         </div>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {QUEST_TEMPLATES.map((tpl) => (
             <button
               key={tpl.id}
-              onClick={() => useTemplate(tpl)}
+              onClick={() => applyTemplate(tpl)}
               className="group flex items-center gap-3 rounded-xl border border-hairline bg-card/60 p-3 text-left transition hover:bg-card"
             >
               <span
@@ -247,7 +243,15 @@ function CatChip({
           ? "border-primary/60 bg-primary/10 text-primary"
           : "border-hairline bg-card/40 text-muted-foreground hover:text-foreground",
       )}
-      style={active && color ? { borderColor: color, color, background: `color-mix(in oklch, ${color} 15%, transparent)` } : undefined}
+      style={
+        active && color
+          ? {
+              borderColor: color,
+              color,
+              background: `color-mix(in oklch, ${color} 15%, transparent)`,
+            }
+          : undefined
+      }
     >
       {children}
     </button>

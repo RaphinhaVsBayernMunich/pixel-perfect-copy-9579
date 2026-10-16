@@ -35,8 +35,8 @@ function Home() {
       {/* Hero — character HUD */}
       <header className="mb-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">{dateStr}</p>
-          <h1 className="mt-2 font-display text-3xl leading-tight font-semibold md:text-5xl">
+          <p className="type-eyebrow text-muted-foreground">{dateStr}</p>
+          <h1 className="mt-2 type-display">
             Welcome back, <span className="text-primary">{character.name}</span>.
           </h1>
           <p className="mt-2 max-w-lg text-sm text-muted-foreground">
@@ -52,7 +52,7 @@ function Home() {
           <button
             type="button"
             onClick={openAICoach}
-            className="group flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/20"
+            className="group flex min-h-11 items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
           >
             <Sparkles className="h-3.5 w-3.5" />
             AI Coach
@@ -72,11 +72,11 @@ function Home() {
       </header>
 
       {/* Level + XP bar */}
-      <section className="mb-6 overflow-hidden rounded-2xl border border-hairline bg-card/60 p-5 shadow-glow-xp/50 backdrop-blur-sm">
+      <section className="mb-6 overflow-hidden surface-panel">
         <div className="flex items-baseline justify-between gap-4">
           <div>
             <p className="text-xs tracking-widest text-muted-foreground uppercase">Life Level</p>
-            <p className="mt-1 font-display text-3xl font-bold">
+            <p className="mt-1 type-xp">
               {character.level}
               <span className="ml-2 align-middle text-sm text-muted-foreground">
                 · {character.title}
@@ -91,9 +91,7 @@ function Home() {
                 / {character.xpToNext.toLocaleString()}
               </span>
             </p>
-            <p className="text-[10px] tracking-widest text-muted-foreground uppercase">
-              XP to next level
-            </p>
+            <p className="type-caption text-muted-foreground">XP to next level</p>
           </div>
         </div>
         <div className="mt-4 h-2 overflow-hidden rounded-full bg-background/60 ring-hairline">
@@ -181,6 +179,17 @@ function Home() {
             </span>
           </div>
           <div className="mt-4 flex flex-col gap-2">
+            {!daily.length && (
+              <p className="text-sm text-muted-foreground">
+                No daily quests yet.{" "}
+                <button
+                  className="min-h-11 text-primary"
+                  onClick={() => useUI.getState().openQuickAdd()}
+                >
+                  Create your first
+                </button>
+              </p>
+            )}
             {daily.map((q) => (
               <QuestRow key={q.id} quest={q} />
             ))}
@@ -191,19 +200,15 @@ function Home() {
         <div className="flex flex-col gap-5">
           <Panel>
             <PanelHeading icon={<Sparkles className="h-4 w-4" />} title="AI Coach" />
-            <p className="mt-3 text-sm leading-relaxed">
-              Your afternoon is light. Move{" "}
-              <span className="text-primary font-medium">Ship auth flow refactor</span> into a
-              90-minute focus block at 3:00pm — you complete coding quests 23% faster after 2pm.
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              Find a starting point, turn a goal into quests, or make time to reflect.
             </p>
-            <div className="mt-4 flex gap-2">
-              <button className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90">
-                Apply
-              </button>
-              <button className="rounded-md border border-hairline px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground">
-                Why?
-              </button>
-            </div>
+            <button
+              onClick={openAICoach}
+              className="mt-4 min-h-11 text-sm font-medium text-primary"
+            >
+              Open AI Coach →
+            </button>
           </Panel>
 
           {weekly[0] && (
@@ -234,12 +239,9 @@ function Home() {
                 const max = Math.max(...Object.values(character.categoryXp));
                 const pct = max ? (val / max) * 100 : 0;
                 return (
-                  <div key={cat} className="rounded-xl border border-hairline bg-background/40 p-3">
+                  <div key={cat} className="py-3">
                     <div className="flex items-center justify-between">
-                      <span
-                        className="text-[11px] font-medium tracking-wide uppercase"
-                        style={{ color: CATEGORY_TOKEN[cat] }}
-                      >
+                      <span className="text-xs font-medium" style={{ color: CATEGORY_TOKEN[cat] }}>
                         {CATEGORY_LABEL[cat]}
                       </span>
                     </div>
@@ -290,13 +292,7 @@ function daysUntil(iso: string) {
 }
 
 function Panel({ children, className }: { children: React.ReactNode; className?: string }) {
-  return (
-    <section
-      className={`rounded-2xl border border-hairline bg-card/60 p-5 backdrop-blur-sm ${className ?? ""}`}
-    >
-      {children}
-    </section>
-  );
+  return <section className={`surface-panel ${className ?? ""}`}>{children}</section>;
 }
 
 function PanelHeading({
@@ -309,7 +305,7 @@ function PanelHeading({
   tone?: "boss";
 }) {
   return (
-    <div className="flex items-center gap-2 text-[10px] font-medium tracking-[0.2em] uppercase">
+    <div className="flex items-center gap-2 type-eyebrow">
       {icon && <span className={tone === "boss" ? "text-boss" : "text-primary"}>{icon}</span>}
       <span className="text-muted-foreground">{title}</span>
     </div>
@@ -331,7 +327,7 @@ function StatChip({
     <div className="flex items-center gap-2 rounded-xl border border-hairline bg-card/60 px-3 py-2 backdrop-blur-sm">
       <span className={accent ? "text-primary" : "text-muted-foreground"}>{icon}</span>
       <div>
-        <p className="text-[10px] tracking-widest text-muted-foreground uppercase">{label}</p>
+        <p className="type-caption text-muted-foreground">{label}</p>
         <p className={`font-display text-sm font-semibold ${accent ? "text-primary" : ""}`}>
           {value}
         </p>

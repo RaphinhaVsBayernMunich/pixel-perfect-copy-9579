@@ -1,8 +1,4 @@
-/**
- * Small pill that hovers above the FAB showing "Premium · 5d left" while
- * on trial, and "Upgrade" once expired. Tapping opens the paywall.
- * Auto-hides for active paid subscribers.
- */
+// Inline upgrade entry for the desktop rail. Mobile uses the Premium header link.
 import { Sparkles } from "lucide-react";
 import { useSubscription, trialDaysLeft } from "@/lib/subscription/service";
 import { useUI } from "@/lib/ui-store";
@@ -28,7 +24,7 @@ export function TrialBadge() {
       type="button"
       onClick={openPaywall}
       className={cn(
-        "fixed right-5 bottom-44 z-40 flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-[11px] font-medium text-primary shadow-sm backdrop-blur-md transition-colors hover:bg-primary/20 md:right-8 md:bottom-28",
+        "mt-5 flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm text-primary transition-colors hover:bg-primary/10",
       )}
     >
       <Sparkles className="h-3 w-3" />

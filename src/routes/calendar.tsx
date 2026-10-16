@@ -4,12 +4,7 @@ import { ChevronLeft, ChevronRight, Plus, CalendarDays } from "lucide-react";
 import { useUI } from "@/lib/ui-store";
 import { useQuests } from "@/lib/quests-store";
 import { conflictIds, toISODate } from "@/lib/calendar-utils";
-import {
-  AgendaView,
-  DayView,
-  MonthView,
-  WeekView,
-} from "@/components/calendar/calendar-views";
+import { AgendaView, DayView, MonthView, WeekView } from "@/components/calendar/calendar-views";
 import { QuestBlock } from "@/components/calendar/quest-block";
 import { cn } from "@/lib/utils";
 
@@ -19,8 +14,7 @@ export const Route = createFileRoute("/calendar")({
       { title: "Calendar — QuestOS" },
       {
         name: "description",
-        content:
-          "Plan your week, block focus sessions, and let the AI balance your workload.",
+        content: "Plan your week, block focus sessions, and let the AI balance your workload.",
       },
       { property: "og:title", content: "Calendar — QuestOS" },
       {
@@ -57,8 +51,7 @@ function CalendarPage() {
   function shift(dir: -1 | 1) {
     const d = new Date(anchor);
     if (view === "day") d.setDate(d.getDate() + dir);
-    else if (view === "week" || view === "agenda")
-      d.setDate(d.getDate() + dir * 7);
+    else if (view === "week" || view === "agenda") d.setDate(d.getDate() + dir * 7);
     else d.setMonth(d.getMonth() + dir);
     setAnchor(d);
   }
@@ -82,8 +75,7 @@ function CalendarPage() {
     start.setDate(start.getDate() + diff);
     const end = new Date(start);
     end.setDate(end.getDate() + (view === "agenda" ? 13 : 6));
-    const fmt = (d: Date) =>
-      d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    const fmt = (d: Date) => d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
     return `${fmt(start)} — ${fmt(end)}`;
   }, [anchor, view]);
 
@@ -91,12 +83,8 @@ function CalendarPage() {
     <div className="mx-auto w-full max-w-7xl px-5 pt-8 pb-8 md:px-10 md:pt-12">
       <header className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
-            Chapter 5
-          </p>
-          <h1 className="mt-2 font-display text-3xl font-semibold md:text-4xl">
-            Calendar
-          </h1>
+          <p className="type-eyebrow text-muted-foreground">Chapter 5</p>
+          <h1 className="mt-2 type-h1">Calendar</h1>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
             Drag quests onto any day or hour to schedule. Conflicts glow red.
           </p>
@@ -114,7 +102,7 @@ function CalendarPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => shift(-1)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-hairline bg-card/40 text-muted-foreground transition hover:text-foreground"
+            className="flex h-11 w-11 items-center justify-center rounded-lg border border-hairline bg-card/40 text-muted-foreground transition hover:text-foreground"
             aria-label="Previous"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -127,7 +115,7 @@ function CalendarPage() {
           </button>
           <button
             onClick={() => shift(1)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-hairline bg-card/40 text-muted-foreground transition hover:text-foreground"
+            className="flex h-11 w-11 items-center justify-center rounded-lg border border-hairline bg-card/40 text-muted-foreground transition hover:text-foreground"
             aria-label="Next"
           >
             <ChevronRight className="h-4 w-4" />
@@ -173,31 +161,20 @@ function CalendarPage() {
           onDrop={(e) => {
             e.preventDefault();
             const id = e.dataTransfer.getData("text/quest");
-            if (id)
-              update(id, { scheduledFor: undefined, startTime: undefined });
+            if (id) update(id, { scheduledFor: undefined, startTime: undefined });
           }}
         >
           <div className="mb-3 flex items-baseline justify-between">
             <div>
-              <p className="text-[10px] tracking-[0.2em] text-muted-foreground uppercase">
-                Backlog
-              </p>
-              <h2 className="mt-1 font-display text-sm font-semibold">
-                Unscheduled
-              </h2>
+              <p className="type-eyebrow text-muted-foreground uppercase">Backlog</p>
+              <h2 className="mt-1 font-display text-sm font-semibold">Unscheduled</h2>
             </div>
-            <span className="text-[10px] text-muted-foreground tabular-nums">
-              {unscheduled.length}
-            </span>
+            <span className="text-xs text-muted-foreground tabular-nums">{unscheduled.length}</span>
           </div>
           {unscheduled.length > 0 ? (
             <div className="flex flex-col gap-1.5">
               {unscheduled.map((q) => (
-                <QuestBlock
-                  key={q.id}
-                  quest={q}
-                  conflict={conflicts.has(q.id)}
-                />
+                <QuestBlock key={q.id} quest={q} conflict={conflicts.has(q.id)} />
               ))}
             </div>
           ) : (
@@ -208,7 +185,7 @@ function CalendarPage() {
               </p>
             </div>
           )}
-          <p className="mt-4 text-[10px] leading-relaxed text-muted-foreground">
+          <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
             Drop onto a day or hour to schedule.
             <br />
             Drop back here to unschedule.
@@ -220,7 +197,7 @@ function CalendarPage() {
       {toISODate(anchor) !== toISODate(new Date()) ? (
         <button
           onClick={() => setAnchor(new Date())}
-          className="fixed bottom-24 left-1/2 z-30 -translate-x-1/2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-[11px] font-medium text-primary backdrop-blur md:bottom-8"
+          className="fixed bottom-24 left-1/2 z-30 -translate-x-1/2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary backdrop-blur md:bottom-8"
         >
           Jump to today
         </button>

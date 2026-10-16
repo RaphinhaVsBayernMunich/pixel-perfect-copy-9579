@@ -167,7 +167,7 @@ function StepHeader({ eyebrow, title, sub }: { eyebrow?: string; title: string; 
           {eyebrow}
         </div>
       )}
-      <h1 className="font-display text-4xl leading-tight tracking-tight">{title}</h1>
+      <h1 className="type-h1">{title}</h1>
       {sub && <p className="mt-3 text-muted-foreground max-w-lg">{sub}</p>}
     </div>
   );
@@ -734,7 +734,7 @@ function BuildStep({
     <div className="pt-6 text-center">
       {status === "idle" && (
         <div className="space-y-4">
-          <h1 className="font-display text-3xl">Choose your starting quests</h1>
+          <h1 className="type-h1">Choose your starting quests</h1>
           <p className="mx-auto max-w-md text-sm text-muted-foreground">
             AI can draft starter quests using your name, profession, goals, interests, skills and
             planning preferences. These details are sent to DeepSeek, whose policy allows service
@@ -757,7 +757,7 @@ function BuildStep({
           <div className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
             <Loader2 className="h-8 w-8 text-primary animate-spin" />
           </div>
-          <h1 className="mt-6 font-display text-3xl">Building your Life OS…</h1>
+          <h1 className="mt-6 type-h1">Building your Life OS…</h1>
           <p className="mt-3 text-muted-foreground">
             AI is drafting your main quest, starter missions, and character.
           </p>
@@ -786,7 +786,7 @@ function BuildStep({
           >
             <Sparkles className="h-10 w-10" />
           </motion.div>
-          <h1 className="mt-6 font-display text-4xl">Your journey begins today.</h1>
+          <h1 className="mt-6 type-h1">Your journey begins today.</h1>
           {welcome && (
             <p className="mt-4 text-muted-foreground italic max-w-md mx-auto">"{welcome}"</p>
           )}
@@ -806,7 +806,7 @@ function BuildStep({
           <div className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-destructive/10 text-destructive">
             <X className="h-8 w-8" />
           </div>
-          <h1 className="mt-6 font-display text-3xl">Something went sideways.</h1>
+          <h1 className="mt-6 type-h1">Something went sideways.</h1>
           <p className="mt-3 text-muted-foreground">
             We couldn't reach the AI. You can enter anyway and generate quests from the coach later.
           </p>

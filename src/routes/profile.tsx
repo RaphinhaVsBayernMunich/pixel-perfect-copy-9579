@@ -40,7 +40,7 @@ function ProfilePage() {
   return (
     <div className="mx-auto w-full max-w-5xl px-5 pt-8 pb-4 md:px-10 md:pt-12">
       {/* Hero */}
-      <header className="relative mb-8 overflow-hidden rounded-3xl border border-hairline bg-card/60 p-6 backdrop-blur-sm md:p-8">
+      <header className="relative mb-8 overflow-hidden surface-panel md:p-8">
         <div
           aria-hidden
           className="absolute inset-0 opacity-40"
@@ -60,9 +60,7 @@ function ProfilePage() {
               </span>
             </div>
             <div>
-              <p className="text-[10px] tracking-[0.2em] text-muted-foreground uppercase">
-                {character.season}
-              </p>
+              <p className="type-eyebrow text-muted-foreground uppercase">{character.season}</p>
               <h1 className="mt-1 font-display text-3xl font-semibold">{character.name}</h1>
               <p className="text-sm text-muted-foreground">
                 {character.title} · Day {character.streakDays}
@@ -87,10 +85,7 @@ function ProfilePage() {
         />
         <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {attributes.map((a) => (
-            <div
-              key={a.key}
-              className="rounded-xl border border-hairline bg-card/60 p-4 backdrop-blur-sm"
-            >
+            <div key={a.key} className="rounded-xl bg-card p-5">
               <div className="flex items-baseline justify-between">
                 <p
                   className="font-display text-xs font-semibold tracking-[0.2em] uppercase"
@@ -98,7 +93,7 @@ function ProfilePage() {
                 >
                   {a.key}
                 </p>
-                <p className="font-display text-2xl font-bold">{a.value}</p>
+                <p className="type-metric">{a.value}</p>
               </div>
               <p className="mt-0.5 text-xs text-muted-foreground">{a.label}</p>
               <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-background/60 ring-hairline">
@@ -128,10 +123,7 @@ function ProfilePage() {
             const tier =
               xp >= 2000 ? "Master" : xp >= 1000 ? "Adept" : xp >= 400 ? "Journeyman" : "Novice";
             return (
-              <div
-                key={cat}
-                className="rounded-xl border border-hairline bg-card/60 p-4 backdrop-blur-sm"
-              >
+              <div key={cat} className="rounded-xl bg-card p-5">
                 <div className="flex items-center justify-between">
                   <span
                     className="font-display text-xs font-semibold tracking-[0.15em] uppercase"
@@ -139,9 +131,7 @@ function ProfilePage() {
                   >
                     {CATEGORY_LABEL[cat]}
                   </span>
-                  <span className="text-[10px] tracking-widest text-muted-foreground uppercase">
-                    #{i + 1}
-                  </span>
+                  <span className="type-caption text-muted-foreground uppercase">#{i + 1}</span>
                 </div>
                 <p className="mt-2 font-display text-xl font-semibold">{tier}</p>
                 <p className="text-xs text-muted-foreground">{xp.toLocaleString()} XP</p>
@@ -168,7 +158,7 @@ function ProfilePage() {
               <div
                 key={a.id}
                 className={cn(
-                  "flex flex-col items-center gap-2 rounded-xl border border-hairline bg-card/60 p-3 text-center backdrop-blur-sm",
+                  "flex flex-col items-center gap-2 rounded-xl border border-hairline bg-card/60 p-3 text-center",
                 )}
               >
                 <div
@@ -202,8 +192,8 @@ function ProfilePage() {
 
 function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div className="rounded-xl border border-hairline bg-background/40 px-3 py-2">
-      <p className="text-[10px] tracking-widest text-muted-foreground uppercase">{label}</p>
+    <div className="px-1 py-3">
+      <p className="type-caption text-muted-foreground uppercase">{label}</p>
       <p className={cn("mt-1 font-display text-lg font-semibold", accent && "text-xp")}>{value}</p>
     </div>
   );
@@ -226,9 +216,7 @@ function SectionHeader({
           {title}
         </h2>
       </div>
-      {hint && (
-        <span className="text-[10px] tracking-widest text-muted-foreground uppercase">{hint}</span>
-      )}
+      {hint && <span className="type-caption text-muted-foreground uppercase">{hint}</span>}
     </div>
   );
 }

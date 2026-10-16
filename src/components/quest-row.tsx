@@ -1,8 +1,5 @@
 import { Check, Clock, Flame, MoreHorizontal, Copy, Trash2, Pencil } from "lucide-react";
-import {
-  CATEGORY_LABEL,
-  CATEGORY_TOKEN,
-} from "@/lib/demo-data";
+import { CATEGORY_LABEL, CATEGORY_TOKEN } from "@/lib/demo-data";
 import { useQuests, type Quest } from "@/lib/quests-store";
 import { useUI } from "@/lib/ui-store";
 import { cn } from "@/lib/utils";
@@ -25,7 +22,7 @@ export function QuestRow({ quest }: { quest: Quest }) {
   return (
     <div
       className={cn(
-        "group flex items-center gap-3 rounded-xl border border-hairline bg-card/60 p-3 pr-2 transition hover:bg-card",
+        "group flex items-center gap-2 rounded-xl bg-card/60 px-3 py-4 transition hover:bg-card",
         done && "opacity-60",
       )}
     >
@@ -33,7 +30,7 @@ export function QuestRow({ quest }: { quest: Quest }) {
         aria-label={done ? "Undo complete" : "Complete quest"}
         onClick={() => (done ? uncomplete(quest.id) : complete(quest.id))}
         className={cn(
-          "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition",
+          "flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border transition",
           done
             ? "border-primary/40 bg-primary/20 text-primary"
             : "border-hairline bg-background text-muted-foreground hover:border-primary/50 hover:text-primary",
@@ -49,19 +46,16 @@ export function QuestRow({ quest }: { quest: Quest }) {
         )}
       </button>
 
-      <button
-        onClick={() => openEditor(quest.id)}
-        className="min-w-0 flex-1 text-left"
-      >
+      <button onClick={() => openEditor(quest.id)} className="min-h-11 min-w-0 flex-1 text-left">
         <p
           className={cn(
-            "truncate text-sm font-medium",
+            "break-words text-sm font-medium",
             done && "line-through decoration-primary/60",
           )}
         >
           {quest.title}
         </p>
-        <div className="mt-1 flex items-center gap-3 text-[11px] text-muted-foreground">
+        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
           <span
             className="inline-flex items-center gap-1.5"
             style={{ color: CATEGORY_TOKEN[quest.category] }}
@@ -86,17 +80,13 @@ export function QuestRow({ quest }: { quest: Quest }) {
       </button>
 
       <div className="shrink-0 pr-1 text-right">
-        <div className="font-display text-sm font-semibold text-xp">
-          +{quest.xp}
-        </div>
-        <div className="text-[10px] tracking-widest text-muted-foreground uppercase">
-          XP
-        </div>
+        <div className="font-display text-sm font-semibold text-xp">+{quest.xp}</div>
+        <div className="type-caption text-muted-foreground uppercase">XP</div>
       </div>
 
       <DropdownMenu>
         <DropdownMenuTrigger
-          className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground opacity-0 transition hover:bg-accent hover:text-foreground group-hover:opacity-100 data-[state=open]:opacity-100"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-100 transition hover:bg-accent hover:text-foreground group-hover:opacity-100 data-[state=open]:opacity-100"
           aria-label="Quest actions"
         >
           <MoreHorizontal className="h-4 w-4" />

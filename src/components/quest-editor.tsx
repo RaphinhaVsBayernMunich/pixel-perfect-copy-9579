@@ -24,8 +24,16 @@ import {
 import { cn } from "@/lib/utils";
 
 const CATEGORIES: Category[] = [
-  "fitness", "business", "academics", "coding", "football",
-  "creativity", "finance", "health", "relationships", "lifestyle",
+  "fitness",
+  "business",
+  "academics",
+  "coding",
+  "football",
+  "creativity",
+  "finance",
+  "health",
+  "relationships",
+  "lifestyle",
 ];
 const TYPES: QuestType[] = ["daily", "weekly", "main", "side", "boss"];
 const DIFFICULTIES: Difficulty[] = ["very-easy", "easy", "medium", "hard", "extreme"];
@@ -67,20 +75,17 @@ export function QuestEditor() {
 
   return (
     <Sheet open={open} onOpenChange={(o) => (o ? null : close())}>
-      <SheetContent
-        side="right"
-        className="w-full border-hairline bg-card/95 backdrop-blur-xl sm:max-w-lg"
-      >
+      <SheetContent side="right" className="w-full border-hairline bg-card/95 sm:max-w-lg">
         <SheetHeader>
           <SheetTitle className="font-display text-xl">Edit quest</SheetTitle>
           <SheetDescription className="text-xs">
-            Adjust anything. Changes save on close.
+            Adjust the details, then choose Save. Cancel keeps the original quest.
           </SheetDescription>
         </SheetHeader>
 
         <div className="mt-6 space-y-5">
           <div>
-            <Label className="text-[10px] tracking-[0.15em] uppercase">Title</Label>
+            <Label className="type-eyebrow uppercase">Title</Label>
             <Input
               value={draft.title}
               onChange={(e) => set("title", e.target.value)}
@@ -89,7 +94,7 @@ export function QuestEditor() {
           </div>
 
           <div>
-            <Label className="text-[10px] tracking-[0.15em] uppercase">Description</Label>
+            <Label className="type-eyebrow uppercase">Description</Label>
             <Textarea
               value={draft.description ?? ""}
               onChange={(e) => set("description", e.target.value)}
@@ -138,7 +143,7 @@ export function QuestEditor() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label className="text-[10px] tracking-[0.15em] uppercase">Estimated minutes</Label>
+              <Label className="type-eyebrow uppercase">Estimated minutes</Label>
               <Input
                 type="number"
                 min={5}
@@ -148,7 +153,7 @@ export function QuestEditor() {
               />
             </div>
             <div>
-              <Label className="text-[10px] tracking-[0.15em] uppercase">XP reward</Label>
+              <Label className="type-eyebrow uppercase">XP reward</Label>
               <div className="relative mt-2">
                 <Input
                   type="number"
@@ -164,7 +169,7 @@ export function QuestEditor() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label className="text-[10px] tracking-[0.15em] uppercase">Scheduled for</Label>
+              <Label className="type-eyebrow uppercase">Scheduled for</Label>
               <Input
                 type="date"
                 value={draft.scheduledFor ?? ""}
@@ -173,7 +178,7 @@ export function QuestEditor() {
               />
             </div>
             <div>
-              <Label className="text-[10px] tracking-[0.15em] uppercase">Start time</Label>
+              <Label className="type-eyebrow uppercase">Start time</Label>
               <Input
                 type="time"
                 value={draft.startTime ?? ""}
@@ -184,7 +189,7 @@ export function QuestEditor() {
           </div>
 
           <div>
-            <Label className="text-[10px] tracking-[0.15em] uppercase">Deadline</Label>
+            <Label className="type-eyebrow uppercase">Deadline</Label>
             <Input
               type="date"
               value={draft.deadline ?? ""}
@@ -205,7 +210,9 @@ export function QuestEditor() {
               <Trash2 className="h-4 w-4" /> Delete
             </Button>
             <div className="flex gap-2">
-              <Button variant="ghost" onClick={close}>Cancel</Button>
+              <Button variant="ghost" onClick={close}>
+                Cancel
+              </Button>
               <Button onClick={save}>Save</Button>
             </div>
           </div>
@@ -218,9 +225,7 @@ export function QuestEditor() {
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="mb-2 text-[10px] font-medium tracking-[0.15em] text-muted-foreground uppercase">
-        {label}
-      </p>
+      <p className="mb-2 type-eyebrow text-muted-foreground uppercase">{label}</p>
       <div className="flex flex-wrap gap-1.5">{children}</div>
     </div>
   );
@@ -242,12 +247,20 @@ function Chip({
       type="button"
       onClick={onClick}
       className={cn(
-        "rounded-full border px-3 py-1 text-xs font-medium capitalize transition",
+        "min-h-11 rounded-lg border px-3 py-2 text-sm font-medium capitalize transition",
         active
           ? "border-primary/60 bg-primary/15 text-primary"
           : "border-hairline bg-background/40 text-muted-foreground hover:text-foreground",
       )}
-      style={active && accentColor ? { borderColor: accentColor, color: accentColor, background: `color-mix(in oklch, ${accentColor} 15%, transparent)` } : undefined}
+      style={
+        active && accentColor
+          ? {
+              borderColor: accentColor,
+              color: accentColor,
+              background: `color-mix(in oklch, ${accentColor} 15%, transparent)`,
+            }
+          : undefined
+      }
     >
       {children}
     </button>

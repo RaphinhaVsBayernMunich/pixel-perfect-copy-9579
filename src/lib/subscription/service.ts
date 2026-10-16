@@ -21,6 +21,8 @@ import type {
 } from "./types";
 interface Store extends SubscriptionState {
   offerings: Offerings | null;
+  pricingLoading: boolean;
+  pricingError: string | null;
   events: Awaited<ReturnType<typeof listSubscriptionEvents>>;
   init: (userId: string) => Promise<void>;
   refreshFromBackend: () => Promise<void>;
@@ -71,6 +73,8 @@ const initial: SubscriptionState = {
 export const useSubscription = create<Store>((set, get) => ({
   ...initial,
   offerings: null,
+  pricingLoading: false,
+  pricingError: null,
   events: [],
   async init(userId) {
     const version = identityVersion;
@@ -144,13 +148,15 @@ export const useSubscription = create<Store>((set, get) => ({
     }
   },
   async refreshOfferings() {
+    if (get().pricingLoading) return;
     const version = identityVersion;
+    set({ pricingLoading: true, pricingError: null });
     try {
       const offerings = await getProvider().getOfferings();
       if (version === identityVersion)
         set({
           offerings,
-          error: offerings.current.length
+          pricingError: offerings.current.length
             ? null
             : "No verified monthly plan is available. Retry or contact support.",
         });
@@ -158,8 +164,10 @@ export const useSubscription = create<Store>((set, get) => ({
       if (version === identityVersion)
         set({
           offerings: { current: [] },
-          error: "Monthly pricing could not be loaded. Retry or contact support.",
+          pricingError: "Pricing is unavailable right now. Check your connection and try again.",
         });
+    } finally {
+      if (version === identityVersion) set({ pricingLoading: false });
     }
   },
   async refreshEvents() {
@@ -299,7 +307,7 @@ export const useSubscription = create<Store>((set, get) => ({
     if (interval) clearInterval(interval);
     interval = undefined;
     useUI.getState().setCheckoutClientSecret(null);
-    set({ ...initial, offerings: null, events: [] });
+    set({ ...initial, offerings: null, pricingLoading: false, pricingError: null, events: [] });
   },
 }));
 export function hasPremiumEntitlement(state: SubscriptionState) {

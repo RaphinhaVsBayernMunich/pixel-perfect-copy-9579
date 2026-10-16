@@ -1,16 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import {
-  Award,
-  BookOpen,
-  Flame,
-  Milestone,
-  Plus,
-  Sparkles,
-  Trophy,
-  Zap,
-  X,
-} from "lucide-react";
+import { Award, BookOpen, Flame, Milestone, Plus, Sparkles, Trophy, Zap, X } from "lucide-react";
 import { useQuests } from "@/lib/quests-store";
 import type { LegacyEvent } from "@/lib/quests-store";
 import { ACHIEVEMENTS, TIER_COLOR } from "@/lib/achievements";
@@ -64,21 +54,33 @@ function LegacyPage() {
   return (
     <div className="mx-auto w-full max-w-5xl px-5 pt-8 pb-4 md:px-10 md:pt-12">
       <header className="mb-8">
-        <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
-          Chapter 4 · Legacy
-        </p>
-        <h1 className="mt-2 font-display text-3xl font-semibold md:text-5xl">
-          The story you're writing.
-        </h1>
+        <p className="type-eyebrow text-muted-foreground">Chapter 4 · Legacy</p>
+        <h1 className="mt-2 type-display">The story you're writing.</h1>
         <p className="mt-2 max-w-xl text-sm text-muted-foreground">
           Every completed quest, level, and reflection lives here forever.
         </p>
 
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <StatCard icon={<Zap className="h-4 w-4" />} label="Completions" value={stats.completions} />
-          <StatCard icon={<Trophy className="h-4 w-4" />} label="Achievements" value={unlocked.length} />
-          <StatCard icon={<Milestone className="h-4 w-4" />} label="Milestones" value={stats.milestones} />
-          <StatCard icon={<BookOpen className="h-4 w-4" />} label="Entries" value={stats.journals} />
+          <StatCard
+            icon={<Zap className="h-4 w-4" />}
+            label="Completions"
+            value={stats.completions}
+          />
+          <StatCard
+            icon={<Trophy className="h-4 w-4" />}
+            label="Achievements"
+            value={unlocked.length}
+          />
+          <StatCard
+            icon={<Milestone className="h-4 w-4" />}
+            label="Milestones"
+            value={stats.milestones}
+          />
+          <StatCard
+            icon={<BookOpen className="h-4 w-4" />}
+            label="Entries"
+            value={stats.journals}
+          />
         </div>
       </header>
 
@@ -110,9 +112,10 @@ function LegacyPage() {
 
 function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
   return (
-    <div className="rounded-xl border border-hairline bg-card/60 p-3 backdrop-blur-sm">
-      <div className="flex items-center gap-2 text-primary">{icon}
-        <span className="text-[10px] tracking-widest text-muted-foreground uppercase">{label}</span>
+    <div className="rounded-xl border border-hairline bg-card/60 p-3">
+      <div className="flex items-center gap-2 text-primary">
+        {icon}
+        <span className="type-caption text-muted-foreground uppercase">{label}</span>
       </div>
       <p className="mt-2 font-display text-2xl font-semibold">{value.toLocaleString()}</p>
     </div>
@@ -123,7 +126,9 @@ function TimelineView({ events }: { events: LegacyEvent[] }) {
   const grouped = useMemo(() => groupByDay(events), [events]);
 
   if (events.length === 0) {
-    return <EmptyPanel title="Nothing recorded yet" body="Complete a quest to start your timeline." />;
+    return (
+      <EmptyPanel title="Nothing recorded yet" body="Complete a quest to start your timeline." />
+    );
   }
 
   return (
@@ -133,7 +138,7 @@ function TimelineView({ events }: { events: LegacyEvent[] }) {
           <div className="mb-3 flex items-center gap-3">
             <p className="font-display text-sm font-semibold">{day}</p>
             <div className="h-px flex-1 bg-hairline" />
-            <span className="text-[10px] tracking-widest text-muted-foreground uppercase">
+            <span className="type-caption text-muted-foreground uppercase">
               {list.length} events
             </span>
           </div>
@@ -164,18 +169,18 @@ function TimelineItem({ ev }: { ev: LegacyEvent }) {
   if (ev.kind === "completion") {
     const color = CATEGORY_TOKEN[ev.category];
     return (
-      <li className="relative rounded-xl border border-hairline bg-card/50 p-3 backdrop-blur-sm">
+      <li className="relative py-4">
         {dot(color)}
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-[10px] tracking-widest text-muted-foreground uppercase">
+            <p className="type-caption text-muted-foreground uppercase">
               {CATEGORY_LABEL[ev.category]} · {ev.type}
             </p>
             <p className="mt-1 font-medium">{ev.title}</p>
           </div>
           <div className="text-right">
             <p className="font-display text-sm font-bold text-xp">+{ev.xp}</p>
-            <p className="text-[10px] text-muted-foreground">{time}</p>
+            <p className="text-xs text-muted-foreground">{time}</p>
           </div>
         </div>
       </li>
@@ -183,14 +188,14 @@ function TimelineItem({ ev }: { ev: LegacyEvent }) {
   }
   if (ev.kind === "levelup") {
     return (
-      <li className="relative rounded-xl border border-hairline bg-card/50 p-3 backdrop-blur-sm">
+      <li className="relative py-4">
         {dot("var(--main-quest)")}
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
             <p className="font-display font-semibold">Level {ev.level} reached</p>
           </div>
-          <p className="text-[10px] text-muted-foreground">{time}</p>
+          <p className="text-xs text-muted-foreground">{time}</p>
         </div>
       </li>
     );
@@ -198,7 +203,7 @@ function TimelineItem({ ev }: { ev: LegacyEvent }) {
   if (ev.kind === "achievement") {
     const ach = ACHIEVEMENTS.find((a) => a.id === ev.achievementId);
     return (
-      <li className="relative rounded-xl border border-hairline bg-card/50 p-3 backdrop-blur-sm">
+      <li className="relative py-4">
         {dot(ach ? TIER_COLOR[ach.tier] : "var(--primary)")}
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -208,14 +213,14 @@ function TimelineItem({ ev }: { ev: LegacyEvent }) {
               <p className="text-xs text-muted-foreground">{ach?.description}</p>
             </div>
           </div>
-          <p className="text-[10px] text-muted-foreground">{time}</p>
+          <p className="text-xs text-muted-foreground">{time}</p>
         </div>
       </li>
     );
   }
   // journal
   return (
-    <li className="relative rounded-xl border border-hairline bg-card/50 p-3 backdrop-blur-sm">
+    <li className="relative py-4">
       {dot("var(--color-cat-lifestyle)")}
       <div className="flex items-start justify-between gap-3">
         <div>
@@ -224,12 +229,10 @@ function TimelineItem({ ev }: { ev: LegacyEvent }) {
             <p className="font-display font-semibold">{ev.title}</p>
           </div>
           {ev.body && (
-            <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">
-              {ev.body}
-            </p>
+            <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{ev.body}</p>
           )}
         </div>
-        <p className="text-[10px] text-muted-foreground">{time}</p>
+        <p className="text-xs text-muted-foreground">{time}</p>
       </div>
     </li>
   );
@@ -247,7 +250,7 @@ function AchievementsView({ unlocked }: { unlocked: string[] }) {
             className={cn(
               "rounded-2xl border p-4 transition",
               on
-                ? "border-hairline bg-card/70 backdrop-blur-sm"
+                ? "border-hairline bg-card/70"
                 : "border-dashed border-hairline bg-card/30 opacity-60",
             )}
           >
@@ -287,11 +290,14 @@ function AchievementsView({ unlocked }: { unlocked: string[] }) {
 }
 
 function MilestonesView({ events }: { events: LegacyEvent[] }) {
-  const items = events.filter(
-    (e) => e.kind === "levelup" || e.kind === "achievement",
-  );
+  const items = events.filter((e) => e.kind === "levelup" || e.kind === "achievement");
   if (items.length === 0) {
-    return <EmptyPanel title="No milestones yet" body="Level up or unlock an achievement to write history." />;
+    return (
+      <EmptyPanel
+        title="No milestones yet"
+        body="Level up or unlock an achievement to write history."
+      />
+    );
   }
   return (
     <ol className="relative space-y-3 border-l border-hairline pl-5">
@@ -330,14 +336,14 @@ function VaultView({ events }: { events: LegacyEvent[] }) {
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-hairline bg-card/60 px-3 py-1.5 text-xs font-medium backdrop-blur-sm hover:bg-card"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-hairline bg-card/60 px-3 py-1.5 text-xs font-medium hover:bg-card"
         >
           <Plus className="h-3.5 w-3.5" /> New entry
         </button>
       </div>
 
       {open && (
-        <div className="mb-6 rounded-2xl border border-hairline bg-card/60 p-4 backdrop-blur-sm">
+        <div className="mb-6 rounded-2xl border border-hairline bg-card/60 p-4">
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -377,7 +383,7 @@ function VaultView({ events }: { events: LegacyEvent[] }) {
           {entries.map((e) => (
             <article
               key={e.id}
-              className="group relative rounded-2xl border border-hairline bg-card/60 p-4 backdrop-blur-sm"
+              className="group relative rounded-2xl border border-hairline bg-card/60 p-4"
             >
               <button
                 type="button"
@@ -387,7 +393,7 @@ function VaultView({ events }: { events: LegacyEvent[] }) {
               >
                 <X className="h-3.5 w-3.5" />
               </button>
-              <p className="text-[10px] tracking-widest text-muted-foreground uppercase">
+              <p className="type-caption text-muted-foreground uppercase">
                 {new Date(e.ts).toLocaleDateString(undefined, {
                   weekday: "short",
                   month: "short",
@@ -396,9 +402,7 @@ function VaultView({ events }: { events: LegacyEvent[] }) {
               </p>
               <p className="mt-1 font-display font-semibold">{e.title}</p>
               {e.body && (
-                <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">
-                  {e.body}
-                </p>
+                <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{e.body}</p>
               )}
             </article>
           ))}
@@ -438,10 +442,8 @@ function ReviewView({
   });
 
   return (
-    <div className="rounded-2xl border border-hairline bg-card/60 p-6 backdrop-blur-sm">
-      <p className="text-[10px] tracking-widest text-muted-foreground uppercase">
-        Monthly Review
-      </p>
+    <div className="surface-panel">
+      <p className="type-caption text-muted-foreground uppercase">Monthly Review</p>
       <h2 className="mt-1 font-display text-2xl font-semibold">{monthLabel}</h2>
 
       <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -463,13 +465,14 @@ function ReviewView({
             Most XP this month came from{" "}
             <strong style={{ color: CATEGORY_TOKEN[topCat[0] as keyof typeof CATEGORY_TOKEN] }}>
               {CATEGORY_LABEL[topCat[0] as keyof typeof CATEGORY_LABEL]}
-            </strong>
-            {" "}({topCat[1].toLocaleString()} XP).
+            </strong>{" "}
+            ({topCat[1].toLocaleString()} XP).
           </p>
         )}
         {completions.length === 0 && (
           <p className="text-muted-foreground">
-            No completions logged this month yet — one quest is enough to start writing this chapter.
+            No completions logged this month yet — one quest is enough to start writing this
+            chapter.
           </p>
         )}
       </div>
@@ -479,8 +482,8 @@ function ReviewView({
 
 function ReviewStat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-xl border border-hairline bg-background/40 p-3">
-      <p className="text-[10px] tracking-widest text-muted-foreground uppercase">{label}</p>
+    <div className="py-3">
+      <p className="type-caption text-muted-foreground uppercase">{label}</p>
       <p className="mt-1 font-display text-2xl font-semibold">{value.toLocaleString()}</p>
     </div>
   );

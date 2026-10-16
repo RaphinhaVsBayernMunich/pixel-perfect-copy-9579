@@ -74,9 +74,9 @@ export function AuthPage() {
           <span className="font-display text-2xl font-semibold tracking-tight">QuestOS</span>
         </div>
 
-        <div className="rounded-2xl border border-hairline bg-card/60 backdrop-blur-md p-6 shadow-xl">
-          <h1 className="font-display text-2xl font-semibold text-foreground">
-            {mode === "signin" ? "Sign in to your save" : "Begin a new save"}
+        <div className="surface-panel space-y-2">
+          <h1 className="type-h2 text-foreground">
+            {mode === "signin" ? "Welcome back" : "Start your next chapter"}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {mode === "signin"

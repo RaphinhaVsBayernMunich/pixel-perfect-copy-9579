@@ -51,15 +51,15 @@ export function AICoach() {
         <Tabs defaultValue="brief" className="mt-2">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="brief">
-              <Sunrise className="mr-2 h-4 w-4" />
-              Morning brief
+              <Sunrise className="mr-2 hidden h-4 w-4 sm:block" />
+              Brief
             </TabsTrigger>
             <TabsTrigger value="goal">
-              <Compass className="mr-2 h-4 w-4" />
-              Goal → Quests
+              <Compass className="mr-2 hidden h-4 w-4 sm:block" />
+              Goals
             </TabsTrigger>
             <TabsTrigger value="reflect">
-              <BookOpen className="mr-2 h-4 w-4" />
+              <BookOpen className="mr-2 hidden h-4 w-4 sm:block" />
               Reflect
             </TabsTrigger>
           </TabsList>
@@ -136,9 +136,9 @@ function MorningBriefTab() {
       )}
       <Button onClick={generate} disabled={loading} className="w-full">
         {loading ? (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          <Loader2 className="mr-2 hidden h-4 w-4 sm:block animate-spin" />
         ) : (
-          <Sparkles className="mr-2 h-4 w-4" />
+          <Sparkles className="mr-2 hidden h-4 w-4 sm:block" />
         )}
         {brief ? "Regenerate" : "Generate morning brief"}
       </Button>
@@ -213,9 +213,9 @@ function GoalToQuestsTab() {
         </div>
         <Button onClick={generate} disabled={loading || goal.trim().length < 3} className="w-full">
           {loading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 className="mr-2 hidden h-4 w-4 sm:block animate-spin" />
           ) : (
-            <Compass className="mr-2 h-4 w-4" />
+            <Compass className="mr-2 hidden h-4 w-4 sm:block" />
           )}
           Break down goal
         </Button>
@@ -366,7 +366,7 @@ function ReflectionTab() {
           />
           <div className="flex gap-2">
             <Button onClick={save} disabled={!answer.trim()} className="flex-1">
-              <Check className="mr-2 h-4 w-4" />
+              <Check className="mr-2 hidden h-4 w-4 sm:block" />
               Save to Memory Vault
             </Button>
             <Button
@@ -384,9 +384,9 @@ function ReflectionTab() {
       {!prompt && (
         <Button onClick={generate} disabled={loading} className="w-full">
           {loading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 className="mr-2 hidden h-4 w-4 sm:block animate-spin" />
           ) : (
-            <BookOpen className="mr-2 h-4 w-4" />
+            <BookOpen className="mr-2 hidden h-4 w-4 sm:block" />
           )}
           Generate reflection prompt
         </Button>

@@ -56,13 +56,18 @@ function SettingsPage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-5 pt-8 pb-16 md:px-10 md:pt-12">
       <header className="mb-8">
-        <p className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground">Preferences</p>
-        <h1 className="mt-1 font-display text-3xl font-semibold">Settings</h1>
+        <p className="type-eyebrow text-muted-foreground">Preferences</p>
+        <h1 className="mt-1 type-h1">Settings</h1>
       </header>
 
       <div className="space-y-6">
         {/* Subscription */}
-        <SubscriptionSection />
+        <details className="workspace-panel">
+          <summary>Premium subscription</summary>
+          <div className="mt-4">
+            <SubscriptionSection />
+          </div>
+        </details>
 
         <NotificationsCard />
         <AiPreferencesCard />
@@ -106,8 +111,8 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-3xl border border-hairline bg-card/60 p-6 backdrop-blur-sm">
-      <div className="flex items-start gap-3">
+    <details className="workspace-panel">
+      <summary className="flex items-start gap-3">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
           {icon}
         </div>
@@ -115,9 +120,9 @@ function Card({
           <h2 className="font-display text-base font-semibold">{title}</h2>
           {description && <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>}
         </div>
-      </div>
+      </summary>
       <div className="mt-5">{children}</div>
-    </section>
+    </details>
   );
 }
 
@@ -223,7 +228,7 @@ function AiPreferencesCard() {
         </Link>
         <p className="rounded-lg bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
           Daily AI limit — Free: {APP_CONFIG.aiQuota.free} · Trial: {APP_CONFIG.aiQuota.trial} ·
-          Premium: {APP_CONFIG.aiQuota.premium ?? "unlimited"}
+          Premium: {"500/day fair use"}
         </p>
       </div>
     </Card>
