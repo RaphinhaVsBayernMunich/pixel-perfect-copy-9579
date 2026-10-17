@@ -26,7 +26,7 @@ export function PremiumPurchase() {
       pending={state.pending}
       native={isNative()}
       cancelAtPeriodEnd={state.cancelAtPeriodEnd ?? false}
-      onRetry={() => void state.refreshOfferings()}
+      onRetry={() => void state.refreshOfferings(true)}
       onRestore={() => void state.restore()}
       onManage={() => void state.openBillingPortal()}
       onPurchase={async () => {

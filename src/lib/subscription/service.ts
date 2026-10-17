@@ -1,5 +1,6 @@
 import { openExternal } from "../native/auth";
 import { reconcileUntilVerified } from "./reconcile";
+import { createOfferingsCache } from "./offerings-cache";
 import { create } from "zustand";
 import { toast } from "sonner";
 import { useUI } from "../ui-store";
@@ -26,7 +27,7 @@ interface Store extends SubscriptionState {
   events: Awaited<ReturnType<typeof listSubscriptionEvents>>;
   init: (userId: string) => Promise<void>;
   refreshFromBackend: () => Promise<void>;
-  refreshOfferings: () => Promise<void>;
+  refreshOfferings: (force?: boolean) => Promise<void>;
   refreshEvents: () => Promise<void>;
   purchase: (plan: PlanId) => Promise<boolean>;
   restore: () => Promise<boolean>;
@@ -41,6 +42,8 @@ let owner: string | null = null;
 let queue = Promise.resolve();
 let unsubscribe: (() => void) | undefined;
 let interval: ReturnType<typeof setInterval> | undefined;
+let initializedIdentity: string | null = null;
+const offeringsCache = createOfferingsCache();
 const getProvider = () =>
   provider ??
   (provider = isNative()
@@ -77,8 +80,21 @@ export const useSubscription = create<Store>((set, get) => ({
   pricingError: null,
   events: [],
   async init(userId) {
+    if (initializedIdentity === userId) return;
+    initializedIdentity = userId;
     const version = identityVersion;
     const p = getProvider();
+    // Server authority does not depend on the store SDK or its network latency.
+    const accessReady = (async () => {
+      try {
+        const fingerprint = await getInstallFingerprint();
+        if (version !== identityVersion) return;
+        await startTrial({ data: fingerprint });
+      } catch {
+        /* Existing server trial remains authoritative. */
+      }
+      if (version === identityVersion) await get().refreshFromBackend();
+    })();
     try {
       queue = queue
         .catch(() => {})
@@ -94,23 +110,18 @@ export const useSubscription = create<Store>((set, get) => ({
         set({ error: "Billing could not initialize. Please retry or sign in again." });
     }
     if (version !== identityVersion) return;
-    try {
-      const fingerprint = await getInstallFingerprint();
-      if (version !== identityVersion) return;
-      await startTrial({ data: fingerprint });
-    } catch {
-      /* Existing server trial remains authoritative; refresh reports failures. */
-    }
-    if (version !== identityVersion) return;
-    await get().refreshFromBackend();
-    if (version !== identityVersion) return;
     void get().refreshOfferings();
+    await accessReady;
+    if (version !== identityVersion) return;
     unsubscribe?.();
     unsubscribe = p.onEntitlementChange(() => {
       if (version === identityVersion) void get().reconcile();
     });
     if (interval) clearInterval(interval);
-    interval = setInterval(() => void get().refreshFromBackend(), 60000);
+    interval = setInterval(() => {
+      void get().refreshFromBackend();
+      void get().refreshOfferings();
+    }, 60000);
     if (
       typeof window !== "undefined" &&
       new URLSearchParams(window.location.search).get("checkout") === "success"
@@ -147,12 +158,14 @@ export const useSubscription = create<Store>((set, get) => ({
         });
     }
   },
-  async refreshOfferings() {
+  async refreshOfferings(force = false) {
     if (get().pricingLoading) return;
     const version = identityVersion;
-    set({ pricingLoading: true, pricingError: null });
+    set({ pricingLoading: !get().offerings?.current.length, pricingError: null });
     try {
-      const offerings = await getProvider().getOfferings();
+      await queue;
+      if (version !== identityVersion || owner !== useAuth.getState().user?.id) return;
+      const offerings = await offeringsCache.load(() => getProvider().getOfferings(), force);
       if (version === identityVersion)
         set({
           offerings,
@@ -294,6 +307,8 @@ export const useSubscription = create<Store>((set, get) => ({
   },
   reset() {
     identityVersion++;
+    initializedIdentity = null;
+    offeringsCache.reset();
     owner = null;
     const p = provider;
     queue = queue

@@ -1,11 +1,11 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Swords, CalendarDays, Scroll, User, Plus, LogOut, Settings } from "lucide-react";
+import { Home, Swords, CalendarDays, Scroll, User, Plus, Settings } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { useUI } from "@/lib/ui-store";
 import { useQuests } from "@/lib/quests-store";
-import { useAuth } from "@/lib/auth-store";
-import { supabase } from "@/integrations/supabase/client";
+import { SignOutButton } from "./sign-out-button";
+
 import { QuestQuickAdd } from "@/components/quest-quick-add";
 import { QuestEditor } from "@/components/quest-editor";
 import { QuestCelebration } from "@/components/quest-celebration";
@@ -151,22 +151,5 @@ function LogoMark() {
     <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-primary/15 ring-hairline">
       <div className="h-3 w-3 rotate-45 bg-primary shadow-glow-xp" />
     </div>
-  );
-}
-
-function SignOutButton() {
-  const user = useAuth((s) => s.user);
-  if (!user) return null;
-  return (
-    <button
-      type="button"
-      onClick={async () => {
-        await supabase.auth.signOut();
-      }}
-      className="mt-3 flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-muted-foreground transition-colors hover:bg-sidebar-accent/50 hover:text-foreground"
-    >
-      <LogOut className="h-3.5 w-3.5" />
-      <span className="truncate">{user.email ?? "Sign out"}</span>
-    </button>
   );
 }

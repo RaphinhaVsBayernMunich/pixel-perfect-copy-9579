@@ -56,6 +56,7 @@ export function createNativeProvider(
     },
     async identify(userId) {
       z.string().uuid().parse(userId);
+      if (owner === userId && (await (await sdk()).getAppUserID()).appUserID === userId) return;
       owner = null;
       await (await sdk()).logIn({ appUserID: userId });
       owner = userId;

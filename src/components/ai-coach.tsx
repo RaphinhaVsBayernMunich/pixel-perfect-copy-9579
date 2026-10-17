@@ -18,6 +18,28 @@ import { useQuests, suggestXp } from "@/lib/quests-store";
 import { CATEGORY_LABEL, CATEGORY_TOKEN } from "@/lib/demo-data";
 import { morningBrief, goalToQuests, reflectionPrompt } from "@/lib/ai.functions";
 import { cn } from "@/lib/utils";
+import { AiError } from "@/lib/ai-contracts";
+import { useSubscription } from "@/lib/subscription/service";
+import { accessTier } from "@/lib/subscription/billing-contracts";
+
+function showCoachError(title: string, error: unknown) {
+  const quota = error instanceof AiError && error.code === "AI_QUOTA";
+  toast.error(title, {
+    id: quota ? "ai-quota" : undefined,
+    description: error instanceof Error ? error.message : "Please try again later.",
+    closeButton: true,
+    action:
+      quota && accessTier(useSubscription.getState()) !== "premium"
+        ? {
+            label: "Explore Premium",
+            onClick: () => {
+              useUI.getState().closeAICoach();
+              useUI.getState().openPaywall();
+            },
+          }
+        : undefined,
+  });
+}
 
 type GeneratedQuest = {
   title: string;
@@ -111,9 +133,7 @@ function MorningBriefTab() {
       });
       setBrief(res.brief);
     } catch (e) {
-      toast.error("Couldn't generate brief", {
-        description: e instanceof Error ? e.message : String(e),
-      });
+      showCoachError("Couldn't generate brief", e);
     } finally {
       setLoading(false);
     }
@@ -164,9 +184,7 @@ function GoalToQuestsTab() {
       setQuests(res.quests as GeneratedQuest[]);
       if (res.quests.length === 0) toast.error("The coach couldn't parse that — try rephrasing.");
     } catch (e) {
-      toast.error("Couldn't break down goal", {
-        description: e instanceof Error ? e.message : String(e),
-      });
+      showCoachError("Couldn't break down goal", e);
     } finally {
       setLoading(false);
     }
@@ -331,9 +349,7 @@ function ReflectionTab() {
       });
       setPrompt(res.prompt);
     } catch (e) {
-      toast.error("Couldn't generate prompt", {
-        description: e instanceof Error ? e.message : String(e),
-      });
+      showCoachError("Couldn't generate prompt", e);
     } finally {
       setLoading(false);
     }

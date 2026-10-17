@@ -1,20 +1,18 @@
-import { useCallback } from "react";
-import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
+import { lazy, Suspense, useCallback } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useUI } from "@/lib/ui-store";
 import { useSubscription } from "@/lib/subscription/service";
 import { PREMIUM_FEATURES } from "@/lib/subscription/types";
-import { getStripe } from "@/lib/stripe";
 import { PremiumPurchase } from "./premium-purchase";
 import { accessTier } from "@/lib/subscription/billing-contracts";
+const WebCheckout = lazy(() => import("./web-checkout"));
 export function Paywall() {
   const open = useUI((s) => s.paywallOpen),
     close = useUI((s) => s.closePaywall),
     secret = useUI((s) => s.checkoutClientSecret),
     setSecret = useUI((s) => s.setCheckoutClientSecret);
   const state = useSubscription();
-  const fetchClientSecret = useCallback(async () => secret ?? "", [secret]);
   const complete = useCallback(async () => {
     if (await useSubscription.getState().reconcile()) {
       setSecret(null);
@@ -42,12 +40,9 @@ export function Paywall() {
         )}
         {secret ? (
           <>
-            <EmbeddedCheckoutProvider
-              stripe={getStripe()}
-              options={{ fetchClientSecret, onComplete: () => void complete() }}
-            >
-              <EmbeddedCheckout />
-            </EmbeddedCheckoutProvider>
+            <Suspense fallback={<p role="status">Loading secure checkout…</p>}>
+              <WebCheckout secret={secret} onComplete={() => void complete()} />
+            </Suspense>
             <Button disabled={state.pending} onClick={() => void complete()}>
               Check purchase status
             </Button>

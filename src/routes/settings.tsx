@@ -20,6 +20,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SignOutButton } from "@/components/sign-out-button";
 import { Switch } from "@/components/ui/switch";
 import { SubscriptionSection } from "@/components/subscription/subscription-section";
 import {
@@ -93,6 +94,7 @@ function SettingsPage() {
           Clear saved health summary
         </Button>
         <LegalCard />
+        <SignOutButton />
         <DangerZone />
       </div>
     </div>
