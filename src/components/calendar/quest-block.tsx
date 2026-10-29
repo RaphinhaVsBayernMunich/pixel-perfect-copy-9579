@@ -14,14 +14,7 @@ interface Props {
   className?: string;
 }
 
-export function QuestBlock({
-  quest,
-  conflict,
-  compact,
-  onDragStart,
-  style,
-  className,
-}: Props) {
+export function QuestBlock({ quest, conflict, compact, onDragStart, style, className }: Props) {
   const openEditor = useUI((s) => s.openEditor);
   const color = CATEGORY_TOKEN[quest.category];
 
@@ -56,9 +49,7 @@ export function QuestBlock({
         >
           {quest.title}
         </p>
-        {conflict ? (
-          <AlertTriangle className="h-3 w-3 shrink-0 text-destructive" />
-        ) : null}
+        {conflict ? <AlertTriangle className="h-3 w-3 shrink-0 text-destructive" /> : null}
       </div>
       {!compact ? (
         <div className="mt-1 flex items-center gap-2 text-[10px] text-muted-foreground">

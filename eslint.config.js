@@ -14,6 +14,9 @@ export default tseslint.config(
       ".wrangler",
       "android/**/build/**",
       "android/.gradle/**",
+      "supabase/.temp/**",
+      ".tanstack/**",
+      "android/app/src/main/assets/**",
     ],
   },
   {

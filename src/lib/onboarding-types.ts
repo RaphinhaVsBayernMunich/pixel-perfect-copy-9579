@@ -141,14 +141,34 @@ export const CELEBRATIONS: { id: CelebrationStyle; label: string; blurb: string 
 ];
 
 export const AI_FEATURES = [
-  { id: "memory", label: "AI Memory", desc: "Remember your patterns and preferences." },
-  { id: "dailyPlanning", label: "Daily Planning", desc: "AI plans your day each morning." },
-  { id: "weeklyReview", label: "Weekly Reviews", desc: "Auto-generated Sunday recap." },
-  { id: "goalSimulator", label: "Goal Simulator", desc: "Project outcomes 3-12 months out." },
+  {
+    id: "memory",
+    label: "AI Memory",
+    desc: "Save preferences after enabling AI Memory separately.",
+  },
+  {
+    id: "dailyPlanning",
+    label: "Daily Planning",
+    desc: "Request a morning brief or a schedule proposal.",
+  },
+  {
+    id: "weeklyReview",
+    label: "Weekly Reviews",
+    desc: "Review your weekly progress in Analytics.",
+  },
+  {
+    id: "goalSimulator",
+    label: "Goal Simulator",
+    desc: "Explore a goal with your available time.",
+  },
   {
     id: "autoQuests",
-    label: "Automatic Quest Generation",
-    desc: "AI adds quests as you set goals.",
+    label: "Quest Suggestions",
+    desc: "Request quests for a goal and choose which to add.",
   },
-  { id: "scheduleOptimizer", label: "Schedule Optimization", desc: "AI reshuffles your calendar." },
+  {
+    id: "scheduleOptimizer",
+    label: "Schedule Planning",
+    desc: "Review a proposed schedule before applying it.",
+  },
 ];

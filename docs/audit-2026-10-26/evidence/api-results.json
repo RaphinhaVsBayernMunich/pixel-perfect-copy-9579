@@ -1,0 +1,94 @@
+[
+  {
+    "name": "production home and health HTTP 200",
+    "status": "PASS"
+  },
+  {
+    "name": "unauthenticated webhook rejected",
+    "status": "PASS"
+  },
+  {
+    "name": "normal profile edit persists",
+    "status": "PASS"
+  },
+  {
+    "name": "billing field escalation denied",
+    "status": "PASS"
+  },
+  {
+    "name": "cross-account profiles hidden",
+    "status": "PASS"
+  },
+  {
+    "name": "valid UUID quest creation and persistence",
+    "status": "PASS"
+  },
+  {
+    "name": "quest edit and completion persist",
+    "status": "PASS"
+  },
+  {
+    "name": "cross-account quest read and write isolation",
+    "status": "PASS"
+  },
+  {
+    "name": "invalid UUID rejected",
+    "status": "PASS"
+  },
+  {
+    "name": "premium memory save and read",
+    "status": "PASS"
+  },
+  {
+    "name": "free account premium data is denied",
+    "status": "PASS"
+  },
+  {
+    "name": "health sample requires explicit save and can be cleared",
+    "status": "PASS"
+  },
+  {
+    "name": "export belongs to signed-in account",
+    "status": "PASS"
+  },
+  {
+    "name": "account deletion rejects missing confirmation",
+    "status": "PASS"
+  },
+  {
+    "name": "AI invalid input returns safe envelope",
+    "status": "PASS"
+  },
+  {
+    "name": "live AI morning brief",
+    "status": "PASS"
+  },
+  {
+    "name": "live AI goal quests",
+    "status": "PASS"
+  },
+  {
+    "name": "live AI reflection",
+    "status": "PASS"
+  },
+  {
+    "name": "live AI starter quests",
+    "status": "PASS"
+  },
+  {
+    "name": "live AI future_me",
+    "status": "PASS"
+  },
+  {
+    "name": "live AI goal_simulator",
+    "status": "PASS"
+  },
+  {
+    "name": "live executive assistant proposal does not mutate calendar",
+    "status": "PASS"
+  },
+  {
+    "name": "quest deletion persists",
+    "status": "PASS"
+  }
+]

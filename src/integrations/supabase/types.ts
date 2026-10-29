@@ -1,759 +1,751 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
+    PostgrestVersion: "14.5";
+  };
   public: {
     Tables: {
       account_sync_revisions: {
         Row: {
-          revision: number
-          user_id: string
-        }
+          revision: number;
+          user_id: string;
+        };
         Insert: {
-          revision?: number
-          user_id: string
-        }
+          revision?: number;
+          user_id: string;
+        };
         Update: {
-          revision?: number
-          user_id?: string
-        }
-        Relationships: []
-      }
+          revision?: number;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       ai_requests: {
         Row: {
-          completed_at: string | null
-          error_code: string | null
-          feature: string
-          id: string
-          input_tokens: number | null
-          lease_expires_at: string
-          model: string
-          output_tokens: number | null
-          provider: string
-          started_at: string
-          status: string
-          usage_date: string
-          user_id: string
-        }
+          completed_at: string | null;
+          error_code: string | null;
+          feature: string;
+          id: string;
+          input_tokens: number | null;
+          lease_expires_at: string;
+          model: string;
+          output_tokens: number | null;
+          provider: string;
+          started_at: string;
+          status: string;
+          usage_date: string;
+          user_id: string;
+        };
         Insert: {
-          completed_at?: string | null
-          error_code?: string | null
-          feature: string
-          id?: string
-          input_tokens?: number | null
-          lease_expires_at?: string
-          model?: string
-          output_tokens?: number | null
-          provider?: string
-          started_at?: string
-          status?: string
-          usage_date?: string
-          user_id: string
-        }
+          completed_at?: string | null;
+          error_code?: string | null;
+          feature: string;
+          id?: string;
+          input_tokens?: number | null;
+          lease_expires_at?: string;
+          model?: string;
+          output_tokens?: number | null;
+          provider?: string;
+          started_at?: string;
+          status?: string;
+          usage_date?: string;
+          user_id: string;
+        };
         Update: {
-          completed_at?: string | null
-          error_code?: string | null
-          feature?: string
-          id?: string
-          input_tokens?: number | null
-          lease_expires_at?: string
-          model?: string
-          output_tokens?: number | null
-          provider?: string
-          started_at?: string
-          status?: string
-          usage_date?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          completed_at?: string | null;
+          error_code?: string | null;
+          feature?: string;
+          id?: string;
+          input_tokens?: number | null;
+          lease_expires_at?: string;
+          model?: string;
+          output_tokens?: number | null;
+          provider?: string;
+          started_at?: string;
+          status?: string;
+          usage_date?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       ai_usage: {
         Row: {
-          last_feature: string | null
-          request_count: number
-          updated_at: string
-          usage_date: string
-          user_id: string
-        }
+          last_feature: string | null;
+          request_count: number;
+          updated_at: string;
+          usage_date: string;
+          user_id: string;
+        };
         Insert: {
-          last_feature?: string | null
-          request_count?: number
-          updated_at?: string
-          usage_date?: string
-          user_id: string
-        }
+          last_feature?: string | null;
+          request_count?: number;
+          updated_at?: string;
+          usage_date?: string;
+          user_id: string;
+        };
         Update: {
-          last_feature?: string | null
-          request_count?: number
-          updated_at?: string
-          usage_date?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          last_feature?: string | null;
+          request_count?: number;
+          updated_at?: string;
+          usage_date?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       analytics_events: {
         Row: {
-          event: string
-          id: string
-          occurred_at: string
-          platform: string | null
-          properties: Json
-          session_id: string | null
-          user_id: string | null
-        }
+          event: string;
+          id: string;
+          occurred_at: string;
+          platform: string | null;
+          properties: Json;
+          session_id: string | null;
+          user_id: string | null;
+        };
         Insert: {
-          event: string
-          id?: string
-          occurred_at?: string
-          platform?: string | null
-          properties?: Json
-          session_id?: string | null
-          user_id?: string | null
-        }
+          event: string;
+          id?: string;
+          occurred_at?: string;
+          platform?: string | null;
+          properties?: Json;
+          session_id?: string | null;
+          user_id?: string | null;
+        };
         Update: {
-          event?: string
-          id?: string
-          occurred_at?: string
-          platform?: string | null
-          properties?: Json
-          session_id?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
+          event?: string;
+          id?: string;
+          occurred_at?: string;
+          platform?: string | null;
+          properties?: Json;
+          session_id?: string | null;
+          user_id?: string | null;
+        };
+        Relationships: [];
+      };
       assistant_proposals: {
         Row: {
-          actions: Json
-          applied_at: string | null
-          created_at: string
-          id: string
-          user_id: string
-        }
+          actions: Json;
+          applied_at: string | null;
+          created_at: string;
+          id: string;
+          user_id: string;
+        };
         Insert: {
-          actions: Json
-          applied_at?: string | null
-          created_at?: string
-          id?: string
-          user_id: string
-        }
+          actions: Json;
+          applied_at?: string | null;
+          created_at?: string;
+          id?: string;
+          user_id: string;
+        };
         Update: {
-          actions?: Json
-          applied_at?: string | null
-          created_at?: string
-          id?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          actions?: Json;
+          applied_at?: string | null;
+          created_at?: string;
+          id?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       billing_accounts: {
         Row: {
-          customer_id: string
-          environment: string
-          provider: string
-          user_id: string
-        }
+          customer_id: string;
+          environment: string;
+          provider: string;
+          user_id: string;
+        };
         Insert: {
-          customer_id: string
-          environment: string
-          provider: string
-          user_id: string
-        }
+          customer_id: string;
+          environment: string;
+          provider: string;
+          user_id: string;
+        };
         Update: {
-          customer_id?: string
-          environment?: string
-          provider?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          customer_id?: string;
+          environment?: string;
+          provider?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       billing_checkout_keys: {
         Row: {
-          environment: string
-          expires_at: string
-          request_key: string
-          user_id: string
-        }
+          environment: string;
+          expires_at: string;
+          request_key: string;
+          user_id: string;
+        };
         Insert: {
-          environment: string
-          expires_at?: string
-          request_key?: string
-          user_id: string
-        }
+          environment: string;
+          expires_at?: string;
+          request_key?: string;
+          user_id: string;
+        };
         Update: {
-          environment?: string
-          expires_at?: string
-          request_key?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          environment?: string;
+          expires_at?: string;
+          request_key?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       billing_configuration: {
         Row: {
-          environment: string
-          id: boolean
-        }
+          environment: string;
+          id: boolean;
+        };
         Insert: {
-          environment: string
-          id?: boolean
-        }
+          environment: string;
+          id?: boolean;
+        };
         Update: {
-          environment?: string
-          id?: boolean
-        }
-        Relationships: []
-      }
+          environment?: string;
+          id?: boolean;
+        };
+        Relationships: [];
+      };
       billing_events: {
         Row: {
-          environment: string
-          event_id: string
-          provider: string
-          received_at: string
-        }
+          environment: string;
+          event_id: string;
+          provider: string;
+          received_at: string;
+        };
         Insert: {
-          environment: string
-          event_id: string
-          provider: string
-          received_at?: string
-        }
+          environment: string;
+          event_id: string;
+          provider: string;
+          received_at?: string;
+        };
         Update: {
-          environment?: string
-          event_id?: string
-          provider?: string
-          received_at?: string
-        }
-        Relationships: []
-      }
+          environment?: string;
+          event_id?: string;
+          provider?: string;
+          received_at?: string;
+        };
+        Relationships: [];
+      };
       billing_request_limits: {
         Row: {
-          attempts: number
-          user_id: string
-          window_start: string
-        }
+          attempts: number;
+          user_id: string;
+          window_start: string;
+        };
         Insert: {
-          attempts?: number
-          user_id: string
-          window_start: string
-        }
+          attempts?: number;
+          user_id: string;
+          window_start: string;
+        };
         Update: {
-          attempts?: number
-          user_id?: string
-          window_start?: string
-        }
-        Relationships: []
-      }
+          attempts?: number;
+          user_id?: string;
+          window_start?: string;
+        };
+        Relationships: [];
+      };
       billing_subscriptions: {
         Row: {
-          cancel_at_period_end: boolean
-          customer_id: string
-          environment: string
-          event_at: string
-          event_rank: number
-          failure_since: string | null
-          paid_until: string
-          product_id: string
-          provider: string
-          status: string
-          subscription_id: string
-          user_id: string
-        }
+          cancel_at_period_end: boolean;
+          customer_id: string;
+          environment: string;
+          event_at: string;
+          event_rank: number;
+          failure_since: string | null;
+          paid_until: string;
+          product_id: string;
+          provider: string;
+          status: string;
+          subscription_id: string;
+          user_id: string;
+        };
         Insert: {
-          cancel_at_period_end?: boolean
-          customer_id: string
-          environment: string
-          event_at: string
-          event_rank?: number
-          failure_since?: string | null
-          paid_until: string
-          product_id: string
-          provider: string
-          status: string
-          subscription_id: string
-          user_id: string
-        }
+          cancel_at_period_end?: boolean;
+          customer_id: string;
+          environment: string;
+          event_at: string;
+          event_rank?: number;
+          failure_since?: string | null;
+          paid_until: string;
+          product_id: string;
+          provider: string;
+          status: string;
+          subscription_id: string;
+          user_id: string;
+        };
         Update: {
-          cancel_at_period_end?: boolean
-          customer_id?: string
-          environment?: string
-          event_at?: string
-          event_rank?: number
-          failure_since?: string | null
-          paid_until?: string
-          product_id?: string
-          provider?: string
-          status?: string
-          subscription_id?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          cancel_at_period_end?: boolean;
+          customer_id?: string;
+          environment?: string;
+          event_at?: string;
+          event_rank?: number;
+          failure_since?: string | null;
+          paid_until?: string;
+          product_id?: string;
+          provider?: string;
+          status?: string;
+          subscription_id?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       installations: {
         Row: {
-          fingerprint: string
-          first_seen_at: string
-          id: string
-          last_seen_at: string
-          platform: string
-          trial_consumed: boolean
-          trial_consumed_at: string | null
-          trial_consumed_by: string | null
-          user_ids: string[]
-        }
+          fingerprint: string;
+          first_seen_at: string;
+          id: string;
+          last_seen_at: string;
+          platform: string;
+          trial_consumed: boolean;
+          trial_consumed_at: string | null;
+          trial_consumed_by: string | null;
+          user_ids: string[];
+        };
         Insert: {
-          fingerprint: string
-          first_seen_at?: string
-          id?: string
-          last_seen_at?: string
-          platform?: string
-          trial_consumed?: boolean
-          trial_consumed_at?: string | null
-          trial_consumed_by?: string | null
-          user_ids?: string[]
-        }
+          fingerprint: string;
+          first_seen_at?: string;
+          id?: string;
+          last_seen_at?: string;
+          platform?: string;
+          trial_consumed?: boolean;
+          trial_consumed_at?: string | null;
+          trial_consumed_by?: string | null;
+          user_ids?: string[];
+        };
         Update: {
-          fingerprint?: string
-          first_seen_at?: string
-          id?: string
-          last_seen_at?: string
-          platform?: string
-          trial_consumed?: boolean
-          trial_consumed_at?: string | null
-          trial_consumed_by?: string | null
-          user_ids?: string[]
-        }
-        Relationships: []
-      }
+          fingerprint?: string;
+          first_seen_at?: string;
+          id?: string;
+          last_seen_at?: string;
+          platform?: string;
+          trial_consumed?: boolean;
+          trial_consumed_at?: string | null;
+          trial_consumed_by?: string | null;
+          user_ids?: string[];
+        };
+        Relationships: [];
+      };
       legacy_events: {
         Row: {
-          category: string | null
-          content: string | null
-          id: string
-          kind: string
-          metadata: Json | null
-          occurred_at: string
-          quest_id: string | null
-          user_id: string
-          xp_earned: number | null
-        }
+          category: string | null;
+          content: string | null;
+          id: string;
+          kind: string;
+          metadata: Json | null;
+          occurred_at: string;
+          quest_id: string | null;
+          user_id: string;
+          xp_earned: number | null;
+        };
         Insert: {
-          category?: string | null
-          content?: string | null
-          id?: string
-          kind: string
-          metadata?: Json | null
-          occurred_at?: string
-          quest_id?: string | null
-          user_id: string
-          xp_earned?: number | null
-        }
+          category?: string | null;
+          content?: string | null;
+          id?: string;
+          kind: string;
+          metadata?: Json | null;
+          occurred_at?: string;
+          quest_id?: string | null;
+          user_id: string;
+          xp_earned?: number | null;
+        };
         Update: {
-          category?: string | null
-          content?: string | null
-          id?: string
-          kind?: string
-          metadata?: Json | null
-          occurred_at?: string
-          quest_id?: string | null
-          user_id?: string
-          xp_earned?: number | null
-        }
-        Relationships: []
-      }
+          category?: string | null;
+          content?: string | null;
+          id?: string;
+          kind?: string;
+          metadata?: Json | null;
+          occurred_at?: string;
+          quest_id?: string | null;
+          user_id?: string;
+          xp_earned?: number | null;
+        };
+        Relationships: [];
+      };
       premium_documents: {
         Row: {
-          kind: string
-          updated_at: string
-          user_id: string
-          value: Json
-        }
+          kind: string;
+          updated_at: string;
+          user_id: string;
+          value: Json;
+        };
         Insert: {
-          kind: string
-          updated_at?: string
-          user_id: string
-          value: Json
-        }
+          kind: string;
+          updated_at?: string;
+          user_id: string;
+          value: Json;
+        };
         Update: {
-          kind?: string
-          updated_at?: string
-          user_id?: string
-          value?: Json
-        }
-        Relationships: []
-      }
+          kind?: string;
+          updated_at?: string;
+          user_id?: string;
+          value?: Json;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
-          avatar_url: string | null
-          category_xp: Json
-          character_state: Json
-          character_title: string | null
-          created_at: string
-          current_plan: string | null
-          day_start_hour: number
-          display_name: string | null
-          entitlement: string
-          last_verification: string | null
-          level: number
-          premium_expiration: string | null
-          revenuecat_customer_id: string | null
-          settings: Json
-          stripe_customer_id: string | null
-          subscription_status: string
-          timezone: string
-          total_xp: number
-          trial_end: string | null
-          trial_start: string | null
-          updated_at: string
-          user_id: string
-        }
+          avatar_url: string | null;
+          category_xp: Json;
+          character_state: Json;
+          character_title: string | null;
+          created_at: string;
+          current_plan: string | null;
+          day_start_hour: number;
+          display_name: string | null;
+          entitlement: string;
+          last_verification: string | null;
+          level: number;
+          premium_expiration: string | null;
+          revenuecat_customer_id: string | null;
+          settings: Json;
+          stripe_customer_id: string | null;
+          subscription_status: string;
+          timezone: string;
+          total_xp: number;
+          trial_end: string | null;
+          trial_start: string | null;
+          updated_at: string;
+          user_id: string;
+        };
         Insert: {
-          avatar_url?: string | null
-          category_xp?: Json
-          character_state?: Json
-          character_title?: string | null
-          created_at?: string
-          current_plan?: string | null
-          day_start_hour?: number
-          display_name?: string | null
-          entitlement?: string
-          last_verification?: string | null
-          level?: number
-          premium_expiration?: string | null
-          revenuecat_customer_id?: string | null
-          settings?: Json
-          stripe_customer_id?: string | null
-          subscription_status?: string
-          timezone?: string
-          total_xp?: number
-          trial_end?: string | null
-          trial_start?: string | null
-          updated_at?: string
-          user_id: string
-        }
+          avatar_url?: string | null;
+          category_xp?: Json;
+          character_state?: Json;
+          character_title?: string | null;
+          created_at?: string;
+          current_plan?: string | null;
+          day_start_hour?: number;
+          display_name?: string | null;
+          entitlement?: string;
+          last_verification?: string | null;
+          level?: number;
+          premium_expiration?: string | null;
+          revenuecat_customer_id?: string | null;
+          settings?: Json;
+          stripe_customer_id?: string | null;
+          subscription_status?: string;
+          timezone?: string;
+          total_xp?: number;
+          trial_end?: string | null;
+          trial_start?: string | null;
+          updated_at?: string;
+          user_id: string;
+        };
         Update: {
-          avatar_url?: string | null
-          category_xp?: Json
-          character_state?: Json
-          character_title?: string | null
-          created_at?: string
-          current_plan?: string | null
-          day_start_hour?: number
-          display_name?: string | null
-          entitlement?: string
-          last_verification?: string | null
-          level?: number
-          premium_expiration?: string | null
-          revenuecat_customer_id?: string | null
-          settings?: Json
-          stripe_customer_id?: string | null
-          subscription_status?: string
-          timezone?: string
-          total_xp?: number
-          trial_end?: string | null
-          trial_start?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          avatar_url?: string | null;
+          category_xp?: Json;
+          character_state?: Json;
+          character_title?: string | null;
+          created_at?: string;
+          current_plan?: string | null;
+          day_start_hour?: number;
+          display_name?: string | null;
+          entitlement?: string;
+          last_verification?: string | null;
+          level?: number;
+          premium_expiration?: string | null;
+          revenuecat_customer_id?: string | null;
+          settings?: Json;
+          stripe_customer_id?: string | null;
+          subscription_status?: string;
+          timezone?: string;
+          total_xp?: number;
+          trial_end?: string | null;
+          trial_start?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       quests: {
         Row: {
-          category: string
-          completed_at: string | null
-          created_at: string
-          description: string | null
-          difficulty: string
-          estimated_duration: number | null
-          id: string
-          priority: string
-          scheduled_for: string | null
-          start_time: string | null
-          status: string
-          title: string
-          type: string
-          updated_at: string
-          user_id: string
-          xp_reward: number
-        }
+          category: string;
+          completed_at: string | null;
+          created_at: string;
+          description: string | null;
+          difficulty: string;
+          estimated_duration: number | null;
+          id: string;
+          priority: string;
+          scheduled_for: string | null;
+          start_time: string | null;
+          status: string;
+          title: string;
+          type: string;
+          updated_at: string;
+          user_id: string;
+          xp_reward: number;
+        };
         Insert: {
-          category: string
-          completed_at?: string | null
-          created_at?: string
-          description?: string | null
-          difficulty: string
-          estimated_duration?: number | null
-          id?: string
-          priority?: string
-          scheduled_for?: string | null
-          start_time?: string | null
-          status?: string
-          title: string
-          type: string
-          updated_at?: string
-          user_id: string
-          xp_reward?: number
-        }
+          category: string;
+          completed_at?: string | null;
+          created_at?: string;
+          description?: string | null;
+          difficulty: string;
+          estimated_duration?: number | null;
+          id?: string;
+          priority?: string;
+          scheduled_for?: string | null;
+          start_time?: string | null;
+          status?: string;
+          title: string;
+          type: string;
+          updated_at?: string;
+          user_id: string;
+          xp_reward?: number;
+        };
         Update: {
-          category?: string
-          completed_at?: string | null
-          created_at?: string
-          description?: string | null
-          difficulty?: string
-          estimated_duration?: number | null
-          id?: string
-          priority?: string
-          scheduled_for?: string | null
-          start_time?: string | null
-          status?: string
-          title?: string
-          type?: string
-          updated_at?: string
-          user_id?: string
-          xp_reward?: number
-        }
-        Relationships: []
-      }
+          category?: string;
+          completed_at?: string | null;
+          created_at?: string;
+          description?: string | null;
+          difficulty?: string;
+          estimated_duration?: number | null;
+          id?: string;
+          priority?: string;
+          scheduled_for?: string | null;
+          start_time?: string | null;
+          status?: string;
+          title?: string;
+          type?: string;
+          updated_at?: string;
+          user_id?: string;
+          xp_reward?: number;
+        };
+        Relationships: [];
+      };
       subscription_events: {
         Row: {
-          entitlement: string | null
-          id: string
-          kind: string
-          metadata: Json
-          occurred_at: string
-          product_id: string | null
-          source: string
-          user_id: string
-        }
+          entitlement: string | null;
+          id: string;
+          kind: string;
+          metadata: Json;
+          occurred_at: string;
+          product_id: string | null;
+          source: string;
+          user_id: string;
+        };
         Insert: {
-          entitlement?: string | null
-          id?: string
-          kind: string
-          metadata?: Json
-          occurred_at?: string
-          product_id?: string | null
-          source?: string
-          user_id: string
-        }
+          entitlement?: string | null;
+          id?: string;
+          kind: string;
+          metadata?: Json;
+          occurred_at?: string;
+          product_id?: string | null;
+          source?: string;
+          user_id: string;
+        };
         Update: {
-          entitlement?: string | null
-          id?: string
-          kind?: string
-          metadata?: Json
-          occurred_at?: string
-          product_id?: string | null
-          source?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          entitlement?: string | null;
+          id?: string;
+          kind?: string;
+          metadata?: Json;
+          occurred_at?: string;
+          product_id?: string | null;
+          source?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       user_achievements: {
         Row: {
-          achievement_id: string
-          id: string
-          unlocked_at: string
-          user_id: string
-        }
+          achievement_id: string;
+          id: string;
+          unlocked_at: string;
+          user_id: string;
+        };
         Insert: {
-          achievement_id: string
-          id?: string
-          unlocked_at?: string
-          user_id: string
-        }
+          achievement_id: string;
+          id?: string;
+          unlocked_at?: string;
+          user_id: string;
+        };
         Update: {
-          achievement_id?: string
-          id?: string
-          unlocked_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-    }
+          achievement_id?: string;
+          id?: string;
+          unlocked_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+    };
     Views: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Functions: {
-      apply_billing_batch: { Args: { _events: Json }; Returns: undefined }
-      apply_billing_event: { Args: { _event: Json }; Returns: boolean }
+      apply_billing_batch: { Args: { _events: Json }; Returns: undefined };
+      apply_billing_event: { Args: { _event: Json }; Returns: boolean };
       billing_checkout_key: {
-        Args: { _environment: string; _user_id: string }
-        Returns: Json
-      }
+        Args: { _environment: string; _user_id: string };
+        Returns: Json;
+      };
       confirm_assistant_plan: {
-        Args: { _proposal_id: string; _user_id: string }
-        Returns: undefined
-      }
+        Args: { _proposal_id: string; _user_id: string };
+        Returns: undefined;
+      };
       finish_ai_request: {
         Args: {
-          _error_code: string
-          _input_tokens: number
-          _output_tokens: number
-          _request_id: string
-        }
-        Returns: boolean
-      }
-      has_active_premium: { Args: { _user_id: string }; Returns: boolean }
+          _error_code: string;
+          _input_tokens: number;
+          _output_tokens: number;
+          _request_id: string;
+        };
+        Returns: boolean;
+      };
+      has_active_premium: { Args: { _user_id: string }; Returns: boolean };
       increment_ai_usage: {
-        Args: { _feature: string; _user_id: string }
-        Returns: number
-      }
-      read_account_save: { Args: never; Returns: Json }
+        Args: { _feature: string; _user_id: string };
+        Returns: number;
+      };
+      read_account_save: { Args: never; Returns: Json };
       register_signup_trial: {
-        Args: { _fingerprint: string; _platform: string; _user_id: string }
-        Returns: Json
-      }
+        Args: { _fingerprint: string; _platform: string; _user_id: string };
+        Returns: Json;
+      };
       reserve_ai_request: {
         Args: {
-          _feature: string
-          _free_limit: number
-          _premium_limit: number
-          _trial_limit: number
-          _user_id: string
-        }
-        Returns: Json
-      }
-      subscription_snapshot: { Args: { _user_id: string }; Returns: Json }
-      take_billing_request: { Args: { _user_id: string }; Returns: undefined }
+          _feature: string;
+          _free_limit: number;
+          _premium_limit: number;
+          _trial_limit: number;
+          _user_id: string;
+        };
+        Returns: Json;
+      };
+      subscription_snapshot: { Args: { _user_id: string }; Returns: Json };
+      take_billing_request: { Args: { _user_id: string }; Returns: undefined };
       write_account_save: {
-        Args: { p_revision: number; p_save: Json }
-        Returns: number
-      }
-    }
+        Args: { p_revision: number; p_save: Json };
+        Returns: number;
+      };
+    };
     Enums: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-}
+      [_ in never]: never;
+    };
+  };
+};
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">;
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">];
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
       DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
+      Row: infer R;
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R;
       }
       ? R
       : never
-    : never
+    : never;
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
+      Insert: infer I;
     }
     ? I
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
+        Insert: infer I;
       }
       ? I
       : never
-    : never
+    : never;
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
+      Update: infer U;
     }
     ? U
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
+        Update: infer U;
       }
       ? U
       : never
-    : never
+    : never;
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never) = never,
+    : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+    : never;
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never) = never,
+    : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+    : never;
 
 export const Constants = {
   public: {
     Enums: {},
   },
-} as const
+} as const;

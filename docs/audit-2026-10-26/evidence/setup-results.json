@@ -1,0 +1,10 @@
+[
+  {
+    "name": "email/password login for both disposable accounts",
+    "status": "PASS"
+  },
+  {
+    "name": "normal seven-day trial through production backend",
+    "status": "PASS"
+  }
+]

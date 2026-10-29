@@ -117,8 +117,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     name: "Polymath",
     description: "Earn XP in 5 different categories.",
     tier: "silver",
-    check: (s) =>
-      Object.values(s.categoryXp).filter((v) => v > 0).length >= 5,
+    check: (s) => Object.values(s.categoryXp).filter((v) => v > 0).length >= 5,
   },
   catAch("fitness", "Iron Body", 1000, "silver"),
   catAch("coding", "Code Poet", 1000, "silver"),

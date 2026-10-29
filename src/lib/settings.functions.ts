@@ -4,8 +4,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import type { Json } from "@/integrations/supabase/types";
 
-const settingsShape = z.record(z.unknown()); // Loose — validated client-side.
+const settingsShape = z.record(z.string(), z.json());
 
 export const loadSettings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -23,15 +24,15 @@ export const loadSettings = createServerFn({ method: "GET" })
 
 export const saveSettings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ settings: settingsShape }).parse(input))
+  .validator((input: unknown) => z.object({ settings: settingsShape }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { error } = await supabase
       .from("profiles")
-      .update({ settings: data.settings as any })
+      .update({ settings: data.settings as Json })
       .eq("user_id", userId)
       .select("user_id")
       .single();
-    if (error) throw error;
+    if (error) throw new Error("Settings could not be saved. Please retry.");
     return { ok: true };
   });

@@ -3,7 +3,12 @@ import type { Category } from "./demo-data";
 /** RPG-style attributes derived from category XP. */
 export const ATTRIBUTES = [
   { key: "STR", label: "Strength", from: ["fitness"] as Category[], hue: 25 },
-  { key: "END", label: "Endurance", from: ["fitness", "football", "health"] as Category[], hue: 145 },
+  {
+    key: "END",
+    label: "Endurance",
+    from: ["fitness", "football", "health"] as Category[],
+    hue: 145,
+  },
   { key: "INT", label: "Intellect", from: ["academics", "coding"] as Category[], hue: 200 },
   { key: "WIS", label: "Wisdom", from: ["academics", "lifestyle"] as Category[], hue: 285 },
   { key: "CHA", label: "Charisma", from: ["business", "relationships"] as Category[], hue: 45 },

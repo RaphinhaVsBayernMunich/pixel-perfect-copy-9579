@@ -1,0 +1,10 @@
+[
+  {
+    "name": "expired disposable account falls back to free",
+    "status": "PASS"
+  },
+  {
+    "name": "free account premium write denied",
+    "status": "PASS"
+  }
+]

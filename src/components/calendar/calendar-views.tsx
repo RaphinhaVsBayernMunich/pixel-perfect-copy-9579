@@ -29,13 +29,7 @@ interface DayColumnProps {
   showHeader?: boolean;
 }
 
-export function DayColumn({
-  date,
-  quests,
-  conflicts,
-  onDrop,
-  showHeader = true,
-}: DayColumnProps) {
+export function DayColumn({ date, quests, conflicts, onDrop, showHeader = true }: DayColumnProps) {
   const iso = toISODate(date);
   const dayQuests = useMemo(
     () => questsOnDate(quests, iso).filter((q) => q.startTime),
@@ -62,12 +56,7 @@ export function DayColumn({
           <p className="text-[10px] tracking-[0.15em] text-muted-foreground uppercase">
             {date.toLocaleDateString(undefined, { weekday: "short" })}
           </p>
-          <p
-            className={cn(
-              "font-display text-lg font-semibold",
-              today && "text-primary",
-            )}
-          >
+          <p className={cn("font-display text-lg font-semibold", today && "text-primary")}>
             {date.getDate()}
           </p>
         </div>
@@ -76,12 +65,7 @@ export function DayColumn({
       {untimed.length > 0 ? (
         <div className="flex flex-col gap-1 border-b border-hairline bg-card/30 p-1">
           {untimed.map((q) => (
-            <QuestBlock
-              key={q.id}
-              quest={q}
-              compact
-              conflict={conflicts.has(q.id)}
-            />
+            <QuestBlock key={q.id} quest={q} compact conflict={conflicts.has(q.id)} />
           ))}
         </div>
       ) : null}
@@ -141,11 +125,7 @@ export function DayColumn({
                 className="absolute right-1 left-1"
                 style={{ top: geom.top, height: geom.height }}
               >
-                <QuestBlock
-                  quest={q}
-                  conflict={conflicts.has(q.id)}
-                  className="h-full"
-                />
+                <QuestBlock quest={q} conflict={conflicts.has(q.id)} className="h-full" />
               </div>
             );
           })}
@@ -203,9 +183,7 @@ export function DayView({ anchor }: ViewProps) {
         date={anchor}
         quests={quests}
         conflicts={conflicts}
-        onDrop={(id, iso, t) =>
-          update(id, { scheduledFor: iso, startTime: t })
-        }
+        onDrop={(id, iso, t) => update(id, { scheduledFor: iso, startTime: t })}
       />
     </div>
   );
@@ -237,9 +215,7 @@ export function WeekView({ anchor }: ViewProps) {
             date={d}
             quests={quests}
             conflicts={conflicts}
-            onDrop={(id, iso, t) =>
-              update(id, { scheduledFor: iso, startTime: t })
-            }
+            onDrop={(id, iso, t) => update(id, { scheduledFor: iso, startTime: t })}
           />
         ))}
       </div>
@@ -309,9 +285,7 @@ export function MonthView({ anchor }: ViewProps) {
                   {d.getDate()}
                 </span>
                 {items.length > 3 ? (
-                  <span className="text-[9px] text-muted-foreground">
-                    +{items.length - 3}
-                  </span>
+                  <span className="text-[9px] text-muted-foreground">+{items.length - 3}</span>
                 ) : null}
               </div>
               <div className="flex flex-col gap-0.5">
@@ -360,12 +334,7 @@ export function AgendaView({ anchor }: ViewProps) {
               )}
             >
               <div className="flex items-baseline gap-3">
-                <span
-                  className={cn(
-                    "font-display text-lg font-semibold",
-                    today && "text-primary",
-                  )}
-                >
+                <span className={cn("font-display text-lg font-semibold", today && "text-primary")}>
                   {d.toLocaleDateString(undefined, {
                     weekday: "long",
                     month: "short",

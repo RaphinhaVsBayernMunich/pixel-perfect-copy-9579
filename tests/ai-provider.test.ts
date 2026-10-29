@@ -313,3 +313,36 @@ test("redirect responses fail closed without following credentials or retrying",
     expect(calls).toBe(1);
   }
 });
+
+for (const feature of ["future_me", "goal_simulator", "executive_assistant"] as const) {
+  test(`${feature} validates output and rejects empty, oversized and spoofed inputs before charging`, async () => {
+    const { impl, events } = dependencies();
+    const narrative = {
+      summary: "Two hours each week builds a sustainable practice routine.",
+      observations: ["The plan allocates two hours weekly.", "Start with a small achievable step."],
+      nextSteps: ["Reserve a weekly practice slot.", "Review progress after one week."],
+    };
+    impl.generate = async () => {
+      events.push("provider");
+      return { content: JSON.stringify(narrative), usage: { inputTokens: 24, outputTokens: 10 } };
+    };
+    expect(await runAi(feature, { evidence: "{}" }, impl)).toEqual({ ok: true, value: narrative });
+    expect(events).toEqual(["auth", "reserve", "provider", "finish"]);
+    for (const input of [
+      null,
+      {},
+      { evidence: "" },
+      { evidence: "x".repeat(16001) },
+      { evidence: "{}", userId: "forged" },
+    ]) {
+      events.length = 0;
+      expect(await runAi(feature, input, impl)).toEqual({ ok: false, code: "AI_INVALID_INPUT" });
+      expect(events).toEqual([]);
+    }
+    impl.generate = async () => ({ content: "{}", usage: { inputTokens: 24, outputTokens: 10 } });
+    expect(await runAi(feature, { evidence: "{}" }, impl)).toEqual({
+      ok: false,
+      code: "AI_INVALID_RESPONSE",
+    });
+  });
+}

@@ -1,6 +1,7 @@
 {
   "name": "tanstack_start_ts",
   "private": true,
+  "packageManager": "bun@1.4.2",
   "sideEffects": false,
   "type": "module",
   "scripts": {
@@ -22,7 +23,7 @@
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^3.0.12",
-    "@capacitor/android": "^8.4.2",
+    "@capacitor/android": "8.4.3",
     "@capacitor/app": "^8.1.1",
     "@capacitor/browser": "^8.0.3",
     "@capacitor/cli": "^8.4.2",
@@ -93,8 +94,12 @@
     "tw-animate-css": "^1.3.4",
     "vaul": "^1.1.2",
     "vite-tsconfig-paths": "^6.0.2",
-    "zod": "^3.24.2",
+    "zod": "4.6.6",
     "zustand": "^5.0.14"
+  },
+  "overrides": {
+    "sharp": "0.35.5",
+    "undici": "7.30.1"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
@@ -116,7 +121,7 @@
     "prettier": "^3.7.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
-    "vite": "^8.0.16",
+    "vite": "8.1.6",
     "wrangler": "^4.145.0"
   }
 }

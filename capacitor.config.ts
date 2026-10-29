@@ -9,7 +9,9 @@ const config: CapacitorConfig = {
   appId: "app.questos.android",
   appName: "QuestOS",
   webDir: "native-shell",
-  server: origin ? { url: new URL(origin).origin, cleartext: false } : undefined,
+  server: origin
+    ? { url: new URL(origin).origin, cleartext: false, errorPath: "offline.html" }
+    : undefined,
   android: { allowMixedContent: false, webContentsDebuggingEnabled: false },
   plugins: {
     QuestOSNative: {

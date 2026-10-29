@@ -12,8 +12,8 @@ const rcSubscription = z.object({
 });
 const customerSchema = z.object({
   subscriber: z.object({
-    subscriptions: z.record(rcSubscription),
-    entitlements: z.record(z.object({ product_identifier: z.string() })),
+    subscriptions: z.record(z.string(), rcSubscription),
+    entitlements: z.record(z.string(), z.object({ product_identifier: z.string() })),
   }),
 });
 

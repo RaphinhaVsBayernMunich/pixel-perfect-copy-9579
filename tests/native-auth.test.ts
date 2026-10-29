@@ -11,6 +11,11 @@ test("native auth accepts only a fresh code callback at the exact registered rou
     "app.questos.android://auth/other?code=one",
     "app.questos.android://auth/callback#access_token=forged",
     "app.questos.android://auth/callback?code=one#access_token=forged",
+    "app.questos.android://other@auth/callback?code=one",
+    "app.questos.android://auth:123/callback?code=one",
+    "app.questos.android://auth/callback?code=one&code=two",
+    "app.questos.android://auth/callback?code=%20",
+    "app.questos.android://auth/callback?code=" + "x".repeat(2049),
   ])
     expect(validAuthCallback(url, now - 1000, now)).toBe(false);
   expect(validAuthCallback("app.questos.android://auth/callback?code=one", now - 600001, now)).toBe(

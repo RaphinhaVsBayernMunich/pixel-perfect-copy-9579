@@ -639,8 +639,8 @@ function AIStep({
     <div>
       <StepHeader
         eyebrow="Step 10 · AI"
-        title="What can the AI do for you?"
-        sub="You keep control. Toggle anything off."
+        title="Which tools interest you?"
+        sub="These are planning preferences, not permissions. AI tools run when you request them."
       />
       <div className="space-y-2">
         {AI_FEATURES.map((f) => {

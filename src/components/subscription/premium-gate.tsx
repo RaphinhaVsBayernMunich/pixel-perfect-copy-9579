@@ -58,18 +58,12 @@ export function PremiumUpsell({
           <Lock className="h-4 w-4" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] tracking-[0.18em] uppercase text-muted-foreground">
-            Premium
-          </p>
+          <p className="text-[10px] tracking-[0.18em] uppercase text-muted-foreground">Premium</p>
           <h3 className="mt-0.5 font-display text-base font-semibold text-foreground">
             {meta.label}
           </h3>
           <p className="mt-1 text-sm text-muted-foreground">{meta.description}</p>
-          <Button
-            size="sm"
-            onClick={openPaywall}
-            className="mt-3 gap-1.5"
-          >
+          <Button size="sm" onClick={openPaywall} className="mt-3 gap-1.5">
             <Sparkles className="h-3.5 w-3.5" />
             Unlock Premium
           </Button>
