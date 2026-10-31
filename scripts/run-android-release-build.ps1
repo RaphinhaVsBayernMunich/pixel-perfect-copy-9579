@@ -8,6 +8,12 @@ $status = @{ status = 'building'; phase = 'bundle-release'; processId = $PID }
 $status | ConvertTo-Json | Set-Content -LiteralPath $statusPath
 try {
     if (!$env:QUESTOS_KEYSTORE_PATH -or !$env:QUESTOS_KEYSTORE_PASSWORD -or !$env:QUESTOS_KEY_ALIAS -or !$env:QUESTOS_KEY_PASSWORD) { throw 'Signing environment is incomplete.' }
+    $bundle = Join-Path $Workspace 'android\app\build\outputs\bundle\release\app-release.aab'
+    if (Test-Path -LiteralPath $bundle) {
+        $oldHash = (Get-FileHash -LiteralPath $bundle -Algorithm SHA256).Hash
+        $backup = Join-Path $privateState ('previous-release-' + $oldHash + '.aab')
+        if (!(Test-Path -LiteralPath $backup)) { Copy-Item -LiteralPath $bundle -Destination $backup }
+    }
     & (Join-Path $Workspace 'android\gradlew.bat') -p android bundleRelease --no-daemon > (Join-Path $privateState 'stage4-release.log') 2>&1
     if ($LASTEXITCODE -ne 0) { throw 'Gradle release build failed.' }
     $bundle = Join-Path $Workspace 'android\app\build\outputs\bundle\release\app-release.aab'

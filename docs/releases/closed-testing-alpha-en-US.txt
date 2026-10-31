@@ -1,0 +1,5 @@
+Welcome to the QuestOS closed-testing Alpha.
+
+Plan quests, track your progress and explore the AI coaching tools.
+This build includes Android security updates and a connection recovery screen.
+Please report issues and feedback to founder@oryxion.net.

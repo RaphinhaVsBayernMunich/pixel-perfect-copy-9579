@@ -1,8 +1,11 @@
 param(
+    [Parameter(Mandatory=$true)][ValidateRange(1,2100000000)][int]$VersionCode,
+    [string]$VersionName = '1.0.0',
     [string]$StoreFile = 'C:\QuestOS-Secrets\questos-release.jks',
     [string]$KeyAlias = 'questos',
     [string]$JavaHome = 'C:\Users\DELL\.jdks\jbr-21.0.11',
-    [switch]$WaitForChecks
+    [switch]$WaitForChecks,
+    [string]$ReadyFile
 )
 $ErrorActionPreference = 'Stop'
 $workspace = Split-Path -Parent $PSScriptRoot
@@ -13,6 +16,7 @@ $privateState = Join-Path $workspace 'supabase\.temp'
 New-Item -ItemType Directory -Force -Path $privateState | Out-Null
 $statusPath = Join-Path $privateState 'stage4-release-status.json'
 $readyPath = Join-Path $privateState 'stage4-build-ready'
+if ($ReadyFile) { $readyPath = $ReadyFile }
 $certificatePath = Join-Path $privateState 'stage4-signing-certificate.pem'
 $status = @{ status = 'awaiting-private-passwords' }
 $status | ConvertTo-Json | Set-Content -LiteralPath $statusPath
@@ -21,7 +25,7 @@ Write-Host "Keystore: $StoreFile; alias: $KeyAlias"
 $storeSecret = Read-Host 'Keystore password' -AsSecureString
 $keySecret = Read-Host 'Key password (separate fresh entry required, even if identical)' -AsSecureString
 $previous = @{}
-foreach ($name in @('JAVA_HOME','QUESTOS_KEYSTORE_PATH','QUESTOS_KEYSTORE_PASSWORD','QUESTOS_KEY_ALIAS','QUESTOS_KEY_PASSWORD')) {
+foreach ($name in @('JAVA_HOME','QUESTOS_VERSION_CODE','QUESTOS_VERSION_NAME','QUESTOS_KEYSTORE_PATH','QUESTOS_KEYSTORE_PASSWORD','QUESTOS_KEY_ALIAS','QUESTOS_KEY_PASSWORD')) {
     $previous[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
 }
 try {
@@ -41,8 +45,8 @@ try {
     $env:QUESTOS_KEY_ALIAS = $KeyAlias
     $env:QUESTOS_KEYSTORE_PASSWORD = [System.Net.NetworkCredential]::new('', $storeSecret).Password
     $env:QUESTOS_KEY_PASSWORD = [System.Net.NetworkCredential]::new('', $keySecret).Password
-    $env:QUESTOS_VERSION_CODE = '2'
-    $env:QUESTOS_VERSION_NAME = '1.0.0'
+    $env:QUESTOS_VERSION_CODE = [string]$VersionCode
+    $env:QUESTOS_VERSION_NAME = $VersionName
     $status.status = 'building'
     $status | ConvertTo-Json | Set-Content -LiteralPath $statusPath
     $status.phase = 'verify-keystore'
