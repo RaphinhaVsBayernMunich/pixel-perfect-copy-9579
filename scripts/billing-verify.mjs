@@ -130,6 +130,9 @@ await check("live Supabase schema, RLS and billing authority (rollback only)", (
     "kqsoccbtookvwelctyhm",
     "--file",
     "scripts/verify-destination.sql",
+    // Explicit owner approval is required by recent Supabase CLI releases even
+    // though this test rolls back. Never silently approve hosted SQL by default.
+    ...(process.argv.includes("--approve-destination-check") ? ["--yes"] : []),
   ]),
 );
 await check("production backend health", async () => {

@@ -80,6 +80,7 @@ test("free, active trial, expired trial, paid, canceled, grace and expired paid"
   expect((await snapshot()).tier).toBe("premium");
   await apply(event({ eventAt: date(-0.009), cancelAtPeriodEnd: true }));
   expect((await snapshot()).cancel_at_period_end).toBe(true);
+  expect((await snapshot()).tier).toBe("premium");
   await apply(
     event({ eventAt: date(-0.008), status: "grace", paidUntil: date(-1), failureSince: date(-1) }),
   );
@@ -98,6 +99,13 @@ test("grace does not slide with repeat billing failures", async () => {
     event({ eventAt: date(-0.001), status: "grace", paidUntil: failure, failureSince: date(-1) }),
   );
   expect((await snapshot()).premium_expiration).toBe(first.premium_expiration);
+});
+test("a stale active event cannot resurrect a newer expired subscription", async () => {
+  await apply(event({ eventAt: date(-2), paidUntil: date(-1) }));
+  await apply(event({ eventAt: date(-0.5), status: "expired", paidUntil: date(-1) }));
+  expect((await snapshot()).tier).toBe("free");
+  expect(await apply(event({ eventAt: date(-1), paidUntil: date(30) }))).toBe(false);
+  expect((await snapshot()).tier).toBe("free");
 });
 test("duplicates and older expirations cannot revoke a current paid period", async () => {
   const e = event();
