@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { createStripeClient } from "@/lib/stripe.server";
 import {
   billingDb,
+  accountBillingEnvironment,
   configuredBillingEnvironment,
   applyBillingEvent,
   getBillingSnapshot,
@@ -37,6 +38,8 @@ export async function monthlyStripePrice() {
 }
 export async function stripeCustomer(userId: string, email?: string, create = false) {
   const env = configuredBillingEnvironment();
+  if ((await accountBillingEnvironment(userId)) !== env)
+    throw new Error("Use Google Play sandbox billing for this dedicated test account.");
   const stripe = createStripeClient(env);
   const { data: account, error } = await billingDb
     .from("billing_accounts")

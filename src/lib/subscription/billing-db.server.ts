@@ -12,13 +12,20 @@ export const billingDb = supabaseAdmin as SupabaseClient;
 export function configuredBillingEnvironment() {
   return billingEnvironment.parse(process.env.BILLING_ENVIRONMENT ?? "live");
 }
+export async function accountBillingEnvironment(userId: string) {
+  const { data, error } = await billingDb
+    .rpc("account_billing_environment", { _user_id: userId })
+    .abortSignal(AbortSignal.timeout(10000));
+  if (error) throw new Error("Billing account configuration is unavailable. Please retry.");
+  return billingEnvironment.parse(data);
+}
 export async function getBillingSnapshot(userId: string) {
   const { data, error } = await billingDb
     .rpc("subscription_snapshot", { _user_id: userId })
     .abortSignal(AbortSignal.timeout(10000));
   if (error) throw new Error("Subscription status is unavailable. Please retry.");
   const result = subscriptionSnapshot.parse(data);
-  if (result.environment !== configuredBillingEnvironment())
+  if (result.environment !== (await accountBillingEnvironment(userId)))
     throw new Error("Billing environment is not configured consistently. Contact support.");
   return result;
 }
@@ -30,7 +37,7 @@ export async function requirePremium(userId: string) {
 }
 export async function applyBillingEvent(input: BillingEvent) {
   const event = billingEvent.parse(input);
-  if (event.environment !== configuredBillingEnvironment())
+  if (event.environment !== (await accountBillingEnvironment(event.userId)))
     throw new Error("Wrong billing environment");
   const { error } = await billingDb
     .rpc("apply_billing_event", { _event: event })

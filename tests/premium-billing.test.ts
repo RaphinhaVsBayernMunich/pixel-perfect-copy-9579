@@ -18,6 +18,7 @@ beforeAll(async () => {
 }, 30000);
 afterAll(() => db.close());
 beforeEach(async () => {
+  await db.exec("RESET ROLE; DELETE FROM questos_private.billing_sandbox_accounts;");
   await db.exec(
     "RESET ROLE;TRUNCATE billing_request_limits,billing_checkout_keys,billing_subscriptions,billing_events,billing_accounts,quests,assistant_proposals,ai_requests,ai_usage;UPDATE profiles SET subscription_status='free',entitlement='free',trial_start=NULL,trial_end=NULL,premium_expiration=NULL;UPDATE billing_configuration SET environment='live';",
   );
@@ -148,6 +149,60 @@ test("provider overlap and environment isolation", async () => {
   expect((await snapshot()).tier).toBe("premium");
   await db.exec("UPDATE billing_configuration SET environment='sandbox'");
   expect((await snapshot()).tier).toBe("free");
+});
+test("sandbox enrollment is server-only and rejects live billing identities", async () => {
+  await expect(
+    db.query(
+      "INSERT INTO questos_private.billing_sandbox_accounts VALUES($1,$2,'isolated test identity')",
+      [a, date(1)],
+    ),
+  ).rejects.toThrow("dedicated account");
+  await db.exec("SET ROLE authenticated");
+  await expect(
+    db.query(
+      "INSERT INTO questos_private.billing_sandbox_accounts VALUES($1,$2,'client self enrollment')",
+      [a, date(1)],
+    ),
+  ).rejects.toThrow();
+  await expect(db.query("SELECT public.account_billing_environment($1)", [a])).rejects.toThrow();
+});
+test("sandbox receipts grant only enrolled identities and expiry removes paid access", async () => {
+  await db.query("DELETE FROM billing_accounts WHERE user_id=$1", [a]);
+  await db.query(
+    "INSERT INTO questos_private.billing_sandbox_accounts VALUES($1,$2,'isolated test identity')",
+    [a, date(1)],
+  );
+  await db.query("INSERT INTO billing_accounts VALUES($1::uuid,'revenuecat','sandbox',$1::text)", [
+    a,
+  ]);
+  await expect(
+    db.query("INSERT INTO billing_accounts VALUES($1::uuid,'revenuecat','sandbox',$1::text)", [b]),
+  ).rejects.toThrow("environment");
+  await apply(
+    event({
+      provider: "revenuecat",
+      environment: "sandbox",
+      subscriptionId: "GPA.1234",
+      productId: "questos_premium_monthly:monthly",
+    }),
+  );
+  expect((await snapshot(a)).tier).toBe("premium");
+  expect((await snapshot(b)).tier).toBe("free");
+  await expect(
+    db.query("INSERT INTO billing_accounts VALUES($1::uuid,'stripe','live',$1::text)", [a]),
+  ).rejects.toThrow();
+  // Local fixture only: simulate elapsed enrollment time without waiting a day.
+  await db.exec(
+    "ALTER TABLE questos_private.billing_sandbox_accounts DISABLE TRIGGER guard_sandbox_enrollment",
+  );
+  await db.query("UPDATE questos_private.billing_sandbox_accounts SET expires_at=$1", [date(-1)]);
+  await db.exec(
+    "ALTER TABLE questos_private.billing_sandbox_accounts ENABLE TRIGGER guard_sandbox_enrollment",
+  );
+  expect((await snapshot(a)).tier).toBe("free");
+  await expect(
+    db.query("INSERT INTO billing_accounts VALUES($1::uuid,'stripe','live',$1::text)", [a]),
+  ).rejects.toThrow("Test identities");
 });
 test("receipt ownership conflict is rejected and rolls back event record", async () => {
   await apply(

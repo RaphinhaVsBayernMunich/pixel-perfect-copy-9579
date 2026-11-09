@@ -2,8 +2,9 @@ import { fetchRevenueCatSubscriber } from "./revenuecat-http.server";
 import { parseRevenueCatRecords } from "./revenuecat-contracts";
 import "@tanstack/react-start/server-only";
 import { z } from "zod";
-import { billingDb, configuredBillingEnvironment, getBillingSnapshot } from "./billing-db.server";
+import { billingDb, accountBillingEnvironment, getBillingSnapshot } from "./billing-db.server";
 import { billingEvent, type BillingEvent } from "./billing-contracts";
+import { verifyWebhookEnvironments } from "./sandbox-policy";
 export async function revenueCatSnapshot(
   userId: string,
   eventId: string,
@@ -13,7 +14,7 @@ export async function revenueCatSnapshot(
   const key = process.env.REVENUECAT_SECRET_API_KEY;
   if (!key) throw new Error("Native billing verification is not configured");
   const payload = await fetchRevenueCatSubscriber(userId, key);
-  const env = configuredBillingEnvironment();
+  const env = await accountBillingEnvironment(userId);
   const events = parseRevenueCatRecords(payload, { userId, eventId, eventAt, env });
   const { error } = await billingDb
     .from("billing_accounts")
@@ -76,9 +77,6 @@ export async function handleRevenueCatEvent(payload: unknown) {
   const { event } = rcWebhook.parse(payload);
   if (event.app_id !== process.env.REVENUECAT_APP_ID) throw new Error("Wrong RevenueCat app");
   if (event.type === "TEST") return;
-  const env = configuredBillingEnvironment();
-  if (event.environment && event.environment !== (env === "live" ? "PRODUCTION" : "SANDBOX"))
-    throw new Error("Wrong RevenueCat environment");
   const users =
     event.type === "TRANSFER"
       ? [...(event.transferred_from ?? []), ...(event.transferred_to ?? [])]
@@ -87,6 +85,10 @@ export async function handleRevenueCatEvent(payload: unknown) {
     ...new Set(users.filter((id): id is string => !!id && z.string().uuid().safeParse(id).success)),
   ];
   if (!ids.length) throw new Error("No verified account identity");
+  // Check every identity before fetching or persisting either side of a transfer.
+  // A mixed live/test transfer must never partially revoke a real customer's access.
+  const environments = await Promise.all(ids.map(accountBillingEnvironment));
+  verifyWebhookEnvironments(environments, event);
   const events: BillingEvent[] = [];
   // Fetch both sides first; the batch revokes the source and grants destination atomically.
   for (const id of ids)
