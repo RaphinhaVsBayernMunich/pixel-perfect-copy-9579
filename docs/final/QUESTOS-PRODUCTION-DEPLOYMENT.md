@@ -1,0 +1,16 @@
+# Production deployment
+
+Updated 2026-11-13.
+
+- Runtime: https://questos.questos-1fd92776.workers.dev
+- Supabase: `kqsoccbtookvwelctyhm` only.
+- Approved migration: `20261109144028_account_scoped_billing_sandbox.sql`, applied November 9; migration ledger independently confirmed November 13.
+- Worker version: `b1d3636d-1c9a-414d-9d34-b56d854a0855`, deployed November 9 using `.output/server/wrangler.json`.
+- Previous Worker rollback target: `e1858c37-b8f3-4f6c-982c-0811c716f71c`.
+- Source repair commit: `a6bc9a5` on `codex/production-release-2026-11-09`.
+
+November 13 billing verification passes production app/backend health and billing configuration. Production Android sync also passes its health preflight. November 9 private reviewer password authentication verification passed; this is not a claim of a new Android UI session test.
+
+No production customer was enrolled as a test user. The two approved sandbox identities were created through normal signup and enrolled for 14 days. No synthetic premium subscription was inserted. No secret rotation, product change, price change or signed AAB replacement occurred.
+
+Rollback requires deliberate review: the previous Worker does not accept sandbox receipts. Keep the additive database guards in place; do not remove test isolation or switch the global environment to sandbox. Deployment logs are ignored local evidence under `supabase/.temp/final-evidence/`.
