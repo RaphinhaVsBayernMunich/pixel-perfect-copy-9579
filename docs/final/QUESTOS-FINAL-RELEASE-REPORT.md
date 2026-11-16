@@ -1,5 +1,9 @@
 # QuestOS final release gate report
 
+## November 16 continuation (supersedes resolved blockers below)
+
+Both sandbox confirmations and password logins pass; server identity, cross-account profile isolation and explicit server-only environment RPC denial also pass. Billing readiness rerun: 10/10. Dashboard access restored: leaked-password protection requires Pro; current plan is Free. No paid upgrade performed. Emulator System UI ANR observed via ADB screenshot; rebooted without wipe. Desktop capture still fails after repositioning; owner agreed to install Alpha manually. No actual purchase, offline recovery pass or production submission claimed. Earlier 117-test/build evidence is preserved, not represented as newly rerun.
+
 Updated 2026-11-13. Status: **BLOCKED BY EXTERNAL VERIFICATION**. No Play production release or real purchase was performed.
 
 ## Verified changes

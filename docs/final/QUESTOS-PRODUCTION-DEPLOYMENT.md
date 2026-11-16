@@ -1,5 +1,7 @@
 # Production deployment
 
+November 16 continuation: billing verification again passed 10/10, including production health and server configuration. Both dedicated sandbox accounts now authenticate successfully. No new Worker deployment or migration was necessary for email confirmation and evidence updates.
+
 Updated 2026-11-13.
 
 - Runtime: https://questos.questos-1fd92776.workers.dev

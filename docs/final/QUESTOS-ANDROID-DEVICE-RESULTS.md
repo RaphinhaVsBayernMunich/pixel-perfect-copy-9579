@@ -1,5 +1,9 @@
 # Android device results
 
+## November 16 continuation
+
+Pixel_8 is now emulator-5554; ADB package inspection found QuestOS absent. Capture failed despite owner repositioning and one recovery attempt. Authorized ADB screenshot `nov16-device.png` shows Android System UI ANR, not a QuestOS crash. Rebooted without wiping data; sys.boot_completed returned 1. Screenshot `nov16-device-recovery.png` shows launcher loading, not proof of application recovery. Owner agreed to install Alpha manually from Play. Installer/version and application recovery checks remain pending.
+
 Updated 2026-11-13. Existing closed-test AAB preserved; no signed rebuild or reupload.
 
 - Artifact: `C:\Users\DELL\Downloads\QuestOS-Closed-Testing.aab`

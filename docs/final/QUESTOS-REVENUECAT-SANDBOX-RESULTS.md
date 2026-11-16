@@ -1,12 +1,12 @@
 # RevenueCat sandbox results
 
-Updated 2026-11-13. Configuration readiness is **10/10 PASS**; actual purchase lifecycle is **NOT EXECUTED**.
+Updated 2026-11-16. Configuration readiness was rerun: **10/10 PASS**; actual purchase lifecycle is **NOT EXECUTED**.
 
 Verified canonical mapping: `questos_premium_monthly:monthly` -> `premium`; `default` -> `$rc_monthly` -> monthly product. Project `f6813f52`, Android `app.questos.android`. Existing V1 subscriber verification and historical annual receipt support are preserved. No products, prices or keys were changed.
 
 RevenueCat Project Settings visibly retains **Allowed App User IDs only**, with **2 items**, and no unsaved changes. Screenshot: local `supabase/.temp/final-evidence/nov13-revenuecat-sandbox.png`. Backend migration is confirmed in the destination migration ledger. Both enrolled identities resolve to sandbox and expire on 2026-11-23 at 16:04:25 UTC. Live query found zero subscriptions for those identities.
 
-Owner reported both confirmation emails completed. A subsequent authoritative database query on November 13 nevertheless found **0/2 email_confirmed_at values set**. Clarification is pending. Do not auto-confirm or substitute another customer account.
+Both accounts are now confirmed through normal email links. On November 16 both passed password authentication, server getUser identity verification, cross-account profile read isolation, and explicit SQLSTATE 42501 denial of account_billing_environment using its exact _user_id argument. Check sessions were signed out locally; other sessions were preserved. No actual store checkout has yet occurred.
 
 | Lifecycle case | Result |
 | --- | --- |
