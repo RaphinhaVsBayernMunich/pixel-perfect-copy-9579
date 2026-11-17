@@ -1,5 +1,7 @@
 # RevenueCat sandbox results
 
+November 17 baseline: live database confirms both approved accounts are email-confirmed, resolve to sandbox, have free-tier snapshots and no stored subscriptions. Enrollment expiry remains November 23, 16:04:25 UTC. Play installation is verified as version 3 / 1.0.0 from com.android.vending. Actual checkout and test-payment marker are still pending private emulator login; no purchase is claimed.
+
 Updated 2026-11-16. Configuration readiness was rerun: **10/10 PASS**; actual purchase lifecycle is **NOT EXECUTED**.
 
 Verified canonical mapping: `questos_premium_monthly:monthly` -> `premium`; `default` -> `$rc_monthly` -> monthly product. Project `f6813f52`, Android `app.questos.android`. Existing V1 subscriber verification and historical annual receipt support are preserved. No products, prices or keys were changed.

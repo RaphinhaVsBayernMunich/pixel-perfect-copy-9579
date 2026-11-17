@@ -1,5 +1,13 @@
 # Android device results
 
+## November 17 Play-installed Alpha verification
+
+ADB on emulator-5554 confirms package app.questos.android, versionCode 3, versionName 1.0.0, installer and initiating package com.android.vending. MainActivity resolves and `am start -W` returned Status: ok. Actual screenshot `nov17-alpha-launch.png` shows the QuestOS login screen.
+
+Offline cold start PASS: disabled emulator Wi-Fi and mobile data, force-stopped only QuestOS, launched MainActivity (LaunchState COLD), and observed the bundled “Let's reconnect” screen with Retry QuestOS (`nov17-offline.png`). Both network transports were restored in a finally block. Clicked Retry through the embedded Android Studio emulator; observed the login screen again (`nov17-reconnected.png`). No data-clear command was used. Authenticated session preservation and post-purchase recovery remain separate, pending checks.
+
+The embedded Android Studio emulator is now capturable and controllable, resolving the previous standalone-window capture blocker. Private Sandbox A login is handed to the owner because the Windows computer-use skill prohibits automating authentication dialogs.
+
 ## November 16 continuation
 
 Pixel_8 is now emulator-5554; ADB package inspection found QuestOS absent. Capture failed despite owner repositioning and one recovery attempt. Authorized ADB screenshot `nov16-device.png` shows Android System UI ANR, not a QuestOS crash. Rebooted without wiping data; sys.boot_completed returned 1. Screenshot `nov16-device-recovery.png` shows launcher loading, not proof of application recovery. Owner agreed to install Alpha manually from Play. Installer/version and application recovery checks remain pending.
