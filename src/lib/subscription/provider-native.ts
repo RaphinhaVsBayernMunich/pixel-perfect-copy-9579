@@ -15,10 +15,12 @@ const eligible = (pkg: PurchasesPackage) =>
   pkg.product.defaultOption.isBasePlan &&
   Number.isFinite(pkg.product.price) &&
   pkg.product.price > 0;
+// Keep the proxy inside a module object: returning it from an async function
+// makes Promise resolution call the proxy's synthetic then method.
+export const loadNativePurchases = () => import("@revenuecat/purchases-capacitor");
 export function createNativeProvider(
   getApiKey: () => string | undefined | Promise<string | undefined>,
-  sdk: () => Promise<PurchasesPlugin> = async () =>
-    (await import("@revenuecat/purchases-capacitor")).Purchases,
+  sdk: () => Promise<{ Purchases: PurchasesPlugin }> = loadNativePurchases,
 ): SubscriptionProvider {
   const listeners = new Set<(e: Entitlement) => void>();
   let initialized = false;
@@ -27,7 +29,7 @@ export function createNativeProvider(
     if (
       !expected ||
       owner !== expected ||
-      (await (await sdk()).getAppUserID()).appUserID !== expected ||
+      (await (await sdk()).Purchases.getAppUserID()).appUserID !== expected ||
       owner !== expected
     )
       throw new Error("Sign in again before using Google Play billing.");
@@ -41,7 +43,7 @@ export function createNativeProvider(
       if (initialized) return;
       const apiKey = await getApiKey();
       if (!apiKey?.startsWith("goog_")) throw new Error("Google Play billing is not configured.");
-      const purchases = await sdk();
+      const { Purchases: purchases } = await sdk();
       await purchases.configure({ apiKey, appUserID: userId! });
       await purchases.addCustomerInfoUpdateListener(
         (info) => owner && listeners.forEach((cb) => cb(entitlement(info))),
@@ -51,18 +53,19 @@ export function createNativeProvider(
     },
     async reset() {
       owner = null;
-      if (initialized && !(await (await sdk()).isAnonymous()).isAnonymous)
-        await (await sdk()).logOut();
+      if (initialized && !(await (await sdk()).Purchases.isAnonymous()).isAnonymous)
+        await (await sdk()).Purchases.logOut();
     },
     async identify(userId) {
       z.string().uuid().parse(userId);
-      if (owner === userId && (await (await sdk()).getAppUserID()).appUserID === userId) return;
+      if (owner === userId && (await (await sdk()).Purchases.getAppUserID()).appUserID === userId)
+        return;
       owner = null;
-      await (await sdk()).logIn({ appUserID: userId });
+      await (await sdk()).Purchases.logIn({ appUserID: userId });
       owner = userId;
     },
     async getOfferings(): Promise<Offerings> {
-      const offerings = await (await sdk()).getOfferings();
+      const offerings = await (await sdk()).Purchases.getOfferings();
       return {
         current: (offerings.all[RC_OFFERING]?.availablePackages ?? []).flatMap((pkg) => {
           const plan = planByProductId(pkg.product.identifier);
@@ -78,7 +81,7 @@ export function createNativeProvider(
       const expected = owner;
       try {
         await assertIdentity(expected);
-        const purchases = await sdk();
+        const { Purchases: purchases } = await sdk();
         const offerings = await purchases.getOfferings();
         const pkg = offerings.all[RC_OFFERING]?.availablePackages.find(
           (p) => eligible(p) && planByProductId(p.product.identifier)?.id === planId,
@@ -112,7 +115,7 @@ export function createNativeProvider(
       const expected = owner;
       try {
         await assertIdentity(expected);
-        const info = await (await sdk()).restorePurchases();
+        const info = await (await sdk()).Purchases.restorePurchases();
         await assertIdentity(expected);
         return { ok: true, entitlement: entitlement(info.customerInfo) };
       } catch {
@@ -126,7 +129,7 @@ export function createNativeProvider(
     async refreshEntitlement() {
       const expected = owner;
       await assertIdentity(expected);
-      const info = await (await sdk()).getCustomerInfo();
+      const info = await (await sdk()).Purchases.getCustomerInfo();
       await assertIdentity(expected);
       return entitlement(info.customerInfo);
     },

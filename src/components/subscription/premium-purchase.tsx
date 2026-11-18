@@ -20,7 +20,7 @@ export function PremiumPurchase() {
       days={trialDaysLeft(state)}
       price={plan?.priceString}
       loaded={state.loaded}
-      pricingLoading={state.pricingLoading || state.offerings === null}
+      pricingLoading={state.pricingLoading}
       pricingError={state.pricingError}
       error={state.error ?? null}
       pending={state.pending}

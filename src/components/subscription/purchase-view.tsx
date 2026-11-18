@@ -57,6 +57,7 @@ export function PurchaseView(p: PurchaseViewProps) {
       ) : p.pricingError || !p.price ? (
         <div className="space-y-3 rounded-xl bg-surface-2 p-4" role="status">
           <p className="text-sm">We couldn't load the current monthly price.</p>
+          {p.pricingError && <p className="text-xs text-muted-foreground">{p.pricingError}</p>}
           <Button variant="outline" disabled={p.pending} onClick={p.onRetry}>
             Retry pricing
           </Button>

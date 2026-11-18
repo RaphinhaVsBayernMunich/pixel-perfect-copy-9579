@@ -1,7 +1,8 @@
 import type { Offerings } from "./types";
+import { pricingDeadline } from "./pricing-deadline";
 
 /** Session-only display metadata. Never stores a native purchase package or entitlement. */
-export function createOfferingsCache(now = Date.now) {
+export function createOfferingsCache(now = Date.now, timeoutMs = 15_000) {
   let value: Offerings | undefined;
   let expires = 0;
   let retryAt = 0;
@@ -15,7 +16,7 @@ export function createOfferingsCache(now = Date.now) {
       if (now() < retryAt) return Promise.reject(new Error("Retry pricing shortly."));
       const current = generation;
       const request = Promise.resolve()
-        .then(fetcher)
+        .then(() => pricingDeadline(fetcher(), timeoutMs))
         .then((result) => {
           if (!result.current.length) throw new Error("No verified monthly plan available.");
           if (current === generation) {

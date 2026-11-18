@@ -1,5 +1,10 @@
 # RevenueCat sandbox results
 
+## November 18 continuation
+
+See [native billing repair and actual Play checkout evidence](QUESTOS-NATIVE-BILLING-REPAIR-2026-11-18.md). This supersedes the older missing-installation and inaccessible-emulator blockers below. Native pricing now works; Play reports success for an explicitly approved no-charge test, but receipt, Premium, and lifecycle verification remain pending. No production submission or AAB rebuild was performed.
+
+
 November 17 baseline: live database confirms both approved accounts are email-confirmed, resolve to sandbox, have free-tier snapshots and no stored subscriptions. Enrollment expiry remains November 23, 16:04:25 UTC. Play installation is verified as version 3 / 1.0.0 from com.android.vending. Actual checkout and test-payment marker are still pending private emulator login; no purchase is claimed.
 
 Updated 2026-11-16. Configuration readiness was rerun: **10/10 PASS**; actual purchase lifecycle is **NOT EXECUTED**.

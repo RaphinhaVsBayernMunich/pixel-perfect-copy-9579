@@ -60,3 +60,25 @@ test("empty catalog is not cached as valid pricing", async () => {
   const cache = createOfferingsCache();
   await expect(cache.load(async () => ({ current: [] }))).rejects.toThrow();
 });
+
+test("a hung provider releases the pending request and late results cannot replace retry pricing", async () => {
+  let now = 0;
+  const cache = createOfferingsCache(() => now, 5);
+  let finish!: (value: Offerings) => void;
+  await expect(
+    cache.load(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
+    ),
+  ).rejects.toThrow("timed out");
+  now = 2001;
+  const recovered = {
+    current: [{ ...metadata.current[0], priceString: "New verified price" }],
+  } as Offerings;
+  expect(await cache.load(async () => recovered, true)).toEqual(recovered);
+  finish(metadata);
+  await Promise.resolve();
+  expect(await cache.load(async () => metadata)).toEqual(recovered);
+});

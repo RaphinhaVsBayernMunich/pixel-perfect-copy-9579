@@ -1,5 +1,10 @@
 # Remaining release actions
 
+## November 18 continuation
+
+See [native billing repair and actual Play checkout evidence](QUESTOS-NATIVE-BILLING-REPAIR-2026-11-18.md). This supersedes the older missing-installation and inaccessible-emulator blockers below. Native pricing now works; Play reports success for an explicitly approved no-charge test, but receipt, Premium, and lifecycle verification remain pending. No production submission or AAB rebuild was performed.
+
+
 Updated 2026-11-16. Verdict: **D. QUESTOS BLOCKED — SPECIFIC ACTION REQUIRED**.
 
 | Blocker | Evidence | Responsible / minimum action |

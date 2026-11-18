@@ -4,7 +4,14 @@ import type {
   PurchasesPackage,
   CustomerInfo,
 } from "@revenuecat/purchases-capacitor";
-import { createNativeProvider } from "../src/lib/subscription/provider-native";
+import { createNativeProvider, loadNativePurchases } from "../src/lib/subscription/provider-native";
+import { pricingDeadline } from "../src/lib/subscription/pricing-deadline";
+
+test("the actual Capacitor SDK loader resolves without assimilating the plugin proxy", async () => {
+  const module = await pricingDeadline(loadNativePurchases(), 2000);
+  expect(typeof module.Purchases.configure).toBe("function");
+  expect("then" in module).toBe(false);
+});
 
 const accountA = "10000000-0000-4000-8000-000000000001";
 const accountB = "10000000-0000-4000-8000-000000000002";
@@ -53,7 +60,7 @@ function fixture() {
   } as unknown as PurchasesPlugin;
   const provider = createNativeProvider(
     () => "goog_test_public",
-    async () => api,
+    async () => ({ Purchases: api }),
   );
   return {
     provider,

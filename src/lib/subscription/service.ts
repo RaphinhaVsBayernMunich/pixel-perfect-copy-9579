@@ -1,6 +1,8 @@
 import { openExternal } from "../native/auth";
 import { reconcileUntilVerified } from "./reconcile";
 import { createOfferingsCache } from "./offerings-cache";
+import { pricingDeadline } from "./pricing-deadline";
+import { pricingErrorMessage } from "./pricing-error";
 import { create } from "zustand";
 import { toast } from "sonner";
 import { useUI } from "../ui-store";
@@ -43,6 +45,7 @@ let queue = Promise.resolve();
 let unsubscribe: (() => void) | undefined;
 let interval: ReturnType<typeof setInterval> | undefined;
 let initializedIdentity: string | null = null;
+let initializationError: string | null = null;
 const offeringsCache = createOfferingsCache();
 const getProvider = () =>
   provider ??
@@ -102,20 +105,30 @@ export const useSubscription = create<Store>((set, get) => ({
           if (version !== identityVersion) return;
           await p.init(userId);
           await p.identify(userId);
-          if (version === identityVersion) owner = userId;
+          if (version === identityVersion) {
+            owner = userId;
+            initializationError = null;
+          }
         });
       await queue;
     } catch {
-      if (version === identityVersion)
-        set({ error: "Billing could not initialize. Please retry or sign in again." });
+      if (version === identityVersion) {
+        initializedIdentity = null;
+        initializationError = "Billing could not initialize. Retry pricing or restart QuestOS.";
+        set({ pricingError: initializationError });
+      }
     }
     if (version !== identityVersion) return;
     void get().refreshOfferings();
     await accessReady;
     if (version !== identityVersion) return;
     unsubscribe?.();
-    unsubscribe = p.onEntitlementChange(() => {
-      if (version === identityVersion) void get().reconcile();
+    unsubscribe = p.onEntitlementChange((entitlement) => {
+      if (version !== identityVersion) return;
+      // A routine free-state SDK update is not a pending purchase. Paid SDK signals
+      // still require server reconciliation; access always comes from the backend.
+      if (entitlement === "premium") void get().reconcile();
+      else void get().refreshFromBackend();
     });
     if (interval) clearInterval(interval);
     interval = setInterval(() => {
@@ -162,9 +175,17 @@ export const useSubscription = create<Store>((set, get) => ({
     if (get().pricingLoading) return;
     const version = identityVersion;
     set({ pricingLoading: !get().offerings?.current.length, pricingError: null });
+    const userId = useAuth.getState().user?.id;
+    // Retry only a settled, failed initialization. A pending identity mutation stays queued.
+    if (force && userId && initializedIdentity !== userId) void get().init(userId);
+    let stage: "identity" | "catalog" = "identity";
     try {
-      await queue;
-      if (version !== identityVersion || owner !== useAuth.getState().user?.id) return;
+      // The identity queue itself must remain serialized even if this display wait expires.
+      await pricingDeadline(queue);
+      if (version !== identityVersion) return;
+      if (!owner || owner !== useAuth.getState().user?.id)
+        throw new Error("Billing identity is not ready.");
+      stage = "catalog";
       const offerings = await offeringsCache.load(() => getProvider().getOfferings(), force);
       if (version === identityVersion)
         set({
@@ -173,11 +194,11 @@ export const useSubscription = create<Store>((set, get) => ({
             ? null
             : "No verified monthly plan is available. Retry or contact support.",
         });
-    } catch {
+    } catch (error) {
       if (version === identityVersion)
         set({
           offerings: { current: [] },
-          pricingError: "Pricing is unavailable right now. Check your connection and try again.",
+          pricingError: initializationError ?? pricingErrorMessage(error, stage),
         });
     } finally {
       if (version === identityVersion) set({ pricingLoading: false });
@@ -308,6 +329,7 @@ export const useSubscription = create<Store>((set, get) => ({
   reset() {
     identityVersion++;
     initializedIdentity = null;
+    initializationError = null;
     offeringsCache.reset();
     owner = null;
     const p = provider;

@@ -1,5 +1,10 @@
 # Production deployment
 
+## November 18 continuation
+
+See [native billing repair and actual Play checkout evidence](QUESTOS-NATIVE-BILLING-REPAIR-2026-11-18.md). This supersedes the older missing-installation and inaccessible-emulator blockers below. Native pricing now works; Play reports success for an explicitly approved no-charge test, but receipt, Premium, and lifecycle verification remain pending. No production submission or AAB rebuild was performed.
+
+
 November 16 continuation: billing verification again passed 10/10, including production health and server configuration. Both dedicated sandbox accounts now authenticate successfully. No new Worker deployment or migration was necessary for email confirmation and evidence updates.
 
 Updated 2026-11-13.

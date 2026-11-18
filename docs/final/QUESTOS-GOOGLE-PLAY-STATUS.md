@@ -1,5 +1,10 @@
 # Google Play status
 
+## November 18 continuation
+
+See [native billing repair and actual Play checkout evidence](QUESTOS-NATIVE-BILLING-REPAIR-2026-11-18.md). This supersedes the older missing-installation and inaccessible-emulator blockers below. Native pricing now works; Play reports success for an explicitly approved no-charge test, but receipt, Premium, and lifecycle verification remain pending. No production submission or AAB rebuild was performed.
+
+
 ## November 16 live Console verification
 
 Production remains Inactive with Create new release available. Dashboard lists 0/5 production tasks complete: select countries/regions, create release, preview/confirm, send for review, publish. The latter three are locked pending release creation. No tester-count gate was displayed on these pages; this is not a full eligibility attestation. No draft, commercial availability change or submission was made while mandatory device gates remain incomplete.
