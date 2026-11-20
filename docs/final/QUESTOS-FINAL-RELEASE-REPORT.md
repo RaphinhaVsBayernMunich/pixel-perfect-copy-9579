@@ -1,8 +1,12 @@
 # QuestOS final release gate report
 
+## November 20 verified lifecycle update
+
+The genuine no-charge Play purchase, server Premium activation, same-account restore, accelerated renewal, voluntary cancellation, access through the paid period, and expiration/access removal now PASS. All four provider lifecycle webhooks returned HTTP 200 on attempt 1. Sandbox B remained free. Offline cold start and Retry recovered Sandbox A with its session intact. See [dated evidence and remaining coverage limits](QUESTOS-SANDBOX-LIFECYCLE-2026-11-19.md). This supersedes older pending-lifecycle and inaccessible-device statements below. Cross-account store restoration, reinstall and final production eligibility are not yet passed. No real payment, AAB rebuild or production submission occurred.
+
 ## November 18 continuation
 
-See [native billing repair and actual Play checkout evidence](QUESTOS-NATIVE-BILLING-REPAIR-2026-11-18.md). This supersedes the older missing-installation and inaccessible-emulator blockers below. Native pricing now works; Play reports success for an explicitly approved no-charge test, but receipt, Premium, and lifecycle verification remain pending. No production submission or AAB rebuild was performed.
+See [native billing repair and actual Play checkout evidence](QUESTOS-NATIVE-BILLING-REPAIR-2026-11-18.md). This supersedes the older missing-installation and inaccessible-emulator blockers below. Native pricing and sandbox receipt ingestion now work. RevenueCat and Supabase confirm refund/revocation; provider webhook delivery returned HTTP 200. Active Premium, renewal, voluntary cancellation and restore still need a fresh promptly completed no-charge cycle. No production submission or AAB rebuild was performed.
 
 
 ## November 16 continuation (supersedes resolved blockers below)
