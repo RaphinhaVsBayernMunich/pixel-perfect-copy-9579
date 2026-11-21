@@ -69,3 +69,11 @@ The owner signed into Sandbox B privately after its existing password was copied
 - Evidence: `nov21-b-home.png`, `nov21-b-premium.png`, `nov21-b-restore-result.png` in the existing ignored evidence directory.
 - Play Publishing overview shows the saved India country change, with submission disabled by **Incomplete app-level trader status declaration**. The account already declares trader status; the app inherits Yes. The existing public Terms URL was prepared but not saved, pending specific owner approval of the declaration. No production release or review submission occurred.
 - Fresh `/api/health`, `/api/billing/health`, and `/legal/terms` requests returned HTTP 200. Security scan: 529 files, zero findings. No source or Android changes; earlier full-suite results remain historical results rather than newly rerun tests.
+
+### November 21 active-receipt continuation
+
+Play Publishing overview independently confirmed **Changes in review**, listing both the app-level trader declaration and production India availability. The owner submitted these configuration changes; this is not a production binary submission or Google approval. An older tab retained unsaved form edits, which were preserved while the saved state was inspected in a separate tab.
+
+The owner explicitly approved Sandbox B's no-charge subscription at the visible Play checkout (`Test card, always approves`, `You will not be charged`). Purchase completed; QuestOS displayed Premium Active. RevenueCat's existing subscriber API reported B's monthly Premium active and A's earlier monthly entitlement expired. Supabase matched: B active/sandbox, A expired/free. At the checkpoint B's paid_until was `2026-11-21T17:03:35Z`. Normal logout returned to login; private Sandbox A sign-in was requested for the active-receipt transfer test. Transfer and reinstall are not yet passed.
+
+Evidence: `nov21-b-checkout.png`, `nov21-b-purchase-result.png`, `nov21-b-active.png`, `nov21-switch.png`. The existing AAB hash remains `9EBA48787FAD2C033ACB0762DAA4A54F7D0398C9BD6DEA526234BEA94D659CE9`; no rebuild or real payment occurred.
