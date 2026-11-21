@@ -55,3 +55,17 @@ The existing Pixel_8 AVD was reopened without wiping. Cold start again restored 
 Live Play Console retains the serving Alpha release, production Inactive, and no unpublished changes. The organization account exposes Create new release without a displayed tester-count/14-day application gate. Production Countries / regions has no selected countries; the owner was asked to choose initial availability. Final declaration/account/payment validation and release validation are still required before claiming eligibility or submission.
 
 Documentation-only verification: security scan passed, 529 files with no findings; git diff --check passed. The prior source verification (123 tests / 652 assertions, typecheck, build, lint, production sync and 10/10 billing configuration) is preserved, not represented as newly executed. No source changes were needed for this lifecycle run.
+
+## November 21 continuation checkpoint
+
+The owner authorized matching production to Alpha's countries. Live Alpha targeting was India only. Production India targeting was saved; Play confirmed the change was saved in Publishing overview for review and displayed Targeted (1), India Targeted. Alpha was not modified and no review submission occurred.
+
+The owner signed into Sandbox B privately after its existing password was copied to the Windows clipboard with explicit authorization. The Android screen identified QuestOS Sandbox B and showed its own incomplete onboarding, rather than inheriting Sandbox A's completed onboarding. Optional basics were skipped, leaving onboarding at profession (step 3/12) when interrupted. This verifies identity switching but does not yet establish full cross-account data/receipt isolation.
+
+### November 21 resumed device and submission checks
+
+- Completed Sandbox B onboarding through the real Android UI, skipping optional personalization and AI generation. Home identified Sandbox B with zero quests. Its session survived the emulator restart. No account was recreated or credentials displayed.
+- The Free upgrade UI loaded the Play price of INR 290.00/month. Restore purchases completed with “No verified paid subscription found yet. Confirm the store account or retry shortly.” A read-only server snapshot afterward returned A=free and B=free. Expired receipts did not grant paid access. This is an actual second-account restore check with expired receipts, not proof of active-receipt transfer or reinstall behavior.
+- Evidence: `nov21-b-home.png`, `nov21-b-premium.png`, `nov21-b-restore-result.png` in the existing ignored evidence directory.
+- Play Publishing overview shows the saved India country change, with submission disabled by **Incomplete app-level trader status declaration**. The account already declares trader status; the app inherits Yes. The existing public Terms URL was prepared but not saved, pending specific owner approval of the declaration. No production release or review submission occurred.
+- Fresh `/api/health`, `/api/billing/health`, and `/legal/terms` requests returned HTTP 200. Security scan: 529 files, zero findings. No source or Android changes; earlier full-suite results remain historical results rather than newly rerun tests.
