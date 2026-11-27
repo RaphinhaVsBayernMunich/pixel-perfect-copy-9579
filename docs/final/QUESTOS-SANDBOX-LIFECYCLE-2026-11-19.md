@@ -77,3 +77,15 @@ Play Publishing overview independently confirmed **Changes in review**, listing 
 The owner explicitly approved Sandbox B's no-charge subscription at the visible Play checkout (`Test card, always approves`, `You will not be charged`). Purchase completed; QuestOS displayed Premium Active. RevenueCat's existing subscriber API reported B's monthly Premium active and A's earlier monthly entitlement expired. Supabase matched: B active/sandbox, A expired/free. At the checkpoint B's paid_until was `2026-11-21T17:03:35Z`. Normal logout returned to login; private Sandbox A sign-in was requested for the active-receipt transfer test. Transfer and reinstall are not yet passed.
 
 Evidence: `nov21-b-checkout.png`, `nov21-b-purchase-result.png`, `nov21-b-active.png`, `nov21-switch.png`. The existing AAB hash remains `9EBA48787FAD2C033ACB0762DAA4A54F7D0398C9BD6DEA526234BEA94D659CE9`; no rebuild or real payment occurred.
+
+## November 27 renewed sandbox and purchase checkpoint
+
+The owner explicitly authorized renewing only the existing Sandbox A/B enrollments for seven days. Both now expire at `2026-12-04T14:01:03.952974Z`; read-only environment checks returned sandbox for both. Enrollment renewal did not grant Premium. No accounts were recreated.
+
+The authorized account holder then approved the specific Sandbox A checkout displaying “Test card, always approves” and “You will not be charged.” The test purchase completed and QuestOS displayed Premium Active. Supabase returned A=premium and B=free; the new A subscription was active in sandbox with paid_until `2026-11-27T14:10:42Z`. Normal logout was initiated, and private Sandbox B sign-in was requested for the active-receipt transfer check. Transfer and reinstall remain unverified at this checkpoint.
+
+Evidence in `supabase/.temp/final-evidence/`: `nov27-approved-checkout.png`, `nov27-purchase-result.png`, `nov27-premium-confirmed.png`, `nov27-settings.png`, `nov27-logout.png`.
+
+Play Publishing overview now shows Last published November 21 and no unpublished changes; the configuration review is no longer pending. Production remains **Inactive**, with Create new release available and no production binary release. This does not establish final release validation or production submission. The Alpha release remains serving.
+
+No source changes, new AAB, real payment or production submission occurred during this checkpoint.
