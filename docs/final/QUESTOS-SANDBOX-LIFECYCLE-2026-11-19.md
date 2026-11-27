@@ -89,3 +89,13 @@ Evidence in `supabase/.temp/final-evidence/`: `nov27-approved-checkout.png`, `no
 Play Publishing overview now shows Last published November 21 and no unpublished changes; the configuration review is no longer pending. Production remains **Inactive**, with Create new release available and no production binary release. This does not establish final release validation or production submission. The Alpha release remains serving.
 
 No source changes, new AAB, real payment or production submission occurred during this checkpoint.
+
+### November 27 active-receipt transfer and reinstall
+
+Verified Home identified Sandbox B with its own zero-quest state. Before explicit Restore, B remained Free. The restore crossed a five-minute renewal boundary: both server tiers were temporarily free at 14:10:44 UTC, before the renewed receipt arrived. By 14:11:09 UTC, the new monthly receipt belonged to B, active/sandbox until 14:15:42 UTC. The app displayed Premium Active. Independent RevenueCat subscriber reads and Supabase snapshots matched A=free, B=premium. This is genuine same-Play-account restoration/transfer between the two authorized sandbox identities; it is not evidence that an unrelated Google account can restore a receipt.
+
+Uninstalled the test app through Google Play and reinstalled directly from the same Early Access listing. Package manager verified versionCode 3, versionName 1.0.0, installer com.android.vending, minSdk 26 and targetSdk 36. Fresh launch reached the signed-out login page. Private B sign-in after reinstall is requested; post-reinstall entitlement restoration is not yet claimed as passed.
+
+Evidence: `nov27-b-home-confirm.png`, `nov27-b-before-restore.png`, `nov27-b-restore-final.png`, `nov27-uninstalled.png`, `nov27-reinstall-progress.png`, `nov27-fresh-login.png`.
+
+The sandbox event ledger also records event `8C88ECB1-6AF8-45ED-B52D-ED49E11611DF` at `2026-11-27T14:10:57.709118Z` with effects for both A and B in the same transaction timestamp. Provider HTTP delivery status for this specific transfer event has not yet been inspected; ledger processing and provider entitlement agreement are verified.
